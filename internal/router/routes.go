@@ -3,6 +3,7 @@ package router
 import (
 	"net/http"
 
+	"github.com/andresmeireles/speaker/internal/modules/person"
 	"github.com/go-chi/chi/v5"
 )
 
@@ -18,4 +19,6 @@ func Run(port string) {
 	}
 }
 
-func routes(router *chi.Mux) {}
+func routes(router *chi.Mux) {
+	router.Get("/", person.ShowMode)
+}

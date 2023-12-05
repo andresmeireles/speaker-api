@@ -4,5 +4,5 @@ CREATE TABLE invites (
     date DATE,
     accept BOOLEAN,
     remembered BOOLEAN,
-    user_id INT REFERENCES persons(id) ON DELETE RESTRICT,
+    user_id INT REFERENCES persons(id) ON DELETE RESTRICT
 );

@@ -1,16 +1,17 @@
-package database
+package repository
 
 import (
 	"database/sql"
 	"fmt"
 
+	"github.com/andresmeireles/speaker/internal/database"
 	"github.com/andresmeireles/speaker/internal/database/entity"
 )
 
 func GetById[T entity.Entity](id int, en T) (*T, error) {
 	var e T
 
-	db, err := GetDB()
+	db, err := database.GetDB()
 
 	defer db.Close()
 
