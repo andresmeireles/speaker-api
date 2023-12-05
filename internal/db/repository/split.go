@@ -3,7 +3,7 @@ package repository
 import (
 	"fmt"
 
-	"github.com/andresmeireles/speaker/internal/database/entity"
+	"github.com/andresmeireles/speaker/internal/db/entity"
 )
 
 // Splits the entity into keys, interrogations and values.

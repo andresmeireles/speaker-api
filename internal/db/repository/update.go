@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/andresmeireles/speaker/internal/database"
-	"github.com/andresmeireles/speaker/internal/database/entity"
+	"github.com/andresmeireles/speaker/internal/db"
+	"github.com/andresmeireles/speaker/internal/db/entity"
 )
 
 func Update[T entity.Entity](en T) error {
-	db, err := database.GetDB()
+	db, err := db.GetDB()
 
 	if err != nil {
 		return err

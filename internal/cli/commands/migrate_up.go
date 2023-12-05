@@ -6,7 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/andresmeireles/speaker/internal/database"
+	"github.com/andresmeireles/speaker/internal/db"
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/spf13/cobra"
 
@@ -46,7 +46,7 @@ func root() (string, error) {
 }
 
 func migrationSetup() *migrate.Migrate {
-	conn, err := database.GetDB()
+	conn, err := db.GetDB()
 
 	if err != nil {
 		panic(err)
@@ -66,7 +66,7 @@ func migrationSetup() *migrate.Migrate {
 		panic(err)
 	}
 
-	databasePath := filepath.Join(root, "internal", "database", "migration")
+	databasePath := filepath.Join(root, "internal", "db", "migration")
 
 	migration, err := migrate.NewWithDatabaseInstance(
 		"file://"+databasePath,

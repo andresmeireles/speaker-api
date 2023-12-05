@@ -3,7 +3,7 @@ package entity_test
 import (
 	"testing"
 
-	"github.com/andresmeireles/speaker/internal/database/entity"
+	"github.com/andresmeireles/speaker/internal/db/entity"
 )
 
 func TestGetId(t *testing.T) {

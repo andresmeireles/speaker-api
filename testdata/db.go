@@ -7,7 +7,7 @@ import (
 	"github.com/andresmeireles/speaker/internal/cli/commands"
 )
 
-func Setup(m *testing.M) {
+func SetupDatabase(m *testing.M) {
 	setupLocalDB()
 	m.Run()
 	teardownLocalDB()

@@ -3,8 +3,8 @@ package repository_test
 import (
 	"testing"
 
-	"github.com/andresmeireles/speaker/internal/database/entity"
-	"github.com/andresmeireles/speaker/internal/database/repository"
+	"github.com/andresmeireles/speaker/internal/db/entity"
+	"github.com/andresmeireles/speaker/internal/db/repository"
 )
 
 func TestGetById(t *testing.T) {

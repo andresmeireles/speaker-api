@@ -4,14 +4,14 @@ import (
 	"database/sql"
 	"fmt"
 
-	"github.com/andresmeireles/speaker/internal/database"
-	"github.com/andresmeireles/speaker/internal/database/entity"
+	"github.com/andresmeireles/speaker/internal/db"
+	"github.com/andresmeireles/speaker/internal/db/entity"
 )
 
 func GetById[T entity.Entity](id int, en T) (*T, error) {
 	var e T
 
-	db, err := database.GetDB()
+	db, err := db.GetDB()
 
 	defer db.Close()
 

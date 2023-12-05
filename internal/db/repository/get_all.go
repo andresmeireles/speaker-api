@@ -3,12 +3,12 @@ package repository
 import (
 	"fmt"
 
-	"github.com/andresmeireles/speaker/internal/database"
-	"github.com/andresmeireles/speaker/internal/database/entity"
+	"github.com/andresmeireles/speaker/internal/db"
+	"github.com/andresmeireles/speaker/internal/db/entity"
 )
 
 func GetAll[T entity.Entity](en T) []T {
-	db, err := database.GetDB()
+	db, err := db.GetDB()
 
 	if err != nil {
 		panic(err)
