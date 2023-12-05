@@ -1,0 +1,5 @@
+CREATE TABLE auths {
+    id SERIAL PRIMARY KEY,
+    user_id INT REFERENCES user(id) ON DELETE CASCADE,
+    hash TEXT NOT NULL
+}
