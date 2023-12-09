@@ -1,12 +1,12 @@
 package entity
 
 type Person struct {
-	id   int
+	Id   int
 	Name string
 }
 
 func (p Person) GetId() int {
-	return p.id
+	return p.Id
 }
 
 func (p Person) Table() string {

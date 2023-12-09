@@ -1,13 +1,13 @@
 package entity
 
 type User struct {
-	id        int
+	Id        int
 	Name      string
 	Telephone string
 }
 
 func (u User) GetId() int {
-	return u.id
+	return u.Id
 }
 
 func (u User) Table() string {
