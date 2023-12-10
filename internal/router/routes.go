@@ -6,6 +6,7 @@ import (
 
 	"github.com/andresmeireles/speaker/internal/modules/invite"
 	"github.com/andresmeireles/speaker/internal/modules/person"
+	"github.com/andresmeireles/speaker/internal/router/middleware"
 	"github.com/go-chi/chi/v5"
 )
 
@@ -21,8 +22,7 @@ func Run(port string) {
 	}
 }
 
-func routes(router *chi.Mux) {
-	router.Get("/", person.ShowMode)
+func guardRoutes(router chi.Router) {
 	router.Get("/invites", invite.GetAllInvites)
 	router.Post("/invite", invite.Create)
 	router.Put("/invite", func(w http.ResponseWriter, r *http.Request) {
@@ -34,5 +34,14 @@ func routes(router *chi.Mux) {
 			return
 		}
 		invite.Update(inviteId, w, r)
+	})
+}
+
+func routes(router *chi.Mux) {
+	router.Get("/", person.ShowMode)
+
+	router.Group(func(r chi.Router) {
+		r.Use(middleware.CheckTokenOnCookie)
+		guardRoutes(r)
 	})
 }

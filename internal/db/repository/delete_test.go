@@ -11,8 +11,8 @@ import (
 func TestDelete(t *testing.T) {
 	// arrange
 	user := entity.User{
-		Name:      "Person 1",
-		Telephone: "123",
+		Name:  "Person 1",
+		Email: "123",
 	}
 	repository.Add(user)
 

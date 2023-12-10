@@ -8,18 +8,18 @@ import (
 )
 
 func SetupDatabase(m *testing.M) {
-	setupLocalDB()
+	SetupLocalDB()
 	m.Run()
-	teardownLocalDB()
+	TeardownLocalDB()
 }
 
-func setupLocalDB() {
+func SetupLocalDB() {
 	os.Setenv("DB_DRIVER", "sqlite3")
 
 	commands.MigrateUp().Execute()
 }
 
-func teardownLocalDB() {
+func TeardownLocalDB() {
 	os.Setenv("DB_DRIVER", "sqlite3")
 
 	commands.MigrateDown().Execute()

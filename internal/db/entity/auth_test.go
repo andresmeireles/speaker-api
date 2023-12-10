@@ -21,8 +21,8 @@ func TestToJson(t *testing.T) {
 	// arrange
 	auth := entity.Auth{
 		User: entity.User{
-			Name:      "Person 1",
-			Telephone: "123",
+			Name:  "Person 1",
+			Email: "123",
 		},
 		Hash: "hash",
 	}

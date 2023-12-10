@@ -13,6 +13,8 @@ func Commands() {
 
 	cmd.AddCommand(
 		commands.MigrateUp(),
+		commands.MigrateDown(),
+		commands.SetAppKey(),
 	)
 
 	err := cmd.Execute()

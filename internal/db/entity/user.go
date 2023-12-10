@@ -1,9 +1,9 @@
 package entity
 
 type User struct {
-	Id        int
-	Name      string
-	Telephone string
+	Id    int
+	Name  string
+	Email string
 }
 
 func (u User) GetId() int {
@@ -17,6 +17,6 @@ func (u User) Table() string {
 func (u User) ToJson() map[string]interface{} {
 	return map[string]interface{}{
 		"name":      u.Name,
-		"telephone": u.Telephone,
+		"telephone": u.Email,
 	}
 }

@@ -30,8 +30,8 @@ func TestGetById(t *testing.T) {
 func TestBiggerEntity(t *testing.T) {
 	// arrange
 	u := entity.User{
-		Name:      "Person 1",
-		Telephone: "123",
+		Name:  "Person 1",
+		Email: "123",
 	}
 	repository.Add(u)
 
@@ -45,8 +45,8 @@ func TestBiggerEntity(t *testing.T) {
 	if user.Name != "Person 1" {
 		t.Fatalf("expected Person 1, got %s", user.Name)
 	}
-	if user.Telephone != "123" {
-		t.Fatalf("expected 123, got %s", user.Telephone)
+	if user.Email != "123" {
+		t.Fatalf("expected 123, got %s", user.Email)
 	}
 }
 
