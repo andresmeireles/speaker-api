@@ -9,6 +9,11 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
+func ExpireAuth(auth entity.Auth, repository AuthRepository) error {
+	auth.Expired = true
+	return repository.Update(auth)
+}
+
 func ValidateJwt(token string) bool {
 	parseFunc := func(t *jwt.Token) (interface{}, error) {
 		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {

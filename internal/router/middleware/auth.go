@@ -16,12 +16,29 @@ func CheckTokenOnCookie(next http.Handler) http.Handler {
 			return
 		}
 
-		if ok := auth.ValidateJwt(cookie.Value); !ok {
-			response.WriteHeader(http.StatusUnauthorized)
-			response.Write([]byte("Unauthorized"))
+		authEntity, err := auth.AuthRepository{}.GetByHash(cookie.Value)
+
+		if err != nil {
+			unauthorized(response)
+			return
+		}
+
+		if authEntity.Expired {
+			unauthorized(response)
+			return
+		}
+
+		if ok := auth.ValidateJwt(authEntity.Hash); !ok {
+			auth.ExpireAuth(authEntity, auth.AuthRepository{})
+			unauthorized(response)
 			return
 		}
 
 		next.ServeHTTP(response, request)
 	})
+}
+
+func unauthorized(res http.ResponseWriter) {
+	res.WriteHeader(http.StatusUnauthorized)
+	res.Write([]byte("Unauthorized"))
 }
