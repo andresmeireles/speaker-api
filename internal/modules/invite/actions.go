@@ -75,9 +75,8 @@ func UpdateInvite(
 		return entity.Invite{}, fmt.Errorf("invite with id %d not found", inviteId)
 	}
 
-	newPerson := &currentInvite.Person
 	if inviteData.PersonId != currentInvite.Person.GetId() {
-		newPerson, err = personRepository.GetById(inviteData.PersonId)
+		newPerson, err := personRepository.GetById(inviteData.PersonId)
 		if err != nil {
 			return entity.Invite{}, errors.New(
 				fmt.Sprintf("person with id %d not found", inviteData.PersonId),
