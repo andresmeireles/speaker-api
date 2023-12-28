@@ -26,7 +26,7 @@ func ParseInviteWithTemplate(
 	}
 	template := config.Value
 
-	inviteDate := time.Unix(int64(invite.Date), 0).UTC().Format("02/01/2006")
+	inviteDate := time.Now().Format("02/01/2006")
 	replaceName := strings.Replace(template, "{{name}}", invite.Person.Name, -1)
 	replaceDate := strings.Replace(replaceName, "{{date}}", inviteDate, -1)
 	replaceTheme := strings.Replace(replaceDate, "{{theme}}", invite.Theme, -1)
@@ -45,16 +45,11 @@ func CreateInvite(
 		return entity.Invite{}, errors.New(fmt.Sprintf("person with id %d not found", inviteData.PersonId))
 	}
 
-	date, err := time.Parse("02/01/2006", inviteData.Date)
-	if err != nil {
-		return entity.Invite{}, errors.New("invalid date")
-	}
-
 	iv := entity.Invite{
 		Person: *personEntity,
 		Theme:  inviteData.Theme,
 		Time:   inviteData.Time,
-		Date:   int(date.Unix()),
+		Date:   time.Now(),
 	}
 	err = inviteRepository.Add(iv)
 	if err != nil {

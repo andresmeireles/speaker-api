@@ -12,15 +12,47 @@ func (r PersonRepository) Add(person entity.Person) error {
 }
 
 func (r PersonRepository) GetById(id int) (*entity.Person, error) {
-	return repository.GetById[entity.Person](id, entity.Person{})
+	row := repository.GetById[entity.Person](id)
+	person := new(entity.Person)
+
+	if err := row.Scan(
+		&person.Id,
+		&person.Name,
+	); err != nil {
+		return nil, err
+	}
+
+	return person, nil
+
 }
 
 func (r PersonRepository) Update(person entity.Person) error {
 	return repository.Update(person)
 }
 
-func (r PersonRepository) GetAll() []entity.Person {
-	return repository.GetAll[entity.Person](entity.Person{})
+func (r PersonRepository) GetAll() ([]entity.Person, error) {
+	rows, err := repository.GetAll[entity.Person]()
+
+	if err != nil {
+		return nil, err
+	}
+
+	people := make([]entity.Person, 0)
+
+	for rows.Next() {
+		person := new(entity.Person)
+
+		if err := rows.Scan(
+			&person.Id,
+			&person.Name,
+		); err != nil {
+			return nil, err
+		}
+
+		people = append(people, *person)
+	}
+
+	return people, nil
 }
 
 func (r PersonRepository) Delete(person entity.Person) error {

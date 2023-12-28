@@ -8,7 +8,6 @@ import (
 )
 
 func main() {
-
 	dir, err := os.Getwd()
 
 	if err != nil {
@@ -21,5 +20,5 @@ func main() {
 		panic(envErr)
 	}
 
-	router.Run(os.Getenv("PORT"))
+	router.Run(os.Getenv("APP_PORT"))
 }

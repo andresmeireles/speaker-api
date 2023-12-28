@@ -17,15 +17,19 @@ func Add[T entity.Entity](en T) error {
 	defer db.Close()
 
 	keys, interrogations, values := Split(en)
-
 	query := fmt.Sprintf(
 		"INSERT INTO %s (%s) VALUES (%s)",
 		en.Table(),
 		keys,
 		interrogations,
 	)
+	stmt, err := db.Prepare(query)
 
-	_, err = db.Exec(query, values...)
+	if err != nil {
+		return err
+	}
+
+	_, err = stmt.Exec(values...)
 
 	if err != nil {
 		return err

@@ -16,7 +16,7 @@ func Delete(en entity.Entity) error {
 
 	defer db.Close()
 
-	query := fmt.Sprintf("DELETE FROM %s WHERE id = ?", en.Table())
+	query := fmt.Sprintf("DELETE FROM %s WHERE id = $1", en.Table())
 
 	_, err = db.Exec(query, en.GetId())
 

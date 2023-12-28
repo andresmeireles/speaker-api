@@ -1,8 +1,9 @@
 package entity
 
 type Config struct {
-	Id    int
-	Value string
+	Id    int    `json:"-"`
+	Name  string `json:"name"`
+	Value string `json:"value"`
 }
 
 func (c Config) GetId() int {
@@ -15,6 +16,7 @@ func (c Config) Table() string {
 
 func (c Config) ToJson() map[string]interface{} {
 	return map[string]interface{}{
+		"name":  c.Name,
 		"value": c.Value,
 	}
 }

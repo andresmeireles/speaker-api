@@ -8,19 +8,33 @@ import (
 )
 
 func SetupDatabase(m *testing.M) {
-	SetupLocalDB()
+	SetCredentials()
+
+	TeardownLocalDB()
+	err := SetupLocalDB()
+
+	if err != nil {
+		TeardownLocalDB()
+		panic(err)
+	}
+
 	m.Run()
+
 	TeardownLocalDB()
 }
 
-func SetupLocalDB() {
-	os.Setenv("DB_DRIVER", "sqlite3")
+func SetupLocalDB() error {
+	return commands.MigrateUp().Execute()
+}
 
-	commands.MigrateUp().Execute()
+func SetCredentials() {
+	os.Setenv("DB_DRIVER", "postgres")
+	os.Setenv("DB_HOST", "localhost")
+	os.Setenv("DB_PORT", "5433")
+	os.Setenv("DB_USERNAME", "speaker")
+	os.Setenv("DB_PASSWORD", "speaker")
 }
 
 func TeardownLocalDB() {
-	os.Setenv("DB_DRIVER", "sqlite3")
-
 	commands.MigrateDown().Execute()
 }

@@ -1,8 +1,9 @@
 CREATE TABLE invites (
     id SERIAL PRIMARY KEY,
     theme VARCHAR(100),
-    date DATE,
-    accept BOOLEAN,
+    date TIMESTAMP,
+    time INTEGER,
+    accepted BOOLEAN,
     remembered BOOLEAN,
-    user_id INT REFERENCES persons(id) ON DELETE RESTRICT
+    person INT REFERENCES persons(id) ON DELETE RESTRICT
 );

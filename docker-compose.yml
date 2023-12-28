@@ -1,14 +1,15 @@
-version: '3'
+version: "3"
 services:
   goweb:
     container_name: sgoweb
     build:
       context: .
       dockerfile: ./build/api/Dockerfile
+    command: bash -c "air -c ./build/api/air.toml"
     ports:
-      - ${PORT}:${PORT}
+      - ${APP_PORT}:${APP_PORT}
     volumes:
-      - '.:/app'
+      - ".:/app"
     depends_on:
       - db
 
@@ -21,4 +22,15 @@ services:
     ports:
       - ${DB_PORT}:${DB_PORT}
     volumes:
-      - '.:/app'
+      - ".:/app"
+
+  testdb:
+    image: postgres:latest
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - 5433:5432
+    volumes:
+      - ".:/app"

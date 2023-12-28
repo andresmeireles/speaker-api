@@ -15,6 +15,8 @@ func Commands() {
 		commands.MigrateUp(),
 		commands.MigrateDown(),
 		commands.SetAppKey(),
+		commands.CreateUser(),
+		commands.ListUser(),
 	)
 
 	err := cmd.Execute()

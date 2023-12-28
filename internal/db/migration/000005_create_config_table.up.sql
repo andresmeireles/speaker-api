@@ -1,0 +1,5 @@
+CREATE TABLE configs (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL UNIQUE,
+    value TEXT NOT NULL
+);

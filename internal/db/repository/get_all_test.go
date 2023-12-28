@@ -29,10 +29,20 @@ func TestGetAll(t *testing.T) {
 	}
 
 	// act
-	people := repository.GetAll[entity.Person](person1)
+	people, err := repository.GetAll[entity.Person]()
 
 	// assert
-	if len(people) != 2 {
-		t.Fatalf("expected 2, got %d", len(people))
+	if err != nil {
+		t.Fatalf("expected nil, got %s", err)
+	}
+
+	numberOfRegisters := 0
+
+	for people.Next() {
+		numberOfRegisters++
+	}
+
+	if numberOfRegisters != 2 {
+		t.Fatalf("expected 2, got %d", numberOfRegisters)
 	}
 }

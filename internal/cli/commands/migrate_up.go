@@ -47,6 +47,7 @@ func migrationSetup() *migrate.Migrate {
 	)
 
 	if err != nil {
+		fmt.Println("error!")
 		panic(err)
 	}
 
@@ -73,13 +74,17 @@ func MigrateUp() *cobra.Command {
 
 			err := migration.Up()
 
+			if err == migrate.ErrNoChange {
+				fmt.Println("Nothing to migrate")
+				return
+			}
+
 			if err != nil {
 				fmt.Println(err)
 				os.Exit(1)
 			}
 
 			fmt.Println("Migration up done")
-			os.Exit(0)
 		},
 	}
 }

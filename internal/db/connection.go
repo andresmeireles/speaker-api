@@ -27,6 +27,8 @@ func queryStringByDrive(driver string) (string, error) {
 		return postgres(), nil
 	case "sqlite3":
 		return sqlite(), nil
+	case "sqlite":
+		return sqlite(), nil
 	default:
 		return "", errors.New("driver " + driver + " not supported")
 	}
@@ -45,5 +47,6 @@ func postgres() string {
 
 func sqlite() string {
 	// create a sqlite3 in memory db connection string
-	return ":memory:"
+	// return ":memory:"
+	return "sdb.db"
 }

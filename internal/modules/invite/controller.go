@@ -29,11 +29,20 @@ func Create(w http.ResponseWriter, r *http.Request) {
 
 func GetAllInvites(w http.ResponseWriter, r *http.Request) {
 	repo := InviteRepository{}
-	invites := repo.GetAll()
-	response, err := json.Marshal(invites)
+	invites, err := repo.GetAll()
+
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(err.Error()))
+		return
+	}
+
+	response, err := json.Marshal(invites)
+
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(err.Error()))
+		return
 	}
 
 	w.WriteHeader(http.StatusOK)

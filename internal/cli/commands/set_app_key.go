@@ -30,7 +30,6 @@ func SetAppKey() *cobra.Command {
 			}
 
 			fmt.Println("App key set")
-			os.Exit(0)
 		},
 	}
 }

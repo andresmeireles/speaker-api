@@ -3,6 +3,7 @@ package invite_test
 import (
 	"errors"
 	"testing"
+	"time"
 
 	"github.com/andresmeireles/speaker/internal/db/entity"
 	"github.com/andresmeireles/speaker/internal/modules/invite"
@@ -31,8 +32,8 @@ func (m *ConfigRepoMock) Delete(config entity.Config) error {
 	return nil
 }
 
-func (m *ConfigRepoMock) GetAll() []entity.Config {
-	return nil
+func (m *ConfigRepoMock) GetAll() ([]entity.Config, error) {
+	return nil, nil
 }
 
 func (m *ConfigRepoMock) GetByName(name string) (*entity.Config, error) {
@@ -61,8 +62,8 @@ func (m *InviteRepoMock) Delete(invite entity.Invite) error {
 	return nil
 }
 
-func (m *InviteRepoMock) GetAll() []entity.Invite {
-	return nil
+func (m *InviteRepoMock) GetAll() ([]entity.Invite, error) {
+	return nil, nil
 }
 
 type PersonRepoMock struct {
@@ -81,8 +82,8 @@ func (m *PersonRepoMock) Add(person entity.Person) error {
 func (m *PersonRepoMock) Update(person entity.Person) error {
 	return nil
 }
-func (m *PersonRepoMock) GetAll() []entity.Person {
-	return nil
+func (m *PersonRepoMock) GetAll() ([]entity.Person, error) {
+	return nil, nil
 }
 func (m *PersonRepoMock) Delete(person entity.Person) error {
 	return nil
@@ -97,7 +98,7 @@ func TestActions(t *testing.T) {
 			},
 			Theme:      "Theme",
 			Time:       5,
-			Date:       1166572800,
+			Date:       time.Now(),
 			Accepted:   true,
 			Remembered: true,
 		}

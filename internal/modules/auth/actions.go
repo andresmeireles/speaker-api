@@ -41,15 +41,18 @@ func ValidateJwt(token string) bool {
 
 func CreateJWT(user entity.User, repository AuthRepository) (entity.Auth, error) {
 	appKey := os.Getenv("APP_KEY")
+
 	if appKey == "" {
 		return entity.Auth{}, fmt.Errorf("APP_KEY not set")
 	}
+
 	jwtToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"iss": "andres.meireles",
 		"sub": user.Email,
 		"exp": time.Now().Add(time.Hour * 24).Unix(),
 	})
 	token, err := jwtToken.SignedString([]byte(appKey))
+
 	if err != nil {
 		return entity.Auth{}, err
 	}
@@ -64,4 +67,19 @@ func CreateJWT(user entity.User, repository AuthRepository) (entity.Auth, error)
 	}
 
 	return newAuth, nil
+}
+
+func CheckCode(userId int, token string, repository AuthRepository) error {
+	code, err := repository.AuthCodeByUser(token, userId)
+	if err != nil {
+		return err
+	}
+	if code == nil {
+		return fmt.Errorf("No code auth found")
+	}
+	if int64(code.ExpiresAt) < time.Now().Unix() {
+		return fmt.Errorf("Code is expired")
+	}
+
+	return nil
 }

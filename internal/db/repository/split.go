@@ -2,6 +2,7 @@ package repository
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/andresmeireles/speaker/internal/db/entity"
 )
@@ -13,14 +14,16 @@ import (
 // Interrogations are comma separated values with "?" equivalent to keys.
 //
 // Values are the values of the entity.
-func Split[T entity.Entity](en T) (string, string, []interface{}) {
+func Split[T entity.Entity](en T) (string, string, []any) {
 	keys := ""
 	interrogations := ""
-	values := []interface{}{}
+	values := make([]any, 0)
+	index := 0
 
 	for key, value := range en.ToJson() {
+		index++
 		keys = keys + key + ","
-		interrogations = interrogations + "?" + ","
+		interrogations = interrogations + "$" + strconv.Itoa(index) + ","
 		values = append(values, fmt.Sprintf("%v", value))
 	}
 
