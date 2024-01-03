@@ -47,7 +47,7 @@ func (c ConfigRepository) GetById(id int) (*entity.Config, error) {
 
 func (c ConfigRepository) GetByName(name string) (*entity.Config, error) {
 	config := new(entity.Config)
-	query := fmt.Sprintf("SELECT * FROM %s WHERE name = ? LIMIT 1", config.Table())
+	query := fmt.Sprintf("SELECT * FROM %s WHERE name = $1 LIMIT 1", config.Table())
 	result := repository.SingleQuery(query, name)
 
 	if result.Err() != nil {

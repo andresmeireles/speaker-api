@@ -19,15 +19,20 @@ func Update[T entity.Entity](en T) error {
 
 	keys, _, values := Split(en)
 	sets := ""
+	lastParam := len(values) + 1
 
-	for _, val := range strings.Split(keys, ",") {
-		sets = sets + fmt.Sprintf("%s = ?", val)
+	for key, val := range strings.Split(keys, ",") {
+		sets = sets + fmt.Sprintf("%s = $%d,", val, key+1)
 	}
 
-	query := fmt.Sprintf("UPDATE %s SET %s WHERE id = ?", en.Table(), sets)
-
+	sets = strings.Trim(sets, ",")
+	query := fmt.Sprintf(
+		"UPDATE %s SET %s WHERE id = $%d",
+		en.Table(),
+		sets,
+		lastParam,
+	)
 	values = append(values, en.GetId())
-
 	_, err = db.Exec(query, values...)
 
 	if err != nil {

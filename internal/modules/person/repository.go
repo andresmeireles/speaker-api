@@ -1,6 +1,8 @@
 package person
 
 import (
+	"fmt"
+
 	"github.com/andresmeireles/speaker/internal/db/entity"
 	"github.com/andresmeireles/speaker/internal/db/repository"
 )
@@ -23,7 +25,22 @@ func (r PersonRepository) GetById(id int) (*entity.Person, error) {
 	}
 
 	return person, nil
+}
 
+func (r PersonRepository) GetByName(name string) (*entity.Person, error) {
+	person := new(entity.Person)
+	query := fmt.Sprintf("SELECT * FROM %s WHERE name = $1 LIMIT 1", person.Table())
+	row := repository.SingleQuery(query, name)
+
+	if row.Err() != nil {
+		return nil, row.Err()
+	}
+
+	if err := row.Scan(&person.Id, &person.Name); err != nil {
+		return nil, err
+	}
+
+	return person, nil
 }
 
 func (r PersonRepository) Update(person entity.Person) error {
@@ -57,12 +74,4 @@ func (r PersonRepository) GetAll() ([]entity.Person, error) {
 
 func (r PersonRepository) Delete(person entity.Person) error {
 	return repository.Delete(person)
-}
-
-func AddNewPerson(person entity.Person) (bool, error) {
-	err := repository.Add(person)
-	if err != nil {
-		return false, err
-	}
-	return true, nil
 }

@@ -3,18 +3,23 @@ package invite
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 
+	"github.com/andresmeireles/speaker/internal/logger"
 	"github.com/andresmeireles/speaker/internal/modules/config"
 	"github.com/andresmeireles/speaker/internal/modules/person"
 	"github.com/andresmeireles/speaker/internal/web"
+	"github.com/go-chi/chi/v5"
 )
 
 func Create(w http.ResponseWriter, r *http.Request) {
 	invite, err := web.DecodePostBody[InvitePost](r.Body)
-
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
+		logger.Error("error on create invite controller, cannot decode", err)
 		w.Write([]byte(err.Error()))
+
+		return
 	}
 
 	_, err = CreateInvite(
@@ -22,6 +27,14 @@ func Create(w http.ResponseWriter, r *http.Request) {
 		person.PersonRepository{},
 		invite,
 	)
+
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		logger.Error("error on create invite controller, cannot create", err)
+		w.Write([]byte(err.Error()))
+
+		return
+	}
 
 	w.WriteHeader(http.StatusCreated)
 	w.Write([]byte("Invite successfully created"))
@@ -56,7 +69,7 @@ func Update(inviteId int, w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(err.Error()))
 	}
 
-	_, err = UpdateInvite(
+	err = UpdateInvite(
 		InviteRepository{},
 		person.PersonRepository{},
 		invite,
@@ -90,4 +103,31 @@ func SendInvite(w http.ResponseWriter, r *http.Response) {
 
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(inviteText))
+}
+
+func DeleteInvite(w http.ResponseWriter, r *http.Request) {
+	inviteIdParam := chi.URLParam(r, "id")
+	inviteId, err := strconv.Atoi(inviteIdParam)
+
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		logger.Error("error on delete invite controller, bad formatted url", err)
+		w.Write([]byte("bad formatted url"))
+
+		return
+	}
+
+	repository := InviteRepository{}
+	err = RemoveInvite(inviteId, repository)
+
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		logger.Error("error on delete invite controller, when remove invite", err)
+		w.Write([]byte(err.Error()))
+
+		return
+	}
+
+	w.WriteHeader(http.StatusAccepted)
+	w.Write([]byte("Invite successfully deleted"))
 }

@@ -32,7 +32,7 @@ func migrationSetup() *migrate.Migrate {
 		panic(err)
 	}
 
-	root, err := root()
+	root, err := Root()
 
 	if err != nil {
 		panic(err)

@@ -2,8 +2,11 @@ package router
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/andresmeireles/speaker/internal/modules/config"
+	"github.com/andresmeireles/speaker/internal/modules/invite"
+	"github.com/andresmeireles/speaker/internal/modules/person"
 	"github.com/andresmeireles/speaker/internal/router/middleware"
 	"github.com/go-chi/chi/v5"
 )
@@ -23,21 +26,26 @@ func Run(port string) {
 }
 
 func guardRoutes(router chi.Router) {
-	// router.Get("/invites", invite.GetAllInvites)
-	// router.Post("/invite", invite.Create)
-	// router.Put("/invite", func(w http.ResponseWriter, r *http.Request) {
-	// 	inviteIdParam := chi.URLParam(r, "inviteId")
-	// 	inviteId, err := strconv.Atoi(inviteIdParam)
-	// 	if err != nil {
-	// 		w.WriteHeader(http.StatusBadRequest)
-	// 		w.Write([]byte("bad formatted url"))
-	// 		return
-	// 	}
-	// 	 invite.Update(inviteId, w, r)
-	// })
+	router.Get("/invites", invite.GetAllInvites)
+	router.Post("/invites", invite.Create)
+	router.Put("/invites", func(w http.ResponseWriter, r *http.Request) {
+		inviteIdParam := chi.URLParam(r, "inviteId")
+		inviteId, err := strconv.Atoi(inviteIdParam)
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte("bad formatted url"))
+			return
+		}
+		invite.Update(inviteId, w, r)
+	})
+	router.Delete("/invites/{id}", invite.DeleteInvite)
 
 	router.Get("/configs", config.GetConfigs)
-	router.Post("/configs", config.CreateConfig)
+	router.Post("/configs", config.WriteConfig)
+
+	router.Get("/speakers", person.GetPersons)
+	router.Post("/speakers", person.WritePerson)
+	router.Delete("/speakers", person.DeletePerson)
 }
 
 func routes(router *chi.Mux) {

@@ -8,7 +8,7 @@ import (
 	"github.com/andresmeireles/speaker/internal/web"
 )
 
-func CreateConfig(w http.ResponseWriter, r *http.Request) {
+func WriteConfig(w http.ResponseWriter, r *http.Request) {
 	body, err := web.DecodePostBody[entity.Config](r.Body)
 
 	if err != nil {
@@ -17,7 +17,7 @@ func CreateConfig(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = createConfig(body.Name, body.Value, ConfigRepository{})
+	err = Write(body.Name, body.Value, ConfigRepository{})
 
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)

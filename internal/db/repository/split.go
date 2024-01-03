@@ -22,8 +22,10 @@ func Split[T entity.Entity](en T) (string, string, []any) {
 
 	for key, value := range en.ToJson() {
 		index++
-		keys = keys + key + ","
+
+		keys = keys + "\"" + key + "\"" + ","
 		interrogations = interrogations + "$" + strconv.Itoa(index) + ","
+
 		values = append(values, fmt.Sprintf("%v", value))
 	}
 

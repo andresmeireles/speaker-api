@@ -9,13 +9,11 @@ import (
 
 func main() {
 	dir, err := os.Getwd()
-
 	if err != nil {
 		panic(err)
 	}
 
 	envErr := godotenv.Load(dir + "/.env")
-
 	if envErr != nil {
 		panic(envErr)
 	}

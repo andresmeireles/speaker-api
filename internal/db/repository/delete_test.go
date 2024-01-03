@@ -47,7 +47,7 @@ func TestDelete(t *testing.T) {
 			Name: "Person 1",
 		}
 		invite := entity.Invite{
-			Person:     person,
+			PersonId:   1,
 			Theme:      "Theme",
 			Time:       1,
 			Date:       time.Now(),

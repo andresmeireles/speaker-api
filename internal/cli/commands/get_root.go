@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 )
 
-func root() (string, error) {
+func Root() (string, error) {
 	dir, err := os.Getwd()
 
 	if err != nil {

@@ -7,7 +7,7 @@ import (
 )
 
 func modifyEnvFile(key, value string) error {
-	root, err := root()
+	root, err := Root()
 
 	if err != nil {
 		fmt.Println(err)

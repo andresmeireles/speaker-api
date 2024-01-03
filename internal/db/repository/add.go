@@ -9,7 +9,6 @@ import (
 
 func Add[T entity.Entity](en T) error {
 	db, err := db.GetDB()
-
 	if err != nil {
 		return err
 	}
@@ -30,7 +29,6 @@ func Add[T entity.Entity](en T) error {
 	}
 
 	_, err = stmt.Exec(values...)
-
 	if err != nil {
 		return err
 	}

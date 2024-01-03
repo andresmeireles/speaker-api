@@ -9,24 +9,28 @@ import (
 
 	"github.com/andresmeireles/speaker/internal/db/entity"
 	"github.com/andresmeireles/speaker/internal/db/repository"
+	"github.com/andresmeireles/speaker/internal/logger"
+	"github.com/andresmeireles/speaker/internal/modules/config"
+	"github.com/andresmeireles/speaker/internal/modules/person"
 )
 
 func ParseInviteWithTemplate(
 	inviteRepository repository.Repository[entity.Invite],
-	configRepository repository.Repository[entity.Config],
+	configRepository config.ConfigRepository,
 	inviteSender InviteSender,
 ) (string, error) {
 	invite, err := inviteRepository.GetById(inviteSender.InvoiceId)
 	if err != nil {
 		return "", err
 	}
-	config, err := configRepository.GetById(inviteSender.TemplateId)
+
+	config, err := configRepository.GetByName("template")
 	if err != nil {
 		return "", err
 	}
-	template := config.Value
 
-	inviteDate := time.Now().Format("02/01/2006")
+	template := config.Value
+	inviteDate := invite.Date.Format("02/01/2006")
 	replaceName := strings.Replace(template, "{{name}}", invite.Person.Name, -1)
 	replaceDate := strings.Replace(replaceName, "{{date}}", inviteDate, -1)
 	replaceTheme := strings.Replace(replaceDate, "{{theme}}", invite.Theme, -1)
@@ -42,66 +46,81 @@ func CreateInvite(
 ) (entity.Invite, error) {
 	personEntity, err := personRepository.GetById(inviteData.PersonId)
 	if err != nil {
-		return entity.Invite{}, errors.New(fmt.Sprintf("person with id %d not found", inviteData.PersonId))
+		logger.Error(err)
+
+		return entity.Invite{}, fmt.Errorf("person with id %d not found", inviteData.PersonId)
 	}
 
 	iv := entity.Invite{
-		Person: *personEntity,
-		Theme:  inviteData.Theme,
-		Time:   inviteData.Time,
-		Date:   time.Now(),
+		PersonId: personEntity.GetId(),
+		Theme:    inviteData.Theme,
+		Time:     inviteData.Time,
+		Date:     time.Now(),
 	}
 	err = inviteRepository.Add(iv)
+
 	if err != nil {
+		logger.Error(err)
+
 		return entity.Invite{}, err
 	}
 
 	return iv, nil
 }
 
+func RemoveInvite(id int, repository InviteRepository) error {
+	invite, err := repository.GetById(id)
+	if err != nil {
+		logger.Error("error on delete invite, when get invite by id", id, err)
+
+		return err
+	}
+
+	return repository.Delete(*invite)
+}
+
 func UpdateInvite(
-	inviteRepository repository.Repository[entity.Invite],
-	personRepository repository.Repository[entity.Person],
-	inviteData InvitePost,
+	inviteRepository InviteRepository,
+	personRepository person.PersonRepository,
+	updateInviteData InvitePost,
 	inviteId int,
-) (entity.Invite, error) {
-	err := validateInviteData(inviteData)
+) error {
+	invite, err := inviteRepository.GetById(inviteId)
 	if err != nil {
-		return entity.Invite{}, err
+		logger.Error(err)
+
+		return err
 	}
 
-	currentInvite, err := inviteRepository.GetById(inviteId)
-	if err != nil {
-		return entity.Invite{}, fmt.Errorf("invite with id %d not found", inviteId)
-	}
-
-	if inviteData.PersonId != currentInvite.Person.GetId() {
-		newPerson, err := personRepository.GetById(inviteData.PersonId)
+	if invite.PersonId != updateInviteData.PersonId {
+		person, err := personRepository.GetById(updateInviteData.PersonId)
 		if err != nil {
-			return entity.Invite{}, errors.New(
-				fmt.Sprintf("person with id %d not found", inviteData.PersonId),
-			)
+			logger.Error(err)
+
+			return err
 		}
-		currentInvite.Person = *newPerson
+
+		invite.PersonId = person.GetId()
 	}
 
-	currentInvite.Theme = inviteData.Theme
-	currentInvite.Time = inviteData.Time
-	err = inviteRepository.Update(*currentInvite)
-	if err != nil {
-		return entity.Invite{}, errors.New("could not update invite")
-	}
+	invite.Theme = updateInviteData.Theme
+	invite.Time = updateInviteData.Time
+	invite.Accepted = updateInviteData.Accepted
+	invite.Remembered = updateInviteData.Remembered
+	invite.References = updateInviteData.References
 
-	return *currentInvite, nil
+	return inviteRepository.Update(*invite)
 }
 
 func validateInviteData(inviteData InvitePost) error {
 	if inviteData.Time == 0 {
 		return errors.New("invalid time, must be greater than 0")
 	}
+
 	if len(strings.Trim(inviteData.Date, "")) == 0 {
 		return errors.New("invalid date, must be not empty")
 	}
+
 	if len(strings.Trim(inviteData.Theme, "")) == 0 {
 		return errors.New("invalid theme, must be not empty")
 	}
