@@ -6,7 +6,7 @@ import (
 	"github.com/andresmeireles/speaker/internal/db/entity"
 )
 
-// Create or update a config
+// Create or update a config.
 func Write(name, value string, repository ConfigRepository) error {
 	config, err := repository.GetByName(name)
 

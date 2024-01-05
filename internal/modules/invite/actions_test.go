@@ -43,10 +43,6 @@ func TestParseTemplate(t *testing.T) {
 		setupInvoice()
 		template := "{{name}} invited you with theme {{theme}} with {{time}} minutes on {{date}}"
 		configRepo := config.ConfigRepository{}
-		senderData := invite.InviteSender{
-			InvoiceId:  1,
-			TemplateId: 1,
-		}
 		err := configRepo.Add(entity.Config{
 			Name:  "template",
 			Value: template,
@@ -57,7 +53,7 @@ func TestParseTemplate(t *testing.T) {
 		}
 
 		// act
-		result, err := invite.ParseInviteWithTemplate(inviteRepo, configRepo, senderData)
+		result, err := invite.ParseInviteWithTemplate(inviteRepo, configRepo, 1)
 
 		// assert
 		if err != nil {

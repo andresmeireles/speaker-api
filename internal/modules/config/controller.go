@@ -9,19 +9,23 @@ import (
 )
 
 func WriteConfig(w http.ResponseWriter, r *http.Request) {
-	body, err := web.DecodePostBody[entity.Config](r.Body)
+	body, err := web.DecodePostBody[[]entity.Config](r.Body)
 
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(err.Error()))
+
 		return
 	}
 
-	err = Write(body.Name, body.Value, ConfigRepository{})
+	for _, config := range body {
+		err = Write(config.Name, config.Value, ConfigRepository{})
+	}
 
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(err.Error()))
+
 		return
 	}
 
@@ -36,14 +40,15 @@ func GetConfigs(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte("Error when get configs"))
+
 		return
 	}
 
 	jsonConfigs, err := json.Marshal(configs)
-
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte("Error when get configs"))
+
 		return
 	}
 

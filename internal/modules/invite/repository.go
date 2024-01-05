@@ -1,6 +1,8 @@
 package invite
 
 import (
+	"database/sql"
+
 	"github.com/andresmeireles/speaker/internal/db/entity"
 	"github.com/andresmeireles/speaker/internal/db/repository"
 	"github.com/andresmeireles/speaker/internal/modules/person"
@@ -10,6 +12,10 @@ type InviteRepository struct{}
 
 func (r InviteRepository) Add(invite entity.Invite) error {
 	return repository.Add(invite)
+}
+
+func (r InviteRepository) Query(query string, values ...any) (*sql.Rows, error) {
+	return repository.Query(query, values...)
 }
 
 func (r InviteRepository) GetAll() ([]entity.Invite, error) {
@@ -23,22 +29,20 @@ func (r InviteRepository) GetAll() ([]entity.Invite, error) {
 
 	for rows.Next() {
 		invite := new(entity.Invite)
-
 		if err := rows.Scan(
 			&invite.Id,
 			&invite.Theme,
 			&invite.References,
 			&invite.Date,
 			&invite.Time,
-			&invite.Remembered,
 			&invite.Accepted,
+			&invite.Remembered,
 			&invite.PersonId,
 		); err != nil {
 			return nil, err
 		}
 
 		person, err := personRepository.GetById(invite.PersonId)
-
 		if err != nil {
 			return nil, err
 		}
@@ -67,13 +71,11 @@ func (r InviteRepository) GetById(id int) (*entity.Invite, error) {
 	); err != nil {
 		return nil, err
 	}
-
 	person, err := personRepository.GetById(invite.PersonId)
 
 	if err != nil {
 		return nil, err
 	}
-
 	invite.Person = *person
 
 	return invite, nil

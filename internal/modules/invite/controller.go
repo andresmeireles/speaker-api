@@ -2,6 +2,7 @@ package invite
 
 import (
 	"encoding/json"
+	"log/slog"
 	"net/http"
 	"strconv"
 
@@ -47,6 +48,7 @@ func GetAllInvites(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(err.Error()))
+
 		return
 	}
 
@@ -55,6 +57,7 @@ func GetAllInvites(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(err.Error()))
+
 		return
 	}
 
@@ -65,44 +68,74 @@ func GetAllInvites(w http.ResponseWriter, r *http.Request) {
 func Update(inviteId int, w http.ResponseWriter, r *http.Request) {
 	invite, err := web.DecodePostBody[InvitePost](r.Body)
 	if err != nil {
+		logger.Error("error cannot decode", err)
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(err.Error()))
+
+		return
 	}
 
-	err = UpdateInvite(
+	if err = UpdateInvite(
 		InviteRepository{},
 		person.PersonRepository{},
 		invite,
 		inviteId,
-	)
-
-	if err != nil {
+	); err != nil {
+		logger.Error("error cannot update", err)
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(err.Error()))
+
+		return
 	}
 
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("Invite successfully updated"))
 }
 
-func SendInvite(w http.ResponseWriter, r *http.Response) {
-	body, err := web.DecodePostBody[InviteSender](r.Body)
+func SendInvite(w http.ResponseWriter, r *http.Request) {
+	inviteId := chi.URLParam(r, "id")
+	id, err := strconv.Atoi(inviteId)
+
 	if err != nil {
+		logger.Error("error on send invite controller, cannot parse id", err)
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(err.Error()))
 	}
+
 	inviteText, err := ParseInviteWithTemplate(
 		InviteRepository{},
 		config.ConfigRepository{},
-		body,
+		id,
 	)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(err.Error()))
 	}
 
+	remeberMessage, err := ParseRememberMessage(
+		InviteRepository{},
+		config.ConfigRepository{},
+		id,
+	)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(err.Error()))
+	}
+
+	response, err := json.Marshal(map[string]string{
+		"invite":   inviteText,
+		"remember": remeberMessage,
+	})
+	if err != nil {
+		logger.Error("error on send invite controller, cannot parse to json", err)
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(err.Error()))
+
+		return
+	}
+
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(inviteText))
+	w.Write(response)
 }
 
 func DeleteInvite(w http.ResponseWriter, r *http.Request) {
@@ -130,4 +163,56 @@ func DeleteInvite(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusAccepted)
 	w.Write([]byte("Invite successfully deleted"))
+}
+
+func Accepted(w http.ResponseWriter, r *http.Request) {
+	inviteIdParam := chi.URLParam(r, "id")
+	inviteId, err := strconv.Atoi(inviteIdParam)
+
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		logger.Error("error on accepted invite controller, error on decode", err)
+		w.Write([]byte("bad formatted url"))
+
+		return
+	}
+
+	repository := InviteRepository{}
+	err = AcceptInvite(inviteId, repository)
+
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("bad formatted url"))
+
+		return
+	}
+
+	w.WriteHeader(http.StatusAccepted)
+	w.Write([]byte("Invite successfully accepted"))
+}
+
+func Remember(w http.ResponseWriter, r *http.Request) {
+	inviteIdParam := chi.URLParam(r, "id")
+	inviteId, err := strconv.Atoi(inviteIdParam)
+
+	if err != nil {
+		slog.Error("error on accepted invite controller, error on decode", err)
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("bad formatted url"))
+
+		return
+	}
+
+	repository := InviteRepository{}
+	err = RememberInvite(inviteId, repository)
+
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("bad formatted url"))
+
+		return
+	}
+
+	w.WriteHeader(http.StatusAccepted)
+	w.Write([]byte("Invite successfully remembered"))
 }

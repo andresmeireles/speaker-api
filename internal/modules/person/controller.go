@@ -14,8 +14,8 @@ import (
 
 func ShowMode(w http.ResponseWriter, r *http.Request) {
 	mode := os.Getenv("MODE")
-	logger.Info("super", "mode")
 
+	logger.Info("super", "mode")
 	w.Write([]byte(mode))
 }
 
@@ -26,14 +26,15 @@ func GetPersons(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(err.Error()))
+
 		return
 	}
 
 	response, err := json.Marshal(persons)
-
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(err.Error()))
+
 		return
 	}
 
@@ -64,37 +65,60 @@ func WritePerson(w http.ResponseWriter, r *http.Request) {
 
 func DeletePerson(w http.ResponseWriter, r *http.Request) {
 	personId, err := web.DecodePostBody[DeletePersonData](r.Body)
-
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte("error on decode"))
+
 		return
 	}
 
 	id, err := strconv.Atoi(personId.Speaker)
-
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte("error on decode"))
+
 		return
 	}
 
 	person, err := PersonRepository{}.GetById(id)
-
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte("error on decode"))
+
 		return
 	}
 
 	err = PersonRepository{}.Delete(*person)
-
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte("error on decode"))
+
 		return
 	}
 
 	w.WriteHeader(http.StatusAccepted)
 	w.Write([]byte("removed person"))
+}
+
+func UpdatePerson(w http.ResponseWriter, r *http.Request) {
+	person, err := web.DecodePostBody[entity.Person](r.Body)
+	if err != nil {
+		logger.Error("error cannot decode", err)
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(err.Error()))
+
+		return
+	}
+
+	personRepo := PersonRepository{}
+	if err = personRepo.Update(person); err != nil {
+		logger.Error("error cannot update", err)
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(err.Error()))
+
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("Person successfully updated"))
 }

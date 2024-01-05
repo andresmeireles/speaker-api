@@ -3,6 +3,7 @@ package main
 import (
 	"os"
 
+	"github.com/andresmeireles/speaker/internal/logger"
 	"github.com/andresmeireles/speaker/internal/router"
 	"github.com/joho/godotenv"
 )
@@ -17,6 +18,8 @@ func main() {
 	if envErr != nil {
 		panic(envErr)
 	}
+
+	logger.Logger()
 
 	router.Run(os.Getenv("APP_PORT"))
 }

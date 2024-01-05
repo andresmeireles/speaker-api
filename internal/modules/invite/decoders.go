@@ -9,8 +9,3 @@ type InvitePost struct {
 	Accepted   bool   `json:"accepted"`
 	Remembered bool   `json:"remembered"`
 }
-
-type InviteSender struct {
-	InvoiceId  int
-	TemplateId int
-}
