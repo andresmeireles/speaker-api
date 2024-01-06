@@ -2,6 +2,7 @@ package entity
 
 type Auth struct {
 	Id      int
+	UserId  int
 	User    User
 	Hash    string
 	Expired bool
@@ -18,7 +19,7 @@ func (a Auth) Table() string {
 func (a Auth) ToJson() map[string]interface{} {
 	return map[string]interface{}{
 		"hash":    a.Hash,
-		"user":    a.User.Id,
+		"user_id": a.UserId,
 		"expired": a.Expired,
 	}
 }

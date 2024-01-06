@@ -14,9 +14,12 @@ func (r PersonRepository) Add(person entity.Person) error {
 }
 
 func (r PersonRepository) GetById(id int) (*entity.Person, error) {
-	row := repository.GetById[entity.Person](id)
-	person := new(entity.Person)
+	row, err := repository.GetById[entity.Person](id)
+	if err != nil {
+		return nil, err
+	}
 
+	person := new(entity.Person)
 	if err := row.Scan(
 		&person.Id,
 		&person.Name,
@@ -30,10 +33,10 @@ func (r PersonRepository) GetById(id int) (*entity.Person, error) {
 func (r PersonRepository) GetByName(name string) (*entity.Person, error) {
 	person := new(entity.Person)
 	query := fmt.Sprintf("SELECT * FROM %s WHERE name = $1 LIMIT 1", person.Table())
-	row := repository.SingleQuery(query, name)
+	row, err := repository.SingleQuery(query, name)
 
-	if row.Err() != nil {
-		return nil, row.Err()
+	if err != nil {
+		return nil, err
 	}
 
 	if err := row.Scan(&person.Id, &person.Name); err != nil {
@@ -49,7 +52,6 @@ func (r PersonRepository) Update(person entity.Person) error {
 
 func (r PersonRepository) GetAll() ([]entity.Person, error) {
 	rows, err := repository.GetAll[entity.Person]()
-
 	if err != nil {
 		return nil, err
 	}
@@ -58,7 +60,6 @@ func (r PersonRepository) GetAll() ([]entity.Person, error) {
 
 	for rows.Next() {
 		person := new(entity.Person)
-
 		if err := rows.Scan(
 			&person.Id,
 			&person.Name,

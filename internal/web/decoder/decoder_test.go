@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/andresmeireles/speaker/internal/db/entity"
-	"github.com/andresmeireles/speaker/internal/web"
+	web "github.com/andresmeireles/speaker/internal/web/decoder"
 )
 
 func TestDecodePostBody(t *testing.T) {
@@ -46,7 +46,6 @@ func TestDecodePostBody(t *testing.T) {
 		}
 		if personWithName.Name != "Person 1" && personWithName.GetId() != 0 {
 			t.Fatalf("expected Person 1 and id 0, got %s and id %d", personWithName.Name, personWithName.GetId())
-
 		}
 	})
 }

@@ -1,12 +1,11 @@
 package invite
 
 import (
-	"log/slog"
 	"net/http"
-	"strconv"
 
 	"github.com/andresmeireles/speaker/internal/modules/config"
 	"github.com/andresmeireles/speaker/internal/modules/person"
+	"github.com/andresmeireles/speaker/internal/web"
 	"github.com/go-chi/chi/v5"
 )
 
@@ -14,86 +13,72 @@ type Setup struct{}
 
 func (s Setup) Routes(router chi.Router) {
 	controller := NewController()
+	getRoutes(router, controller)
+	postRoutes(router, controller)
+	putRoutes(router, controller)
+	deleteRoutes(router, controller)
+}
 
+func getRoutes(router chi.Router, controller InviteController) {
 	router.Get("/invites", controller.GetAllInvites)
 	router.Get("/invites/message/{id}", func(w http.ResponseWriter, r *http.Request) {
-		inviteId := chi.URLParam(r, "id")
-		id, err := strconv.Atoi(inviteId)
-
+		id, err, handlerFunc := web.GetIntParameter(r, "id")
 		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte("bad formatted url"))
-
-			return
+			handlerFunc(w)
+		} else {
+			controller.SendInvite(id, w, r)
 		}
-
-		controller.SendInvite(id, w, r)
 	})
+}
+
+func postRoutes(router chi.Router, controller InviteController) {
 	router.Post("/invites", controller.Create)
+}
+
+func putRoutes(router chi.Router, controller InviteController) {
 	router.Put("/invites/accept/{id}", func(w http.ResponseWriter, r *http.Request) {
-		inviteIdParam := chi.URLParam(r, "id")
-		inviteId, err := strconv.Atoi(inviteIdParam)
-
+		id, err, handlerFunc := web.GetIntParameter(r, "id")
 		if err != nil {
-			slog.Error("error on accepted invite controller, error on decode", err)
-			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte("bad formatted url"))
-
-			return
+			handlerFunc(w)
+		} else {
+			controller.Accepted(id, w, r)
 		}
-
-		controller.Accepted(inviteId, w, r)
 	})
 	router.Put("/invites/remember/{id}", func(w http.ResponseWriter, r *http.Request) {
-		inviteIdParam := chi.URLParam(r, "id")
-		inviteId, err := strconv.Atoi(inviteIdParam)
-
+		id, err, handlerFunc := web.GetIntParameter(r, "id")
 		if err != nil {
-			slog.Error("error on accepted invite controller, error on decode", err)
-			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte("bad formatted url"))
-
-			return
+			handlerFunc(w)
+		} else {
+			controller.Remember(id, w, r)
 		}
-
-		controller.Remember(inviteId, w, r)
 	})
 	router.Put("/invites", func(w http.ResponseWriter, r *http.Request) {
-		inviteIdParam := chi.URLParam(r, "inviteId")
-		inviteId, err := strconv.Atoi(inviteIdParam)
-
+		id, err, handlerFunc := web.GetIntParameter(r, "id")
 		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte("bad formatted url"))
-
-			return
+			handlerFunc(w)
+		} else {
+			controller.Update(id, w, r)
 		}
-
-		controller.Update(inviteId, w, r)
 	})
+}
+
+func deleteRoutes(router chi.Router, controller InviteController) {
 	router.Delete("/invites/{id}", func(w http.ResponseWriter, r *http.Request) {
-		inviteIdParam := chi.URLParam(r, "inviteId")
-		inviteId, err := strconv.Atoi(inviteIdParam)
-
+		id, err, handlerFunc := web.GetIntParameter(r, "id")
 		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte("bad formatted url"))
-
-			return
+			handlerFunc(w)
+		} else {
+			controller.DeleteInvite(id, w, r)
 		}
-
-		controller.DeleteInvite(inviteId, w, r)
 	})
 }
 
 func NewController() InviteController {
-	actions := NewActions()
-
 	return InviteController{
 		inviteRepository: InviteRepository{},
 		personRepository: person.PersonRepository{},
 		configRepository: config.ConfigRepository{},
-		action:           actions,
+		action:           NewActions(),
 	}
 }
 

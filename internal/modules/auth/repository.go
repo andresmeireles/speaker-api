@@ -18,17 +18,19 @@ func (a AuthRepository) GetByHash(hash string) (entity.Auth, error) {
 	}
 	defer db.Close()
 
-	var auth entity.Auth
-	query := "SELECT * FROM auths WHERE hash = ?"
+	auth := new(entity.Auth)
+	query := "SELECT * FROM auths WHERE hash = $1"
 	row := db.QueryRow(query, hash)
 
-	if err := row.Scan(&auth); err != nil {
+	if err := row.Scan(&auth.Id, &auth.UserId, &auth.Hash, &auth.Expired); err != nil {
 		if err == sql.ErrNoRows {
 			return entity.Auth{}, fmt.Errorf("auth with hash %s not found", hash)
 		}
+
+		return entity.Auth{}, err
 	}
 
-	return auth, nil
+	return *auth, nil
 }
 
 func (a AuthRepository) AuthCodeByUser(authCode string, userId int) (*entity.AuthCode, error) {
@@ -56,7 +58,11 @@ func (a AuthRepository) Add(auth entity.Auth) error {
 
 func (a AuthRepository) GetById(id int) (*entity.Auth, error) {
 	auth := new(entity.Auth)
-	authRow := repository.GetById[entity.Auth](id)
+	authRow, err := repository.GetById[entity.Auth](id)
+
+	if err != nil {
+		return nil, err
+	}
 
 	if err := authRow.Scan(&auth.Id, &auth.User, &auth.Hash, &auth.Expired); err != nil {
 		return nil, err
@@ -78,6 +84,7 @@ func (a AuthRepository) GetAll() ([]entity.Auth, error) {
 		if err := authRows.Scan(&auth.Id, &auth.User, &auth.Hash, &auth.Expired); err != nil {
 			return nil, err
 		}
+
 		auths = append(auths, *auth)
 	}
 

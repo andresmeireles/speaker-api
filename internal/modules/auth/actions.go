@@ -89,11 +89,8 @@ func (a Actions) CreateJWT(user entity.User) (entity.Auth, error) {
 
 func (a Actions) HasEmail(email string) bool {
 	_, err := a.userRepository.UserByEmail(email)
-	if err != nil {
-		return false
-	}
 
-	return true
+	return err != nil
 }
 
 func (a Actions) CheckCode(userId int, token string) error {
@@ -119,10 +116,12 @@ func (a Actions) SendCode(email string) error {
 		return err
 	}
 
-	_, err = a.codeSenderAction.CreateCode(user)
+	code, err := a.codeSenderAction.CreateCode(user)
 	if err != nil {
 		return err
 	}
 
-	return nil
+	err = a.email.Send(code, user.Email)
+
+	return err
 }

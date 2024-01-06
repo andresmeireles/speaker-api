@@ -7,7 +7,7 @@ type Setup struct{}
 func (s Setup) Routes(router chi.Router) {
 	controller := NewController()
 
-	router.Get("/login", controller.ReceiveEmail)
+	router.Post("/login", controller.ReceiveEmail)
 }
 
 func NewController() AuthController {

@@ -56,7 +56,12 @@ func (r InviteRepository) GetAll() ([]entity.Invite, error) {
 
 func (r InviteRepository) GetById(id int) (*entity.Invite, error) {
 	invite := new(entity.Invite)
-	row := repository.GetById[entity.Invite](id)
+	row, err := repository.GetById[entity.Invite](id)
+
+	if err != nil {
+		return nil, err
+	}
+
 	personRepository := person.PersonRepository{}
 
 	if err := row.Scan(
@@ -71,11 +76,12 @@ func (r InviteRepository) GetById(id int) (*entity.Invite, error) {
 	); err != nil {
 		return nil, err
 	}
-	person, err := personRepository.GetById(invite.PersonId)
 
+	person, err := personRepository.GetById(invite.PersonId)
 	if err != nil {
 		return nil, err
 	}
+
 	invite.Person = *person
 
 	return invite, nil

@@ -12,9 +12,9 @@ func (a AuthCodeRepository) Add(authCode entity.AuthCode) error {
 }
 
 func (a AuthCodeRepository) GetById(authCodeId int) (entity.AuthCode, error) {
-	row := repository.GetById[entity.AuthCode](authCodeId)
-	if row.Err() != nil {
-		return entity.AuthCode{}, row.Err()
+	row, err := repository.GetById[entity.AuthCode](authCodeId)
+	if err != nil {
+		return entity.AuthCode{}, err
 	}
 
 	var authCode entity.AuthCode

@@ -23,28 +23,21 @@ func (c AuthController) ReceiveEmail(w http.ResponseWriter, r *http.Request) {
 
 	hasEmail := c.actions.HasEmail(email.Email)
 	if !hasEmail {
+		slog.Error("Email not found", "email", email.Email)
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("email not found"))
+
 		return
 	}
 
-	// SendCode()
+	err = c.actions.SendCode(email.Email)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(err.Error()))
 
-	// err := triggerValidationCode(email.Email)
-	// if err != nil {
-	// 	slog.Error("Failed to decode email", err)
-	// 	w.WriteHeader(http.StatusBadRequest)
-	// 	w.Write([]byte("error"))
-
-	// 	return
-	// }
+		return
+	}
 
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("Validation code was send to email"))
 }
-
-// func Login(response http.ResponseWriter, request *http.Request) {
-// 	body, err := json.NewDecoder().Decode()
-// }
-
-// func Logout(response http.ResponseWriter, request *http.Request) {
-
-// }

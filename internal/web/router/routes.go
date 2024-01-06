@@ -25,6 +25,7 @@ var openModules = []modules.ModuleSetup{
 func Run(port string) {
 	router := chi.NewRouter()
 
+	router.Use(middleware.ErrorHandler)
 	router.Use(middleware.Cors)
 
 	routes(router)
@@ -38,6 +39,9 @@ func Run(port string) {
 
 func routes(router *chi.Mux) {
 	// router.Get("/", person.ShowMode)
+	for _, unprotectedRoutes := range openModules {
+		unprotectedRoutes.Routes(router)
+	}
 
 	router.Group(func(r chi.Router) {
 		// r.Use(middleware.CheckTokenOnCookie)
