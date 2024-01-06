@@ -5,12 +5,16 @@ import (
 	"net/http"
 
 	"github.com/andresmeireles/speaker/internal/db/entity"
-	"github.com/andresmeireles/speaker/internal/web"
+	web "github.com/andresmeireles/speaker/internal/web/decoder"
 )
 
-func WriteConfig(w http.ResponseWriter, r *http.Request) {
-	body, err := web.DecodePostBody[[]entity.Config](r.Body)
+type ConfigController struct {
+	configRepository ConfigRepository
+	actions          Actions
+}
 
+func (c ConfigController) WriteConfig(w http.ResponseWriter, r *http.Request) {
+	body, err := web.DecodePostBody[[]entity.Config](r.Body)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(err.Error()))
@@ -19,7 +23,7 @@ func WriteConfig(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for _, config := range body {
-		err = Write(config.Name, config.Value, ConfigRepository{})
+		err = c.actions.Write(config.Name, config.Value)
 	}
 
 	if err != nil {
@@ -33,10 +37,8 @@ func WriteConfig(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Config created"))
 }
 
-func GetConfigs(w http.ResponseWriter, r *http.Request) {
-	repository := ConfigRepository{}
-	configs, err := repository.GetAll()
-
+func (c ConfigController) GetConfigs(w http.ResponseWriter, r *http.Request) {
+	configs, err := c.configRepository.GetAll()
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte("Error when get configs"))

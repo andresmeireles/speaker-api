@@ -13,13 +13,11 @@ func (a AuthCodeRepository) Add(authCode entity.AuthCode) error {
 
 func (a AuthCodeRepository) GetById(authCodeId int) (entity.AuthCode, error) {
 	row := repository.GetById[entity.AuthCode](authCodeId)
-
 	if row.Err() != nil {
 		return entity.AuthCode{}, row.Err()
 	}
 
 	var authCode entity.AuthCode
-
 	if err := row.Scan(&authCode.Id, &authCode.Code, &authCode.User, &authCode.ExpiresAt); err != nil {
 		return entity.AuthCode{}, err
 	}

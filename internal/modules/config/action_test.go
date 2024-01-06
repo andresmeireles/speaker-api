@@ -7,12 +7,14 @@ import (
 )
 
 func TestActions(t *testing.T) {
+	actions := config.NewActions()
+
 	t.Run("should create a new config", func(t *testing.T) {
 		// arrange
 		repo := config.ConfigRepository{}
 
 		// act
-		err := config.Write("key", "value", repo)
+		err := actions.Write("key", "value")
 		conf, getErr := repo.GetByName("key")
 
 		// assert
@@ -36,10 +38,10 @@ func TestActions(t *testing.T) {
 	t.Run("should update a config", func(t *testing.T) {
 		// arrange
 		repo := config.ConfigRepository{}
-		_ = config.Write("key", "value", repo)
+		_ = actions.Write("key", "value")
 
 		// act
-		err := config.Write("key", "value2", repo)
+		err := actions.Write("key", "value2")
 		conf, getErr := repo.GetByName("key")
 
 		// assert

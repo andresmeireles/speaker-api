@@ -6,12 +6,15 @@ import (
 	"github.com/andresmeireles/speaker/internal/db/entity"
 )
 
-// Create or update a config.
-func Write(name, value string, repository ConfigRepository) error {
-	config, err := repository.GetByName(name)
+type Actions struct {
+	configRepository ConfigRepository
+}
 
+// Create or update a config.
+func (a Actions) Write(name, value string) error {
+	config, err := a.configRepository.GetByName(name)
 	if err == sql.ErrNoRows {
-		return createConfig(name, value, repository)
+		return createConfig(name, value, a.configRepository)
 	}
 
 	if err != nil {
@@ -20,7 +23,7 @@ func Write(name, value string, repository ConfigRepository) error {
 
 	config.Value = value
 
-	return repository.Update(*config)
+	return a.configRepository.Update(*config)
 }
 
 func createConfig(name, value string, repository ConfigRepository) error {

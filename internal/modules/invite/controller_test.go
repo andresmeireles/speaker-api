@@ -26,10 +26,12 @@ func TestController(t *testing.T) {
 			t.Fatalf("expected nil, got %s", err)
 		}
 
+		controller := invite.NewController()
+
 		reader := strings.NewReader(`{"person_id":1,"date":"02/01/2006","theme":"Theme","time":1}`)
 		recorder := httptest.NewRecorder()
 		request, err := http.NewRequest(http.MethodPost, "/invites", reader)
-		handler := http.HandlerFunc(invite.Create)
+		handler := http.HandlerFunc(controller.Create)
 
 		if err != nil {
 			t.Fatal(err)

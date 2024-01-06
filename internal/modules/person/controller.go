@@ -2,28 +2,24 @@ package person
 
 import (
 	"encoding/json"
-	"fmt"
+	"log/slog"
 	"net/http"
-	"os"
 	"strconv"
 
 	"github.com/andresmeireles/speaker/internal/db/entity"
 	"github.com/andresmeireles/speaker/internal/logger"
-	"github.com/andresmeireles/speaker/internal/web"
+	web "github.com/andresmeireles/speaker/internal/web/decoder"
 )
 
-func ShowMode(w http.ResponseWriter, r *http.Request) {
-	mode := os.Getenv("MODE")
-
-	logger.Info("super", "mode")
-	w.Write([]byte(mode))
+type PersonController struct {
+	personRepository PersonRepository
+	actions          Actions
 }
 
-func GetPersons(w http.ResponseWriter, r *http.Request) {
-	repo := PersonRepository{}
-	persons, err := repo.GetAll()
-
+func (p PersonController) GetPersons(w http.ResponseWriter, r *http.Request) {
+	persons, err := p.personRepository.GetAll()
 	if err != nil {
+		slog.Error("error on get persons", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(err.Error()))
 
@@ -32,6 +28,7 @@ func GetPersons(w http.ResponseWriter, r *http.Request) {
 
 	response, err := json.Marshal(persons)
 	if err != nil {
+		slog.Error("error on get persons", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(err.Error()))
 
@@ -42,30 +39,30 @@ func GetPersons(w http.ResponseWriter, r *http.Request) {
 	w.Write(response)
 }
 
-func WritePerson(w http.ResponseWriter, r *http.Request) {
+func (p PersonController) WritePerson(w http.ResponseWriter, r *http.Request) {
 	person, err := web.DecodePostBody[entity.Person](r.Body)
-
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(err.Error()))
 	}
 
-	fmt.Println(person)
-
-	err = Write(person, PersonRepository{})
-
+	err = p.actions.Write(person)
 	if err != nil {
+		slog.Error("error on write person", err)
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(err.Error()))
+
+		return
 	}
 
 	w.WriteHeader(http.StatusCreated)
 	w.Write([]byte("Person created"))
 }
 
-func DeletePerson(w http.ResponseWriter, r *http.Request) {
+func (p PersonController) DeletePerson(w http.ResponseWriter, r *http.Request) {
 	personId, err := web.DecodePostBody[DeletePersonData](r.Body)
 	if err != nil {
+		slog.Error("error on decode", err)
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte("error on decode"))
 
@@ -74,22 +71,27 @@ func DeletePerson(w http.ResponseWriter, r *http.Request) {
 
 	id, err := strconv.Atoi(personId.Speaker)
 	if err != nil {
+		slog.Error("error on decode", err)
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte("error on decode"))
 
 		return
 	}
 
-	person, err := PersonRepository{}.GetById(id)
+	repository := p.personRepository
+	person, err := repository.GetById(id)
+
 	if err != nil {
+		slog.Error("error on decode", err)
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte("error on decode"))
 
 		return
 	}
 
-	err = PersonRepository{}.Delete(*person)
+	err = repository.Delete(*person)
 	if err != nil {
+		slog.Error("error on decode", err)
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte("error on decode"))
 
@@ -100,7 +102,7 @@ func DeletePerson(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("removed person"))
 }
 
-func UpdatePerson(w http.ResponseWriter, r *http.Request) {
+func (p PersonController) UpdatePerson(w http.ResponseWriter, r *http.Request) {
 	person, err := web.DecodePostBody[entity.Person](r.Body)
 	if err != nil {
 		logger.Error("error cannot decode", err)
@@ -110,9 +112,9 @@ func UpdatePerson(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	personRepo := PersonRepository{}
+	personRepo := p.personRepository
 	if err = personRepo.Update(person); err != nil {
-		logger.Error("error cannot update", err)
+		slog.Error("error cannot update", err)
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(err.Error()))
 

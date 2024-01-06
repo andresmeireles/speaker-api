@@ -4,16 +4,21 @@ import (
 	"encoding/json"
 	"log/slog"
 	"net/http"
-	"strconv"
 
 	"github.com/andresmeireles/speaker/internal/logger"
 	"github.com/andresmeireles/speaker/internal/modules/config"
 	"github.com/andresmeireles/speaker/internal/modules/person"
-	"github.com/andresmeireles/speaker/internal/web"
-	"github.com/go-chi/chi/v5"
+	web "github.com/andresmeireles/speaker/internal/web/decoder"
 )
 
-func Create(w http.ResponseWriter, r *http.Request) {
+type InviteController struct {
+	inviteRepository InviteRepository
+	personRepository person.PersonRepository
+	configRepository config.ConfigRepository
+	action           Actions
+}
+
+func (i InviteController) Create(w http.ResponseWriter, r *http.Request) {
 	invite, err := web.DecodePostBody[InvitePost](r.Body)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -23,15 +28,10 @@ func Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err = CreateInvite(
-		InviteRepository{},
-		person.PersonRepository{},
-		invite,
-	)
-
+	_, err = i.action.CreateInvite(invite)
 	if err != nil {
+		slog.Error("error on create invite controller, cannot create", err)
 		w.WriteHeader(http.StatusBadRequest)
-		logger.Error("error on create invite controller, cannot create", err)
 		w.Write([]byte(err.Error()))
 
 		return
@@ -41,9 +41,8 @@ func Create(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Invite successfully created"))
 }
 
-func GetAllInvites(w http.ResponseWriter, r *http.Request) {
-	repo := InviteRepository{}
-	invites, err := repo.GetAll()
+func (i InviteController) GetAllInvites(w http.ResponseWriter, r *http.Request) {
+	invites, err := i.inviteRepository.GetAll()
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -65,10 +64,10 @@ func GetAllInvites(w http.ResponseWriter, r *http.Request) {
 	w.Write(response)
 }
 
-func Update(inviteId int, w http.ResponseWriter, r *http.Request) {
+func (i InviteController) Update(inviteId int, w http.ResponseWriter, r *http.Request) {
 	invite, err := web.DecodePostBody[InvitePost](r.Body)
 	if err != nil {
-		logger.Error("error cannot decode", err)
+		slog.Error("error cannot decode", err)
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(err.Error()))
 
@@ -76,12 +75,12 @@ func Update(inviteId int, w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err = UpdateInvite(
-		InviteRepository{},
-		person.PersonRepository{},
+		i.inviteRepository,
+		i.personRepository,
 		invite,
 		inviteId,
 	); err != nil {
-		logger.Error("error cannot update", err)
+		slog.Error("error cannot update", err)
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(err.Error()))
 
@@ -92,30 +91,17 @@ func Update(inviteId int, w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Invite successfully updated"))
 }
 
-func SendInvite(w http.ResponseWriter, r *http.Request) {
-	inviteId := chi.URLParam(r, "id")
-	id, err := strconv.Atoi(inviteId)
-
-	if err != nil {
-		logger.Error("error on send invite controller, cannot parse id", err)
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(err.Error()))
-	}
-
-	inviteText, err := ParseInviteWithTemplate(
-		InviteRepository{},
-		config.ConfigRepository{},
-		id,
-	)
+func (i InviteController) SendInvite(inviteId int, w http.ResponseWriter, r *http.Request) {
+	inviteText, err := i.action.ParseInviteWithTemplate(inviteId)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(err.Error()))
 	}
 
-	remeberMessage, err := ParseRememberMessage(
-		InviteRepository{},
-		config.ConfigRepository{},
-		id,
+	rememberMessage, err := ParseRememberMessage(
+		i.inviteRepository,
+		i.configRepository,
+		inviteId,
 	)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -124,7 +110,7 @@ func SendInvite(w http.ResponseWriter, r *http.Request) {
 
 	response, err := json.Marshal(map[string]string{
 		"invite":   inviteText,
-		"remember": remeberMessage,
+		"remember": rememberMessage,
 	})
 	if err != nil {
 		logger.Error("error on send invite controller, cannot parse to json", err)
@@ -138,20 +124,9 @@ func SendInvite(w http.ResponseWriter, r *http.Request) {
 	w.Write(response)
 }
 
-func DeleteInvite(w http.ResponseWriter, r *http.Request) {
-	inviteIdParam := chi.URLParam(r, "id")
-	inviteId, err := strconv.Atoi(inviteIdParam)
-
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		logger.Error("error on delete invite controller, bad formatted url", err)
-		w.Write([]byte("bad formatted url"))
-
-		return
-	}
-
-	repository := InviteRepository{}
-	err = RemoveInvite(inviteId, repository)
+func (i InviteController) DeleteInvite(inviteId int, w http.ResponseWriter, r *http.Request) {
+	repository := i.inviteRepository
+	err := RemoveInvite(inviteId, repository)
 
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -165,20 +140,8 @@ func DeleteInvite(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Invite successfully deleted"))
 }
 
-func Accepted(w http.ResponseWriter, r *http.Request) {
-	inviteIdParam := chi.URLParam(r, "id")
-	inviteId, err := strconv.Atoi(inviteIdParam)
-
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		logger.Error("error on accepted invite controller, error on decode", err)
-		w.Write([]byte("bad formatted url"))
-
-		return
-	}
-
-	repository := InviteRepository{}
-	err = AcceptInvite(inviteId, repository)
+func (i InviteController) Accepted(inviteId int, w http.ResponseWriter, r *http.Request) {
+	err := i.action.acceptInvite(inviteId)
 
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -191,20 +154,8 @@ func Accepted(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Invite successfully accepted"))
 }
 
-func Remember(w http.ResponseWriter, r *http.Request) {
-	inviteIdParam := chi.URLParam(r, "id")
-	inviteId, err := strconv.Atoi(inviteIdParam)
-
-	if err != nil {
-		slog.Error("error on accepted invite controller, error on decode", err)
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("bad formatted url"))
-
-		return
-	}
-
-	repository := InviteRepository{}
-	err = RememberInvite(inviteId, repository)
+func (i InviteController) Remember(inviteId int, w http.ResponseWriter, r *http.Request) {
+	err := i.action.rememberInvite(inviteId)
 
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)

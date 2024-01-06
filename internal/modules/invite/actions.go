@@ -15,19 +15,21 @@ import (
 	"github.com/andresmeireles/speaker/internal/modules/person"
 )
 
-func ParseInviteWithTemplate(
-	inviteRepository repository.Repository[entity.Invite],
-	configRepository config.ConfigRepository,
-	inviteId int,
-) (string, error) {
-	invite, err := inviteRepository.GetById(inviteId)
+type Actions struct {
+	inviteRepository InviteRepository
+	personRepository person.PersonRepository
+	configRepository config.ConfigRepository
+}
+
+func (a Actions) ParseInviteWithTemplate(inviteId int) (string, error) {
+	invite, err := a.inviteRepository.GetById(inviteId)
 	if err != nil {
 		slog.Error("error when get invite", err)
 
 		return "", err
 	}
 
-	config, err := configRepository.GetByName("template")
+	config, err := a.configRepository.GetByName("template")
 	if err != nil {
 		slog.Error("error when get config", err)
 
@@ -74,14 +76,12 @@ func parseMessage(message string, invite entity.Invite) string {
 	return parsedMessage
 }
 
-func CreateInvite(
-	inviteRepository repository.Repository[entity.Invite],
-	personRepository repository.Repository[entity.Person],
+func (a Actions) CreateInvite(
 	inviteData InvitePost,
 ) (entity.Invite, error) {
-	personEntity, err := personRepository.GetById(inviteData.PersonId)
+	personEntity, err := a.personRepository.GetById(inviteData.PersonId)
 	if err != nil {
-		logger.Error(err)
+		slog.Error("Error", err)
 
 		return entity.Invite{}, fmt.Errorf("person with id %d not found", inviteData.PersonId)
 	}
@@ -93,10 +93,10 @@ func CreateInvite(
 		Date:       time.Now(),
 		References: inviteData.References,
 	}
-	err = inviteRepository.Add(iv)
+	err = a.inviteRepository.Add(iv)
 
 	if err != nil {
-		logger.Error(err)
+		slog.Error("Error", err)
 
 		return entity.Invite{}, err
 	}
@@ -164,8 +164,8 @@ func validateInviteData(inviteData InvitePost) error {
 	return nil
 }
 
-func AcceptInvite(inviteId int, repository InviteRepository) error {
-	_, err := repository.GetById(inviteId)
+func (a Actions) acceptInvite(inviteId int) error {
+	_, err := a.inviteRepository.GetById(inviteId)
 	if err != nil {
 		slog.Error("error on accept invite, when get invite by id", inviteId, err)
 
@@ -173,7 +173,7 @@ func AcceptInvite(inviteId int, repository InviteRepository) error {
 	}
 
 	acceptQuery := "UPDATE invites SET accepted = true WHERE id = $1;"
-	_, err = repository.Query(acceptQuery, inviteId)
+	_, err = a.inviteRepository.Query(acceptQuery, inviteId)
 
 	if err != nil {
 		slog.Error("error on accept invite, when get invite by id;", inviteId, err)
@@ -182,8 +182,8 @@ func AcceptInvite(inviteId int, repository InviteRepository) error {
 	return err
 }
 
-func RememberInvite(inviteId int, repository InviteRepository) error {
-	_, err := repository.GetById(inviteId)
+func (a Actions) rememberInvite(inviteId int) error {
+	_, err := a.inviteRepository.GetById(inviteId)
 	if err != nil {
 		slog.Error("error on accept invite, when get invite by id", inviteId, err)
 
@@ -191,7 +191,7 @@ func RememberInvite(inviteId int, repository InviteRepository) error {
 	}
 
 	acceptQuery := "UPDATE invites SET remembered=true WHERE id = $1;"
-	_, err = repository.Query(acceptQuery, inviteId)
+	_, err = a.inviteRepository.Query(acceptQuery, inviteId)
 
 	if err != nil {
 		slog.Error("error on accept invite, when get invite by id;", inviteId, err)

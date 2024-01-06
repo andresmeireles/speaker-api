@@ -4,7 +4,7 @@ import (
 	"os"
 
 	"github.com/andresmeireles/speaker/internal/logger"
-	"github.com/andresmeireles/speaker/internal/router"
+	"github.com/andresmeireles/speaker/internal/web/router"
 	"github.com/joho/godotenv"
 )
 

@@ -6,16 +6,20 @@ import (
 	"github.com/andresmeireles/speaker/internal/db/entity"
 )
 
-func Write(person entity.Person, repository PersonRepository) error {
-	dbPerson, err := repository.GetByName(person.Name)
+type Actions struct {
+	repository PersonRepository
+}
+
+func (a Actions) Write(person entity.Person) error {
+	dbPerson, err := a.repository.GetByName(person.Name)
 
 	if err == sql.ErrNoRows {
-		return repository.Add(person)
+		return a.repository.Add(person)
 	}
 
 	if err != nil {
 		return err
 	}
 
-	return repository.Update(*dbPerson)
+	return a.repository.Update(*dbPerson)
 }

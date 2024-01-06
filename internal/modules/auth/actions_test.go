@@ -36,12 +36,14 @@ func createJwt(expireDate int64) string {
 }
 
 func TestValidateJson(t *testing.T) {
+	actions := auth.NewActions()
+
 	t.Run("should return true", func(t *testing.T) {
 		// arrange
 		token := createJwt(time.Now().Add(time.Hour * 24).Unix())
 
 		// act
-		validateToken := auth.ValidateJwt(token)
+		validateToken := actions.ValidateJwt(token)
 
 		// assert
 		if !validateToken {
@@ -54,7 +56,7 @@ func TestValidateJson(t *testing.T) {
 		token := createJwt(0)
 
 		// act
-		validateToken := auth.ValidateJwt(token)
+		validateToken := actions.ValidateJwt(token)
 
 		// assert
 		if validateToken {
@@ -64,7 +66,7 @@ func TestValidateJson(t *testing.T) {
 
 	t.Run("should return false when token is invalid", func(t *testing.T) {
 		// act
-		validateToken := auth.ValidateJwt("jarl")
+		validateToken := actions.ValidateJwt("jarl")
 
 		// assert
 		if validateToken {

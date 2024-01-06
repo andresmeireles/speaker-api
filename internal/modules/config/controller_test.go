@@ -26,8 +26,9 @@ func TestConfigController(t *testing.T) {
 			t.Fatal(err)
 		}
 
+		controller := config.NewController()
 		rr := httptest.NewRecorder()
-		handler := http.HandlerFunc(config.GetConfigs)
+		handler := http.HandlerFunc(controller.GetConfigs)
 		handler.ServeHTTP(rr, req)
 
 		if status := rr.Code; status != http.StatusOK {

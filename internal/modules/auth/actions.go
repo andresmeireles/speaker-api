@@ -2,19 +2,33 @@ package auth
 
 import (
 	"fmt"
+	"log/slog"
 	"os"
 	"time"
 
 	"github.com/andresmeireles/speaker/internal/db/entity"
+	"github.com/andresmeireles/speaker/internal/modules/codesender"
+	"github.com/andresmeireles/speaker/internal/modules/user"
+	"github.com/andresmeireles/speaker/internal/tools"
 	"github.com/golang-jwt/jwt/v5"
 )
 
-func ExpireAuth(auth entity.Auth, repository AuthRepository) error {
-	auth.Expired = true
-	return repository.Update(auth)
+const HOURS_TO_EXPIRE = 24
+
+type Actions struct {
+	repository       AuthRepository
+	userRepository   user.UserRepository
+	email            tools.Email
+	codeSenderAction codesender.Actions
 }
 
-func ValidateJwt(token string) bool {
+func (a Actions) ExpireAuth(auth entity.Auth) error {
+	auth.Expired = true
+
+	return a.repository.Update(auth)
+}
+
+func (a Actions) ValidateJwt(token string) bool {
 	parseFunc := func(t *jwt.Token) (interface{}, error) {
 		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", t.Header["alg"])
@@ -23,6 +37,7 @@ func ValidateJwt(token string) bool {
 		return []byte(os.Getenv("APP_KEY")), nil
 	}
 	jwtToken, err := jwt.Parse(token, parseFunc)
+
 	if err != nil {
 		return false
 	}
@@ -31,17 +46,19 @@ func ValidateJwt(token string) bool {
 	if !ok {
 		return false
 	}
-	exp := claims["exp"].(float64)
-	if int64(exp) < time.Now().Unix() {
+
+	exp, ok := claims["exp"].(float64)
+	if !ok {
+		slog.Error("exp claims are not float64")
+
 		return false
 	}
 
-	return true
+	return int64(exp) < time.Now().Unix()
 }
 
-func CreateJWT(user entity.User, repository AuthRepository) (entity.Auth, error) {
+func (a Actions) CreateJWT(user entity.User) (entity.Auth, error) {
 	appKey := os.Getenv("APP_KEY")
-
 	if appKey == "" {
 		return entity.Auth{}, fmt.Errorf("APP_KEY not set")
 	}
@@ -49,7 +66,7 @@ func CreateJWT(user entity.User, repository AuthRepository) (entity.Auth, error)
 	jwtToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"iss": "andres.meireles",
 		"sub": user.Email,
-		"exp": time.Now().Add(time.Hour * 24).Unix(),
+		"exp": time.Now().Add(time.Hour * HOURS_TO_EXPIRE).Unix(),
 	})
 	token, err := jwtToken.SignedString([]byte(appKey))
 
@@ -61,7 +78,8 @@ func CreateJWT(user entity.User, repository AuthRepository) (entity.Auth, error)
 		User: user,
 		Hash: token,
 	}
-	err = repository.Add(newAuth)
+	err = a.repository.Add(newAuth)
+
 	if err != nil {
 		return entity.Auth{}, err
 	}
@@ -69,16 +87,41 @@ func CreateJWT(user entity.User, repository AuthRepository) (entity.Auth, error)
 	return newAuth, nil
 }
 
-func CheckCode(userId int, token string, repository AuthRepository) error {
-	code, err := repository.AuthCodeByUser(token, userId)
+func (a Actions) HasEmail(email string) bool {
+	_, err := a.userRepository.UserByEmail(email)
+	if err != nil {
+		return false
+	}
+
+	return true
+}
+
+func (a Actions) CheckCode(userId int, token string) error {
+	code, err := a.repository.AuthCodeByUser(token, userId)
 	if err != nil {
 		return err
 	}
+
 	if code == nil {
 		return fmt.Errorf("No code auth found")
 	}
+
 	if int64(code.ExpiresAt) < time.Now().Unix() {
 		return fmt.Errorf("Code is expired")
+	}
+
+	return nil
+}
+
+func (a Actions) SendCode(email string) error {
+	user, err := a.userRepository.UserByEmail(email)
+	if err != nil {
+		return err
+	}
+
+	_, err = a.codeSenderAction.CreateCode(user)
+	if err != nil {
+		return err
 	}
 
 	return nil

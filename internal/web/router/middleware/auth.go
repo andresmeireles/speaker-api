@@ -9,10 +9,12 @@ import (
 func CheckTokenOnCookie(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(response http.ResponseWriter, request *http.Request) {
 		cookie, err := request.Cookie("token")
+		authActions := auth.NewActions()
 
 		if err != nil {
 			response.WriteHeader(http.StatusBadRequest)
 			response.Write([]byte("Token not found"))
+
 			return
 		}
 
@@ -20,17 +22,20 @@ func CheckTokenOnCookie(next http.Handler) http.Handler {
 
 		if err != nil {
 			unauthorized(response)
+
 			return
 		}
 
 		if authEntity.Expired {
 			unauthorized(response)
+
 			return
 		}
 
-		if ok := auth.ValidateJwt(authEntity.Hash); !ok {
-			auth.ExpireAuth(authEntity, auth.AuthRepository{})
+		if ok := authActions.ValidateJwt(authEntity.Hash); !ok {
+			authActions.ExpireAuth(authEntity)
 			unauthorized(response)
+
 			return
 		}
 

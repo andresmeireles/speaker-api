@@ -5,3 +5,4 @@ linters:
     - nosnakecase
     - ifshort
     - scopelint
+    - depguard

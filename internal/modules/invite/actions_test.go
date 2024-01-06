@@ -12,6 +12,7 @@ import (
 
 func TestParseTemplate(t *testing.T) {
 	inviteRepo := invite.InviteRepository{}
+	actions := invite.NewActions()
 
 	setupInvoice := func() {
 		personRepo := person.PersonRepository{}
@@ -53,7 +54,7 @@ func TestParseTemplate(t *testing.T) {
 		}
 
 		// act
-		result, err := invite.ParseInviteWithTemplate(inviteRepo, configRepo, 1)
+		result, err := actions.ParseInviteWithTemplate(1)
 
 		// assert
 		if err != nil {
@@ -68,7 +69,7 @@ func TestParseTemplate(t *testing.T) {
 
 func TestCreateInvite(t *testing.T) {
 	personRepo := person.PersonRepository{}
-	inviteRepo := invite.InviteRepository{}
+	actions := invite.NewActions()
 
 	t.Run("should create new invite", func(t *testing.T) {
 		// arrange
@@ -84,11 +85,7 @@ func TestCreateInvite(t *testing.T) {
 		}
 
 		// act
-		result, err := invite.CreateInvite(
-			inviteRepo,
-			personRepo,
-			invitePost,
-		)
+		result, err := actions.CreateInvite(invitePost)
 
 		// assert
 		if err != nil {
