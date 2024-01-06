@@ -4,26 +4,45 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/andresmeireles/speaker/internal/db"
+	"github.com/andresmeireles/speaker/internal/db/entity"
+	"github.com/andresmeireles/speaker/internal/modules/user"
 	"github.com/spf13/cobra"
 )
 
 func CreateUser() *cobra.Command {
-	return &cobra.Command{
+	var name, email string
+
+	command := &cobra.Command{
 		Use:   "cuser",
 		Short: "Create user",
 		Run: func(cmd *cobra.Command, args []string) {
-			db, err := db.GetDB()
-
-			if err != nil {
-				fmt.Fprintln(os.Stderr, err)
+			if name == "" {
+				fmt.Println("Name is required")
+				os.Exit(1)
+			}
+			if email == "" {
+				fmt.Println("Email is required")
+				os.Exit(1)
 			}
 
-			db.Query("INSERT INTO users (name) VALUES ('andres')")
+			userRepository := user.UserRepository{}
+			user := entity.User{
+				Name:  name,
+				Email: email,
+			}
+			err := userRepository.Add(user)
 
-			defer db.Close()
+			if err != nil {
+				fmt.Println(err)
+				os.Exit(1)
+			}
 
 			fmt.Println("User created")
 		},
 	}
+
+	command.Flags().StringVarP(&name, "name", "n", "", "Name")
+	command.Flags().StringVarP(&email, "email", "e", "", "Email")
+
+	return command
 }

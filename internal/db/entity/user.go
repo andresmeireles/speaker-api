@@ -16,7 +16,7 @@ func (u User) Table() string {
 
 func (u User) ToJson() map[string]interface{} {
 	return map[string]interface{}{
-		"name":      u.Name,
-		"telephone": u.Email,
+		"name":  u.Name,
+		"email": u.Email,
 	}
 }

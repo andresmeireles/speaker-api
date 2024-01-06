@@ -18,8 +18,8 @@ func ListUser() *cobra.Command {
 			if err != nil {
 				fmt.Fprintln(os.Stderr, err)
 			}
-			r, e := db.Query("SELECT name FROM users")
 
+			r, e := db.Query("SELECT name FROM users")
 			if e != nil {
 				fmt.Fprintln(os.Stderr, e)
 			}

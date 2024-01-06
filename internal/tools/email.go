@@ -1,11 +1,13 @@
 package tools
 
 import (
+	"crypto/tls"
 	"fmt"
 	"log/slog"
 	"net/smtp"
 	"os"
 	"regexp"
+	"strings"
 )
 
 type Email struct {
@@ -22,6 +24,7 @@ func NewEmail(smtpHost, password, smtpPort, from string) *Email {
 		smtpPort: smtpPort,
 		password: password,
 		from:     from,
+		to:       make([]string, 0),
 	}
 }
 
@@ -29,7 +32,7 @@ func NewDefaultEmail() (*Email, error) {
 	host := os.Getenv("SMTP_HOST")
 	port := os.Getenv("SMTP_PORT")
 	password := os.Getenv("SMTP_PASSWORD")
-	email := os.Getenv("SMPT_USER")
+	email := os.Getenv("SMTP_USER")
 	client := NewEmail(host, password, port, email)
 
 	if !client.isEmail(email) {
@@ -61,7 +64,7 @@ func (e *Email) AddTo(to string) error {
 	return nil
 }
 
-func (e Email) isEmail(email string) bool {
+func (e *Email) isEmail(email string) bool {
 	emailRegex := `^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`
 	match, err := regexp.MatchString(emailRegex, email)
 
@@ -74,10 +77,9 @@ func (e Email) isEmail(email string) bool {
 	return match
 }
 
-func (e Email) Send(message string, to ...string) error {
+func (e *Email) Send(message string, to ...string) error {
 	for _, t := range to {
-		err := (&e).AddTo(t)
-
+		err := e.AddTo(t)
 		if err != nil {
 			return err
 		}
@@ -93,12 +95,77 @@ func (e Email) Send(message string, to ...string) error {
 
 	auth := smtp.PlainAuth("", e.from, e.password, e.smtpHost)
 	smtpConn := fmt.Sprintf("%s:%s", e.smtpHost, e.smtpPort)
+	tlsConfig := &tls.Config{
+		InsecureSkipVerify: false,
+		ServerName:         e.smtpHost,
+	}
+	conn, err := tls.Dial("tcp", smtpConn, tlsConfig)
 
-	if err := smtp.SendMail(smtpConn, auth, e.from, e.to, []byte(message)); err != nil {
-		slog.Error("Error when send email", err)
+	if err != nil {
+		slog.Error("Error on tls dial", err)
+
+		return err
+	}
+
+	client, err := smtp.NewClient(conn, e.smtpHost)
+	if err != nil {
+		slog.Error("Error when create client", err)
+
+		return err
+	}
+
+	if err = client.Auth(auth); err != nil {
+		slog.Error("Error when auth", err)
+
+		return err
+	}
+
+	if err = client.Mail(e.from); err != nil {
+		slog.Error("Error when set mail producer", err)
+
+		return err
+	}
+
+	for _, addr := range e.to {
+		if err = client.Rcpt(addr); err != nil {
+			slog.Error("Error when set recipient", err)
+
+			return err
+		}
+	}
+
+	wc, err := client.Data()
+	if err != nil {
+		slog.Error("Error when create data", err)
+
+		return err
+	}
+
+	emailMessage := e.formatEmail(message)
+	_, err = wc.Write([]byte(emailMessage))
+
+	if err != nil {
+		slog.Error("Error when write data", err)
+
+		return err
+	}
+
+	err = wc.Close()
+	if err != nil {
+		slog.Error("Error when close data", err)
 
 		return err
 	}
 
 	return nil
+}
+
+func (e Email) formatEmail(message string) string {
+	return fmt.Sprintf(
+		"From: %s\r\nTo: %s\r\nSubject: %s\r\nMIME-Version: 1.0\r\nContent-Type: text/plain; charset=UTF-8\r\n\r\n%s",
+		e.from,
+		strings.Join(e.to, ","),
+		"Code login",
+		message,
+	)
 }

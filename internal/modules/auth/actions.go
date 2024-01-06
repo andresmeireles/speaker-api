@@ -18,7 +18,7 @@ const HOURS_TO_EXPIRE = 24
 type Actions struct {
 	repository       AuthRepository
 	userRepository   user.UserRepository
-	email            tools.Email
+	email            *tools.Email
 	codeSenderAction codesender.Actions
 }
 
@@ -88,30 +88,13 @@ func (a Actions) CreateJWT(user entity.User) (entity.Auth, error) {
 }
 
 func (a Actions) HasEmail(email string) bool {
-	_, err := a.userRepository.UserByEmail(email)
+	_, err := a.userRepository.GetByEmail(email)
 
-	return err != nil
-}
-
-func (a Actions) CheckCode(userId int, token string) error {
-	code, err := a.repository.AuthCodeByUser(token, userId)
-	if err != nil {
-		return err
-	}
-
-	if code == nil {
-		return fmt.Errorf("No code auth found")
-	}
-
-	if int64(code.ExpiresAt) < time.Now().Unix() {
-		return fmt.Errorf("Code is expired")
-	}
-
-	return nil
+	return err == nil
 }
 
 func (a Actions) SendCode(email string) error {
-	user, err := a.userRepository.UserByEmail(email)
+	user, err := a.userRepository.GetByEmail(email)
 	if err != nil {
 		return err
 	}

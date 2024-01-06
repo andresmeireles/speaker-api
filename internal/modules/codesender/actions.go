@@ -1,6 +1,7 @@
 package codesender
 
 import (
+	"fmt"
 	"math/rand"
 	"strconv"
 	"time"
@@ -21,7 +22,7 @@ func (a Actions) CreateCode(user entity.User) (string, error) {
 		UserId:    user.Id,
 		User:      user,
 		Code:      code,
-		ExpiresAt: int(time.Now().Add(EXPIRE_TIME_MINUTES * time.Minute).Unix()),
+		ExpiresAt: time.Now().Add(EXPIRE_TIME_MINUTES * time.Minute),
 	}
 	err := a.repository.Add(authCode)
 
@@ -30,4 +31,21 @@ func (a Actions) CreateCode(user entity.User) (string, error) {
 	}
 
 	return code, nil
+}
+
+func (a Actions) VerifyCode(userEmail, code string) error {
+	row, err := a.repository.GetByCode(code)
+	if err != nil {
+		return err
+	}
+
+	if row.ExpiresAt.Before(time.Now()) {
+		return fmt.Errorf("auth code expired")
+	}
+
+	if row.User.Email != userEmail {
+		return fmt.Errorf("invalid user")
+	}
+
+	return nil
 }
