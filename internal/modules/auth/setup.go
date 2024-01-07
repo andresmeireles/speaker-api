@@ -13,7 +13,7 @@ func (s Setup) Routes(router chi.Router) {
 	controller := NewController()
 
 	router.Post("/login", controller.ReceiveEmail)
-	router.Post("/confirm", controller.ReceiveCode)
+	router.Post("/login/confirm", controller.ReceiveCode)
 }
 
 func NewController() AuthController {

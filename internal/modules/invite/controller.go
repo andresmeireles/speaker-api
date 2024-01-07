@@ -30,7 +30,6 @@ func (i InviteController) Create(w http.ResponseWriter, r *http.Request) {
 
 	_, err = i.action.CreateInvite(invite)
 	if err != nil {
-		slog.Error("error on create invite controller, cannot create", err)
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(err.Error()))
 
@@ -42,7 +41,7 @@ func (i InviteController) Create(w http.ResponseWriter, r *http.Request) {
 }
 
 func (i InviteController) GetAllInvites(w http.ResponseWriter, r *http.Request) {
-	invites, err := i.inviteRepository.GetAll()
+	invites, err := i.inviteRepository.GetAllOrdered("date", true)
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)

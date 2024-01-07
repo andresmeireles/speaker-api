@@ -33,6 +33,11 @@ func SetCredentials() {
 	os.Setenv("DB_PORT", "5433")
 	os.Setenv("DB_USERNAME", "speaker")
 	os.Setenv("DB_PASSWORD", "speaker")
+	os.Setenv("APP_KEY", "e7bca8464289691d92f60271")
+	os.Setenv("SMTP_HOST", "smtp.server")
+	os.Setenv("SMTP_PORT", "465")
+	os.Setenv("SMTP_USER", "email@gmail.com")
+	os.Setenv("SMTP_PASSWORD", "password")
 }
 
 func TeardownLocalDB() {

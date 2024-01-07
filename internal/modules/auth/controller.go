@@ -59,7 +59,6 @@ func (c AuthController) ReceiveCode(w http.ResponseWriter, r *http.Request) {
 
 	err = c.codesenderActions.VerifyCode(form.Email, form.Code)
 	if err != nil {
-		slog.Error("Failed to verify code", err)
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(err.Error()))
 
@@ -100,4 +99,26 @@ func (c AuthController) ReceiveCode(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusCreated)
 	w.Write(responseJson)
+}
+
+func (c AuthController) Logout(w http.ResponseWriter, r *http.Request) {
+	userId, ok := r.Context().Value("user_id").(int)
+	if !ok {
+		w.WriteHeader(http.StatusUnauthorized)
+		w.Write([]byte("Unauthorized"))
+
+		return
+	}
+
+	err := c.actions.Logout(userId)
+	if err != nil {
+		slog.Error("Failed to logout", err)
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(err.Error()))
+
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("Logged out"))
 }

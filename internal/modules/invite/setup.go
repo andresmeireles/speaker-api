@@ -75,16 +75,22 @@ func deleteRoutes(router chi.Router, controller InviteController) {
 
 func NewController() InviteController {
 	return InviteController{
-		inviteRepository: InviteRepository{},
+		inviteRepository: NewRepository(),
 		personRepository: person.PersonRepository{},
 		configRepository: config.ConfigRepository{},
 		action:           NewActions(),
 	}
 }
 
+func NewRepository() InviteRepository {
+	return InviteRepository{
+		personRepository: person.PersonRepository{},
+	}
+}
+
 func NewActions() Actions {
 	return Actions{
-		inviteRepository: InviteRepository{},
+		inviteRepository: NewRepository(),
 		personRepository: person.PersonRepository{},
 		configRepository: config.ConfigRepository{},
 	}

@@ -1,32 +1,23 @@
 package auth_test
 
 import (
-	"crypto/sha256"
-	"encoding/hex"
-	"math/rand"
 	"os"
-	"strconv"
 	"testing"
 	"time"
 
 	"github.com/andresmeireles/speaker/internal/modules/auth"
+	"github.com/andresmeireles/speaker/testdata"
 	"github.com/golang-jwt/jwt/v5"
 )
 
 func TestMain(m *testing.M) {
-	randomNumber := rand.Intn(100000)
-	hash := sha256.New()
-	hash.Write([]byte(strconv.Itoa(randomNumber)))
-	hashedBytes := hash.Sum(nil)
-	h := hex.EncodeToString(hashedBytes)
-	os.Setenv("APP_KEY", h)
-	os.Exit(m.Run())
+	testdata.SetupDatabase(m)
 }
 
 func createJwt(expireDate int64) string {
 	tk := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"iss": "andres.meireles",
-		"sub": "andres.meireles",
+		"iss": "andres.meireles@email.com",
+		"sub": "andres.meireles@email.com",
 		"exp": expireDate,
 	})
 

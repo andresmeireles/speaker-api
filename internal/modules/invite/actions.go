@@ -86,11 +86,20 @@ func (a Actions) CreateInvite(
 		return entity.Invite{}, fmt.Errorf("person with id %d not found", inviteData.PersonId)
 	}
 
+	layout := "2006-01-02T15:04:05.000Z"
+	date, err := time.Parse(layout, inviteData.Date)
+
+	if err != nil {
+		slog.Error("Error on parse", err)
+
+		return entity.Invite{}, err
+	}
+
 	iv := entity.Invite{
 		PersonId:   personEntity.GetId(),
 		Theme:      inviteData.Theme,
 		Time:       inviteData.Time,
-		Date:       time.Now(),
+		Date:       date,
 		References: inviteData.References,
 	}
 	err = a.inviteRepository.Add(iv)

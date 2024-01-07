@@ -22,10 +22,13 @@ type Actions struct {
 	codeSenderAction codesender.Actions
 }
 
-func (a Actions) ExpireAuth(auth entity.Auth) error {
-	auth.Expired = true
+func (a Actions) Logout(userId int) error {
+	err := a.repository.ExpireTokenByUserId(userId)
+	if err != nil {
+		slog.Error("error on update auths to expire", err)
+	}
 
-	return a.repository.Update(auth)
+	return err
 }
 
 func (a Actions) ValidateJwt(token string) bool {
@@ -54,7 +57,7 @@ func (a Actions) ValidateJwt(token string) bool {
 		return false
 	}
 
-	return int64(exp) < time.Now().Unix()
+	return int64(exp) > time.Now().Unix()
 }
 
 func (a Actions) CreateJWT(user entity.User) (entity.Auth, error) {
@@ -75,8 +78,9 @@ func (a Actions) CreateJWT(user entity.User) (entity.Auth, error) {
 	}
 
 	newAuth := entity.Auth{
-		User: user,
-		Hash: token,
+		User:   user,
+		UserId: user.Id,
+		Hash:   token,
 	}
 	err = a.repository.Add(newAuth)
 

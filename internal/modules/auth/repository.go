@@ -91,6 +91,13 @@ func (a AuthRepository) GetAll() ([]entity.Auth, error) {
 	return auths, nil
 }
 
+func (a AuthRepository) ExpireTokenByUserId(userId int) error {
+	query := "UPDATE auths SET expired = true WHERE user_id = $1 AND expired = false"
+	_, err := repository.Query(query, userId)
+
+	return err
+}
+
 func (a AuthRepository) Update(auth entity.Auth) error {
 	return repository.Update(auth)
 }

@@ -96,7 +96,7 @@ func (e *Email) Send(message string, to ...string) error {
 	auth := smtp.PlainAuth("", e.from, e.password, e.smtpHost)
 	smtpConn := fmt.Sprintf("%s:%s", e.smtpHost, e.smtpPort)
 	tlsConfig := &tls.Config{
-		InsecureSkipVerify: false,
+		InsecureSkipVerify: true,
 		ServerName:         e.smtpHost,
 	}
 	conn, err := tls.Dial("tcp", smtpConn, tlsConfig)

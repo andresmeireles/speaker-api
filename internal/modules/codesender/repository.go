@@ -53,7 +53,7 @@ func (a AuthCodeRepository) GetAll() ([]entity.AuthCode, error) {
 }
 
 func (a AuthCodeRepository) GetByCode(code string) (entity.AuthCode, error) {
-	query := "SELECT * FROM auth_code WHERE code = $1 LIMIT 1"
+	query := "SELECT * FROM auth_codes WHERE code = $1 LIMIT 1"
 	row, err := repository.SingleQuery(query, code)
 
 	if err != nil {
@@ -61,7 +61,7 @@ func (a AuthCodeRepository) GetByCode(code string) (entity.AuthCode, error) {
 	}
 
 	authCode := new(entity.AuthCode)
-	if err = row.Scan(&authCode.Id, &authCode.Code, &authCode.User, &authCode.ExpiresAt); err != nil {
+	if err = row.Scan(&authCode.Id, &authCode.Code, &authCode.ExpiresAt, &authCode.UserId); err != nil {
 		if err == sql.ErrNoRows {
 			return entity.AuthCode{}, fmt.Errorf("auth code with code %s not found", code)
 		}

@@ -45,6 +45,10 @@ func (r UserRepository) GetById(id int) (entity.User, error) {
 
 	user := new(entity.User)
 	if err = row.Scan(&user.Id, &user.Name, &user.Email); err != nil {
+		if err == sql.ErrNoRows {
+			return entity.User{}, fmt.Errorf("user with id %d not found", id)
+		}
+
 		return entity.User{}, err
 	}
 

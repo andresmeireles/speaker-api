@@ -2,6 +2,7 @@ package codesender
 
 import (
 	"fmt"
+	"log/slog"
 	"math/rand"
 	"strconv"
 	"time"
@@ -36,14 +37,20 @@ func (a Actions) CreateCode(user entity.User) (string, error) {
 func (a Actions) VerifyCode(userEmail, code string) error {
 	row, err := a.repository.GetByCode(code)
 	if err != nil {
+		slog.Error("Failed to get auth code", err)
+
 		return err
 	}
 
 	if row.ExpiresAt.Before(time.Now()) {
+		slog.Error("Auth code expired", "code", code)
+
 		return fmt.Errorf("auth code expired")
 	}
 
 	if row.User.Email != userEmail {
+		slog.Error("Invalid user", "email", userEmail)
+
 		return fmt.Errorf("invalid user")
 	}
 
