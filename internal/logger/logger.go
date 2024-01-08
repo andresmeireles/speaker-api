@@ -7,17 +7,27 @@ import (
 	"github.com/andresmeireles/speaker/internal/cli/commands"
 )
 
-func Logger() {
-	root, _ := commands.Root()
-	file, err := os.OpenFile(root+"/var/logger.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+func createHandler() *slog.TextHandler {
+	handlerOptions := slog.HandlerOptions{
+		AddSource: true,
+	}
+	isDev := os.Getenv("APP_MODE") == "dev"
+	if isDev {
+		root, _ := commands.Root()
+		file, err := os.OpenFile(root+"/var/logger.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 
-	if err != nil {
-		panic(err)
+		if err != nil {
+			panic(err)
+		}
+
+		return slog.NewTextHandler(file, &handlerOptions)
 	}
 
-	handler := slog.NewTextHandler(file, &slog.HandlerOptions{
-		AddSource: true,
-	})
+	return slog.NewTextHandler(os.Stdout, &handlerOptions)
+}
+
+func Logger() {
+	handler := createHandler()
 	logger := slog.New(handler)
 	slog.SetDefault(logger)
 }
