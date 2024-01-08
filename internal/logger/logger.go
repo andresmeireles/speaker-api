@@ -12,6 +12,7 @@ func createHandler() *slog.TextHandler {
 		AddSource: true,
 	}
 	isDev := os.Getenv("APP_MODE") == "dev"
+
 	if isDev {
 		root, _ := commands.Root()
 		file, err := os.OpenFile(root+"/var/logger.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
