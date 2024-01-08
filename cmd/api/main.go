@@ -20,8 +20,7 @@ func main() {
 	}
 
 	if mode == "dev" {
-		envErr := godotenv.Load(dir + "/.env")
-		if envErr != nil {
+		if envErr := godotenv.Load(dir + "/.env"); envErr != nil {
 			panic(envErr)
 		}
 	}

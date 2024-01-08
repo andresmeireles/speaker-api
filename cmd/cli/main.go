@@ -8,15 +8,22 @@ import (
 )
 
 func main() {
+	mode := os.Getenv("APP_MODE")
+	if mode == "" {
+		mode = "dev"
+	}
+
+	isDev := mode == "dev"
 	dir, err := os.Getwd()
+
 	if err != nil {
 		panic(err)
 	}
 
-	envErr := godotenv.Load(dir + "/.env")
-
-	if envErr != nil {
-		panic(envErr)
+	if isDev {
+		if envErr := godotenv.Load(dir + "/.env"); envErr != nil {
+			panic(envErr)
+		}
 	}
 
 	cli.Commands()
