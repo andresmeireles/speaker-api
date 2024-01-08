@@ -11,7 +11,7 @@ primary_region = "gru"
   buildpacks = ["gcr.io/paketo-buildpacks/go"]
 
 [env]
-  APP_PORT="8000"
+  APP_PORT="80"
   APP_URL="https://speaker-api.fly.dev"
   APP_MODE="prod"
 
