@@ -53,6 +53,16 @@ func routes(ctx context.Context, router *chi.Mux) {
 		})
 	})
 
+	router.Get("/", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("OK"))
+	})
+
+	router.Get("/heartbeat", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("OK"))
+	})
+
 	for _, unprotectedRoutes := range openModules {
 		unprotectedRoutes.Routes(router)
 	}

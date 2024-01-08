@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"fmt"
 	"os"
-	"path/filepath"
 
 	"github.com/andresmeireles/speaker/internal/db"
 	"github.com/golang-migrate/migrate/v4"
@@ -18,18 +17,6 @@ import (
 )
 
 func migrationSource() string {
-	isDev := os.Getenv("APP_MODE") == "dev"
-	if isDev {
-		root, err := Root()
-		if err != nil {
-			panic(err)
-		}
-
-		migrationsPath := filepath.Join(root, "build", "migrations")
-
-		return "file://" + migrationsPath
-	}
-
 	return "file://" + os.Getenv("DB_MIGRATIONS_PATH")
 }
 
