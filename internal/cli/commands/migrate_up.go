@@ -17,31 +17,38 @@ import (
 	migrateDatabase "github.com/golang-migrate/migrate/v4/database"
 )
 
+func migrationSource() string {
+	isDev := os.Getenv("APP_MODE") == "dev"
+	if isDev {
+		root, err := Root()
+		if err != nil {
+			panic(err)
+		}
+
+		migrationsPath := filepath.Join(root, "build", "migrations")
+
+		return "file://" + migrationsPath
+	}
+
+	return "file://" + os.Getenv("DB_MIGRATIONS_PATH")
+}
+
 func migrationSetup() *migrate.Migrate {
 	conn, err := db.GetDB()
-
 	if err != nil {
 		panic(err)
 	}
 
 	drive := os.Getenv("DB_DRIVER")
-
 	driver, err := getDrive(drive, conn)
 
 	if err != nil {
 		panic(err)
 	}
 
-	root, err := Root()
-
-	if err != nil {
-		panic(err)
-	}
-
-	databasePath := filepath.Join(root, "internal", "db", "migration")
-
+	migrationSource := migrationSource()
 	migration, err := migrate.NewWithDatabaseInstance(
-		"file://"+databasePath,
+		migrationSource,
 		drive,
 		driver,
 	)
