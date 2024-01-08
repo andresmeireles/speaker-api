@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/andresmeireles/speaker/internal/logger"
@@ -18,6 +19,8 @@ func main() {
 	if mode == "" {
 		mode = "dev"
 	}
+
+	fmt.Println("running on ", mode, "mode")
 
 	if mode == "dev" {
 		envErr := godotenv.Load(dir + "/.env")
