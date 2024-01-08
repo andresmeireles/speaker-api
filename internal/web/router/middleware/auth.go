@@ -10,8 +10,9 @@ import (
 
 func getToken(req *http.Request) (string, error) {
 	if auth := req.Header.Get("Authorization"); auth != "" {
-		auth = auth[7:]
-		return auth, nil
+		a := auth[7:]
+
+		return a, nil
 	}
 
 	cookie, err := req.Cookie("session_id")
