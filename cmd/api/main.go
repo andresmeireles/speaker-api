@@ -14,9 +14,16 @@ func main() {
 		panic(err)
 	}
 
-	envErr := godotenv.Load(dir + "/.env")
-	if envErr != nil {
-		panic(envErr)
+	mode := os.Getenv("APP_MODE")
+	if mode == "" {
+		mode = "dev"
+	}
+
+	if mode == "dev" {
+		envErr := godotenv.Load(dir + "/.env")
+		if envErr != nil {
+			panic(envErr)
+		}
 	}
 
 	logger.Logger()
