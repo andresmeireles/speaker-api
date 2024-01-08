@@ -40,6 +40,27 @@ func (i InviteController) Create(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Invite successfully created"))
 }
 
+func (i InviteController) GetInvite(inviteId int, w http.ResponseWriter, r *http.Request) {
+	invite, err := i.inviteRepository.GetById(inviteId)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("no invite found"))
+
+		return
+	}
+
+	response, err := json.Marshal(invite)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(err.Error()))
+
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write(response)
+}
+
 func (i InviteController) GetAllInvites(w http.ResponseWriter, r *http.Request) {
 	invites, err := i.inviteRepository.GetAllOrdered("date", true)
 
@@ -64,7 +85,7 @@ func (i InviteController) GetAllInvites(w http.ResponseWriter, r *http.Request) 
 }
 
 func (i InviteController) Update(inviteId int, w http.ResponseWriter, r *http.Request) {
-	invite, err := web.DecodePostBody[InvitePost](r.Body)
+	inviteUpdateData, err := web.DecodePostBody[UpdateInviteData](r.Body)
 	if err != nil {
 		slog.Error("error cannot decode", err)
 		w.WriteHeader(http.StatusBadRequest)
@@ -73,13 +94,12 @@ func (i InviteController) Update(inviteId int, w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	if err = UpdateInvite(
+	if err = i.action.UpdateInvite(
 		i.inviteRepository,
 		i.personRepository,
-		invite,
+		inviteUpdateData,
 		inviteId,
 	); err != nil {
-		slog.Error("error cannot update", err)
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(err.Error()))
 

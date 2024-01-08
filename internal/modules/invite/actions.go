@@ -124,28 +124,17 @@ func RemoveInvite(id int, repository InviteRepository) error {
 	return repository.Delete(*invite)
 }
 
-func UpdateInvite(
+func (a Actions) UpdateInvite(
 	inviteRepository InviteRepository,
 	personRepository person.PersonRepository,
-	updateInviteData InvitePost,
+	updateInviteData UpdateInviteData,
 	inviteId int,
 ) error {
 	invite, err := inviteRepository.GetById(inviteId)
 	if err != nil {
-		logger.Error(err)
+		slog.Error("error when get id", err)
 
 		return err
-	}
-
-	if invite.PersonId != updateInviteData.PersonId {
-		person, err := personRepository.GetById(updateInviteData.PersonId)
-		if err != nil {
-			logger.Error(err)
-
-			return err
-		}
-
-		invite.PersonId = person.GetId()
 	}
 
 	invite.Theme = updateInviteData.Theme

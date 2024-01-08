@@ -21,6 +21,14 @@ func (s Setup) Routes(router chi.Router) {
 
 func getRoutes(router chi.Router, controller InviteController) {
 	router.Get("/invites", controller.GetAllInvites)
+	router.Get("/invites/{id}", func(w http.ResponseWriter, r *http.Request) {
+		id, err, handlerFunc := web.GetIntParameter(r, "id")
+		if err != nil {
+			handlerFunc(w)
+		} else {
+			controller.GetInvite(id, w, r)
+		}
+	})
 	router.Get("/invites/message/{id}", func(w http.ResponseWriter, r *http.Request) {
 		id, err, handlerFunc := web.GetIntParameter(r, "id")
 		if err != nil {
@@ -52,7 +60,7 @@ func putRoutes(router chi.Router, controller InviteController) {
 			controller.Remember(id, w, r)
 		}
 	})
-	router.Put("/invites", func(w http.ResponseWriter, r *http.Request) {
+	router.Put("/invites/{id}", func(w http.ResponseWriter, r *http.Request) {
 		id, err, handlerFunc := web.GetIntParameter(r, "id")
 		if err != nil {
 			handlerFunc(w)
