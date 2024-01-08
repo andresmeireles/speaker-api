@@ -10,6 +10,7 @@ import (
 
 func getToken(req *http.Request) (string, error) {
 	if auth := req.Header.Get("Authorization"); auth != "" {
+		auth = auth[7:]
 		return auth, nil
 	}
 
