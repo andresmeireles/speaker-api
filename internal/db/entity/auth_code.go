@@ -25,3 +25,7 @@ func (ac AuthCode) ToJson() map[string]any {
 		"expires_at": ac.ExpiresAt.Format("2006-01-02 15:04:05"),
 	}
 }
+
+func (a AuthCode) IsExpired() bool {
+	return time.Now().After(a.ExpiresAt)
+}
