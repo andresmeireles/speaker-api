@@ -12,7 +12,6 @@ type Actions struct {
 
 func (a Actions) Write(person entity.Person) error {
 	dbPerson, err := a.repository.GetByName(person.Name)
-
 	if err == sql.ErrNoRows {
 		return a.repository.Add(person)
 	}

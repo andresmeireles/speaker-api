@@ -44,8 +44,8 @@ func (r InviteRepository) GetAllOrdered(field string, asc bool) ([]entity.Invite
 			&invite.References,
 			&invite.Date,
 			&invite.Time,
-			&invite.Remembered,
 			&invite.Accepted,
+			&invite.Remembered,
 			&invite.PersonId,
 		); err != nil {
 			if err == sql.ErrNoRows {
