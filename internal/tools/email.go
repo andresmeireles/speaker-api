@@ -93,30 +93,8 @@ func (e *Email) Send(message string, to ...string) error {
 		return fmt.Errorf("no email to send")
 	}
 
-	auth := smtp.PlainAuth("", e.from, e.password, e.smtpHost)
-	smtpConn := fmt.Sprintf("%s:%s", e.smtpHost, e.smtpPort)
-	tlsConfig := &tls.Config{
-		InsecureSkipVerify: true,
-		ServerName:         e.smtpHost,
-	}
-	conn, err := tls.Dial("tcp", smtpConn, tlsConfig)
-
+	client, err := e.setupClient()
 	if err != nil {
-		slog.Error("Error on tls dial", err)
-
-		return err
-	}
-
-	client, err := smtp.NewClient(conn, e.smtpHost)
-	if err != nil {
-		slog.Error("Error when create client", err)
-
-		return err
-	}
-
-	if err = client.Auth(auth); err != nil {
-		slog.Error("Error when auth", err)
-
 		return err
 	}
 
@@ -142,9 +120,7 @@ func (e *Email) Send(message string, to ...string) error {
 	}
 
 	emailMessage := e.formatEmail(message)
-	_, err = wc.Write([]byte(emailMessage))
-
-	if err != nil {
+	if _, err = wc.Write([]byte(emailMessage)); err != nil {
 		slog.Error("Error when write data", err)
 
 		return err
@@ -158,6 +134,37 @@ func (e *Email) Send(message string, to ...string) error {
 	}
 
 	return nil
+}
+
+func (e *Email) setupClient() (*smtp.Client, error) {
+	smtpConn := fmt.Sprintf("%s:%s", e.smtpHost, e.smtpPort)
+	tlsConfig := &tls.Config{
+		InsecureSkipVerify: true,
+		ServerName:         e.smtpHost,
+	}
+	conn, err := tls.Dial("tcp", smtpConn, tlsConfig)
+
+	if err != nil {
+		slog.Error("Error on tls dial", err)
+
+		return nil, err
+	}
+
+	client, err := smtp.NewClient(conn, e.smtpHost)
+	if err != nil {
+		slog.Error("Error when create client", err)
+
+		return nil, err
+	}
+
+	auth := smtp.PlainAuth("", e.from, e.password, e.smtpHost)
+	if err = client.Auth(auth); err != nil {
+		slog.Error("Error when auth", err)
+
+		return nil, err
+	}
+
+	return client, nil
 }
 
 func (e Email) formatEmail(message string) string {

@@ -32,7 +32,9 @@ func Update[T entity.Entity](en T) error {
 		sets,
 		lastParam,
 	)
+
 	values = append(values, en.GetId())
+
 	_, err = db.Exec(query, values...)
 
 	if err != nil {

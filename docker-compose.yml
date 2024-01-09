@@ -34,3 +34,9 @@ services:
       - 5433:5432
     volumes:
       - ".:/app"
+
+  maildev:
+    image: maildev/maildev
+    ports:
+      - 1080:1080
+      - 1025:1025

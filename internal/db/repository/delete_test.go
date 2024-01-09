@@ -9,7 +9,6 @@ import (
 )
 
 func TestDelete(t *testing.T) {
-
 	t.Run("delete register", func(t *testing.T) {
 		// arrange
 		user := entity.User{
