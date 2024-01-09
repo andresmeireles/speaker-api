@@ -95,8 +95,6 @@ func (i InviteController) Update(inviteId int, w http.ResponseWriter, r *http.Re
 	}
 
 	if err = i.action.UpdateInvite(
-		i.inviteRepository,
-		i.personRepository,
 		inviteUpdateData,
 		inviteId,
 	); err != nil {

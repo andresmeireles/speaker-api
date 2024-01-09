@@ -9,7 +9,6 @@ import (
 
 func Delete(en entity.Entity) error {
 	db, err := db.GetDB()
-
 	if err != nil {
 		return err
 	}
@@ -17,7 +16,6 @@ func Delete(en entity.Entity) error {
 	defer db.Close()
 
 	query := fmt.Sprintf("DELETE FROM %s WHERE id = $1", en.Table())
-
 	_, err = db.Exec(query, en.GetId())
 
 	return err

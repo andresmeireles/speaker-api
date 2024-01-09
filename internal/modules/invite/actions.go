@@ -2,7 +2,6 @@ package invite
 
 import (
 	"errors"
-	"fmt"
 	"log/slog"
 	"strconv"
 	"strings"
@@ -81,9 +80,9 @@ func (a Actions) CreateInvite(
 ) (entity.Invite, error) {
 	personEntity, err := a.personRepository.GetById(inviteData.PersonId)
 	if err != nil {
-		slog.Error("Error", err)
+		slog.Error("Error on get person", err)
 
-		return entity.Invite{}, fmt.Errorf("person with id %d not found", inviteData.PersonId)
+		return entity.Invite{}, err
 	}
 
 	layout := "2006-01-02T15:04:05.000Z"
@@ -125,25 +124,30 @@ func RemoveInvite(id int, repository InviteRepository) error {
 }
 
 func (a Actions) UpdateInvite(
-	inviteRepository InviteRepository,
-	personRepository person.PersonRepository,
 	updateInviteData UpdateInviteData,
 	inviteId int,
 ) error {
-	invite, err := inviteRepository.GetById(inviteId)
+	invite, err := a.inviteRepository.GetById(inviteId)
 	if err != nil {
 		slog.Error("error when get id", err)
 
 		return err
 	}
 
+	// string to time golang
+	layout := "2006-01-02T15:04:05.000Z"
+	date, err := time.Parse(layout, updateInviteData.Date)
+
+	if err != nil {
+		slog.Error("Error on parse", err)
+	}
+
 	invite.Theme = updateInviteData.Theme
 	invite.Time = updateInviteData.Time
-	invite.Accepted = updateInviteData.Accepted
-	invite.Remembered = updateInviteData.Remembered
+	invite.Date = date
 	invite.References = updateInviteData.References
 
-	return inviteRepository.Update(*invite)
+	return a.inviteRepository.Update(*invite)
 }
 
 func validateInviteData(inviteData InvitePost) error {

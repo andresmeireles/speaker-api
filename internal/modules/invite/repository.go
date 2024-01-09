@@ -3,6 +3,7 @@ package invite
 import (
 	"database/sql"
 	"fmt"
+	"log/slog"
 
 	"github.com/andresmeireles/speaker/internal/db/entity"
 	"github.com/andresmeireles/speaker/internal/db/repository"
@@ -37,28 +38,10 @@ func (r InviteRepository) GetAllOrdered(field string, asc bool) ([]entity.Invite
 	}
 
 	for rows.Next() {
-		invite := new(entity.Invite)
-		if err := rows.Scan(
-			&invite.Id,
-			&invite.Theme,
-			&invite.References,
-			&invite.Date,
-			&invite.Time,
-			&invite.Accepted,
-			&invite.Remembered,
-			&invite.PersonId,
-		); err != nil {
-			if err == sql.ErrNoRows {
-				return nil, fmt.Errorf("no rows found")
-			}
-
-			return nil, err
-		}
-		person, err := r.personRepository.GetById(invite.PersonId)
+		invite, err := r.scan(rows.Scan)
 		if err != nil {
 			return nil, err
 		}
-		invite.Person = *person
 
 		invites = append(invites, *invite)
 	}
@@ -67,35 +50,19 @@ func (r InviteRepository) GetAllOrdered(field string, asc bool) ([]entity.Invite
 }
 
 func (r InviteRepository) GetAll() ([]entity.Invite, error) {
-	invites := make([]entity.Invite, 0)
 	rows, err := repository.GetAll[entity.Invite]()
-	personRepository := person.PersonRepository{}
-
 	if err != nil {
 		return nil, err
 	}
 
-	for rows.Next() {
-		invite := new(entity.Invite)
-		if err := rows.Scan(
-			&invite.Id,
-			&invite.Theme,
-			&invite.References,
-			&invite.Date,
-			&invite.Time,
-			&invite.Accepted,
-			&invite.Remembered,
-			&invite.PersonId,
-		); err != nil {
-			return nil, err
-		}
+	invites := make([]entity.Invite, 0)
 
-		person, err := personRepository.GetById(invite.PersonId)
+	for rows.Next() {
+		invite, err := r.scan(rows.Scan)
 		if err != nil {
 			return nil, err
 		}
 
-		invite.Person = *person
 		invites = append(invites, *invite)
 	}
 
@@ -103,16 +70,43 @@ func (r InviteRepository) GetAll() ([]entity.Invite, error) {
 }
 
 func (r InviteRepository) GetById(id int) (*entity.Invite, error) {
-	invite := new(entity.Invite)
 	row, err := repository.GetById[entity.Invite](id)
+	if err != nil {
+		return nil, err
+	}
+
+	invite, err := r.scan(row.Scan)
+	if err != nil {
+		return nil, err
+	}
+
+	return invite, nil
+}
+
+func (r InviteRepository) GetByPersonId(id int) ([]entity.Invite, error) {
+	invites := make([]entity.Invite, 0)
+	query := "SELECT * FROM invites WHERE person_id = $1"
+	rows, err := repository.Query(query, id)
 
 	if err != nil {
 		return nil, err
 	}
 
-	personRepository := person.PersonRepository{}
+	for rows.Next() {
+		invite, err := r.scan(rows.Scan)
+		if err != nil {
+			return nil, err
+		}
 
-	if err := row.Scan(
+		invites = append(invites, *invite)
+	}
+
+	return invites, nil
+}
+
+func (r InviteRepository) scan(scanFunc func(dest ...any) error) (*entity.Invite, error) {
+	invite := new(entity.Invite)
+	if err := scanFunc(
 		&invite.Id,
 		&invite.Theme,
 		&invite.References,
@@ -125,7 +119,7 @@ func (r InviteRepository) GetById(id int) (*entity.Invite, error) {
 		return nil, err
 	}
 
-	person, err := personRepository.GetById(invite.PersonId)
+	person, err := r.personRepository.GetById(invite.PersonId)
 	if err != nil {
 		return nil, err
 	}
@@ -140,5 +134,16 @@ func (r InviteRepository) Update(invite entity.Invite) error {
 }
 
 func (r InviteRepository) Delete(invite entity.Invite) error {
+	invitesPerPerson, err := r.GetByPersonId(invite.PersonId)
+	if err != nil {
+		return err
+	}
+
+	if len(invitesPerPerson) > 0 {
+		slog.Error("error on delete invite, person has more than one invite")
+
+		return fmt.Errorf("person has more than one invite")
+	}
+
 	return repository.Delete(invite)
 }

@@ -22,3 +22,7 @@ func (a Actions) Write(person entity.Person) error {
 
 	return a.repository.Update(*dbPerson)
 }
+
+func (a Actions) RemovePerson(personId int) error {
+	return a.repository.Delete(entity.Person{Id: personId})
+}
