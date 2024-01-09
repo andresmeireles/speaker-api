@@ -9,7 +9,9 @@ import (
 )
 
 func main() {
+	os.Setenv("TZ", "America/Sao_Paulo")
 	dir, err := os.Getwd()
+
 	if err != nil {
 		panic(err)
 	}
