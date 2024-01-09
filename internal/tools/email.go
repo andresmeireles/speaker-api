@@ -35,7 +35,7 @@ func NewDefaultEmail() (*Email, error) {
 	email := os.Getenv("SMTP_USER")
 	client := NewEmail(host, password, port, email)
 
-	if !client.isEmail(email) {
+	if os.Getenv("APP_MODE") != "dev" && !client.isEmail(email) {
 		return nil, fmt.Errorf("invalid email %s", email)
 	}
 
@@ -48,18 +48,6 @@ func (e *Email) SetFrom(from string) error {
 	}
 
 	e.from = from
-
-	return nil
-}
-
-func (e *Email) AddTo(to string) error {
-	if !e.isEmail(to) {
-		slog.Error("invalid email", "email", to)
-
-		return fmt.Errorf("invalid email %s", to)
-	}
-
-	e.to = append(e.to, to)
 
 	return nil
 }
@@ -77,20 +65,11 @@ func (e *Email) isEmail(email string) bool {
 	return match
 }
 
-func (e *Email) Send(message string, to ...string) error {
-	for _, t := range to {
-		err := e.AddTo(t)
-		if err != nil {
-			return err
-		}
-	}
+func (e *Email) Send(message string, to string) error {
+	e.to = []string{to}
 
-	if e.from == "" {
-		return fmt.Errorf("no email from")
-	}
-
-	if len(e.to) == 0 {
-		return fmt.Errorf("no email to send")
+	if os.Getenv("APP_MODE") == "dev" {
+		return e.sendDevEmail(message)
 	}
 
 	client, err := e.setupClient()
@@ -142,8 +121,8 @@ func (e *Email) setupClient() (*smtp.Client, error) {
 		InsecureSkipVerify: true,
 		ServerName:         e.smtpHost,
 	}
-	conn, err := tls.Dial("tcp", smtpConn, tlsConfig)
 
+	conn, err := tls.Dial("tcp", smtpConn, tlsConfig)
 	if err != nil {
 		slog.Error("Error on tls dial", err)
 
@@ -165,6 +144,20 @@ func (e *Email) setupClient() (*smtp.Client, error) {
 	}
 
 	return client, nil
+}
+
+func (e Email) sendDevEmail(message string) error {
+	err := smtp.SendMail(e.smtpHost+":"+e.smtpPort, nil, e.from, e.to, []byte(e.formatEmail(message)))
+
+	if err != nil {
+		slog.Error("Error when send email", err)
+
+		return err
+	}
+
+	slog.Info("Email sent")
+
+	return nil
 }
 
 func (e Email) formatEmail(message string) string {
