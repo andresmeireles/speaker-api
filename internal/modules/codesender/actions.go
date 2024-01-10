@@ -42,8 +42,16 @@ func (a Actions) VerifyCode(userEmail, code string) error {
 		return err
 	}
 
-	if row.ExpiresAt.Before(time.Now()) {
-		slog.Error("Auth code expired", "code", code)
+	// Em main o timezone esta definido para America/SaoPaulo ou -3
+	// mas o banco de dados salva o timestamp sem zona.
+	//
+	// Devo verficar como criar um now sem timezone, o que acho dificil.
+	//
+	// A solução mais facil foi de atrazar o horario em 3 horas, para que
+	// quando for resolvido o horario e adicionar as 3 horas ao horario atual
+	// por causa do UTC a validação ainda funcione.
+	if row.ExpiresAt.Before(time.Now().Add(time.Hour * -3)) {
+		slog.Error("Auth code expired", "current time", time.Now(), "expired time", row.ExpiresAt)
 
 		return fmt.Errorf("auth code expired")
 	}

@@ -112,8 +112,8 @@ func (r InviteRepository) scan(scanFunc func(dest ...any) error) (*entity.Invite
 		&invite.References,
 		&invite.Date,
 		&invite.Time,
-		&invite.Remembered,
 		&invite.Accepted,
+		&invite.Remembered,
 		&invite.PersonId,
 	); err != nil {
 		return nil, err
