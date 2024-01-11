@@ -6,12 +6,15 @@ on:
   pull_request:
     branches: ["main"]
 
+env:
+  IS_CI: true
+
 jobs:
   build:
     runs-on: ubuntu-latest
 
     services:
-      postgres:
+      testdb:
         image: postgres
         env:
           POSTGRES_DB: ${DB_NAME}
