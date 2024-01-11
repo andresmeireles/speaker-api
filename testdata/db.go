@@ -9,10 +9,9 @@ import (
 
 func SetupDatabase(m *testing.M) {
 	SetCredentials()
-
 	TeardownLocalDB()
-	err := SetupLocalDB()
 
+	err := SetupLocalDB()
 	if err != nil {
 		TeardownLocalDB()
 		panic(err)
@@ -32,6 +31,7 @@ func SetCredentials() {
 	os.Setenv("DB_DRIVER", "postgres")
 	os.Setenv("DB_HOST", "localhost")
 	os.Setenv("DB_PORT", "5433")
+	os.Setenv("DB_NAME", "speaker")
 
 	if os.Getenv("IS_CI") == "true" {
 		os.Setenv("DB_HOST", "testdb")
