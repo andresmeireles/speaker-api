@@ -7,7 +7,7 @@ on:
     branches: ["main"]
 
 env:
-  IS_CI: true
+  IS_CI: false
 
 jobs:
   build:
