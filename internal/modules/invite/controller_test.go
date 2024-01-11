@@ -3,6 +3,7 @@ package invite_test
 import (
 	"net/http"
 	"net/http/httptest"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -26,9 +27,16 @@ func TestController(t *testing.T) {
 			t.Fatalf("expected nil, got %s", err)
 		}
 
+		pN, err := personRepo.GetByName("Andre")
+		if err != nil {
+			t.Fatalf("expected nil, got %s", err)
+		}
+
+		pNS := strconv.Itoa(pN.Id)
+
 		controller := testdata.GetService[invite.InviteController]()
 
-		reader := strings.NewReader(`{"person_id":1,"date":"2006-01-02T15:04:05.000Z","theme":"Theme","time":1}`)
+		reader := strings.NewReader(`{"person_id":` + pNS + `,"date":"2006-01-02T15:04:05.000Z","theme":"Theme","time":1}`)
 		recorder := httptest.NewRecorder()
 		request, err := http.NewRequest(http.MethodPost, "/invites", reader)
 		handler := http.HandlerFunc(controller.Create)
