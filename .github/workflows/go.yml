@@ -17,9 +17,9 @@ jobs:
       testdb:
         image: postgres
         env:
-          POSTGRES_DB: ${DB_NAME}
-          POSTGRES_USER: ${DB_USERNAME}
-          POSTGRES_PASSWORD: ${DB_PASSWORD}
+          POSTGRES_DB: postgres
+          POSTGRES_USER: speaker
+          POSTGRES_PASSWORD: speaker
         ports:
           - 5433:5432
         options: >-
