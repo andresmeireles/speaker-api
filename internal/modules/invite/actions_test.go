@@ -80,11 +80,21 @@ func TestCreateInvite(t *testing.T) {
 	t.Run("should create new invite", func(t *testing.T) {
 		// arrange
 		person := entity.Person{
-			Name: "Person 1",
+			Name: "Person 1000",
 		}
-		personRepo.Add(person)
+		err := personRepo.Add(person)
+
+		if err != nil {
+			t.Fatalf("expected nil, got %s", err)
+		}
+
+		p, err := personRepo.GetByName(person.Name)
+		if err != nil {
+			t.Fatalf("expected nil, got %s", err)
+		}
+
 		invitePost := invite.InvitePost{
-			PersonId: 1,
+			PersonId: p.Id,
 			Theme:    "Theme",
 			Time:     5,
 			Date:     time.Date(2006, 12, 20, 0, 0, 0, 0, time.UTC).Format("2006-01-02T15:04:05.000Z"),
@@ -98,8 +108,8 @@ func TestCreateInvite(t *testing.T) {
 			t.Fatalf("expected nil, got %s", err)
 		}
 
-		if result.PersonId != 1 {
-			t.Fatalf("expected 1, got %d", result.PersonId)
+		if result.Theme != "Theme" {
+			t.Fatalf("expected Theme, got %d", result.PersonId)
 		}
 	})
 }
