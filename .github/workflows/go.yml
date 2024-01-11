@@ -15,7 +15,7 @@ jobs:
 
     services:
       testdb:
-        image: postgres
+        image: postgres:latest
         env:
           POSTGRES_DB: speaker
           POSTGRES_USER: speaker
