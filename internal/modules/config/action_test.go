@@ -39,14 +39,15 @@ func TestActions(t *testing.T) {
 
 	t.Run("should update a config", func(t *testing.T) {
 		// arrange
+		a := testdata.GetService[config.Actions]()
 		key := "key5"
-		err := actions.Write(key, "value")
+		err := a.Write(key, "value")
 		if err != nil {
 			t.Errorf("unexpected error: %s", err)
 		}
 
 		// act
-		err = actions.Write(key, "value2")
+		err = a.Write(key, "value2")
 		conf, getErr := repo.GetByName(key)
 
 		// assert
