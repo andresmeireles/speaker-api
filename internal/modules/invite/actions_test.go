@@ -17,7 +17,7 @@ func TestParseTemplate(t *testing.T) {
 	personRepo := testdata.GetService[person.PersonRepository]()
 	configRepo := testdata.GetService[config.ConfigRepository]()
 
-	setupInvoice := func() {
+	setupInvite := func() {
 		err := personRepo.Add(entity.Person{Name: "Person 1"})
 
 		if err != nil {
@@ -43,7 +43,7 @@ func TestParseTemplate(t *testing.T) {
 
 	t.Run("should parse template by default", func(t *testing.T) {
 		// arrange
-		setupInvoice()
+		setupInvite()
 		template := "{{name}} invited you with theme {{theme}} with {{time}} minutes on {{date}}"
 		err := configRepo.Add(entity.Config{
 			Name:  "template",
@@ -54,8 +54,13 @@ func TestParseTemplate(t *testing.T) {
 			t.Fatalf("expected nil, got %s", err)
 		}
 
+		invites, err := inviteRepo.GetAll()
+		if err != nil {
+			t.Fatalf("expected nil, got %s", err)
+		}
+
 		// act
-		result, err := actions.ParseInviteWithTemplate(1)
+		result, err := actions.ParseInviteWithTemplate(invites[0].Id)
 
 		// assert
 		if err != nil {

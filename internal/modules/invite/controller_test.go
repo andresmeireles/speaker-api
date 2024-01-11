@@ -33,9 +33,7 @@ func TestController(t *testing.T) {
 		}
 
 		pNS := strconv.Itoa(pN.Id)
-
 		controller := testdata.GetService[invite.InviteController]()
-
 		reader := strings.NewReader(`{"person_id":` + pNS + `,"date":"2006-01-02T15:04:05.000Z","theme":"Theme","time":1}`)
 		recorder := httptest.NewRecorder()
 		request, err := http.NewRequest(http.MethodPost, "/invites", reader)
