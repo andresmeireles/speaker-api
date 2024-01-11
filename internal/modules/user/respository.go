@@ -7,17 +7,31 @@ import (
 
 	"github.com/andresmeireles/speaker/internal/db/entity"
 	"github.com/andresmeireles/speaker/internal/db/repository"
+	"github.com/andresmeireles/speaker/internal/tools/servicelocator"
 )
 
-type UserRepository struct{}
+type UserRepository struct {
+	repository repository.Repository[entity.User]
+}
+
+func (u UserRepository) New(s servicelocator.ServiceLocator) any {
+	return UserRepository{
+		repository: servicelocator.Get[repository.Repository[entity.User]](s),
+	}
+}
 
 func (u UserRepository) Add(user entity.User) error {
-	return repository.Add(user)
+	return u.repository.Add(user)
 }
 
 func (u UserRepository) GetByEmail(email string) (entity.User, error) {
-	row, err := repository.SingleQuery("SELECT * FROM users WHERE email = $1 LIMIT 1", email)
+	row, err := u.repository.SingleQuery(
+		"SELECT * FROM users WHERE email = $1 LIMIT 1",
+		email,
+	)
 	if err != nil {
+		slog.Error("error querying user", err)
+
 		return entity.User{}, err
 	}
 
@@ -38,7 +52,7 @@ func (u UserRepository) GetByEmail(email string) (entity.User, error) {
 }
 
 func (r UserRepository) GetById(id int) (entity.User, error) {
-	row, err := repository.GetById[entity.User](id)
+	row, err := r.repository.GetById(id)
 	if err != nil {
 		return entity.User{}, err
 	}

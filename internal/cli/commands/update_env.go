@@ -8,7 +8,6 @@ import (
 
 func modifyEnvFile(key, value string) error {
 	root, err := Root()
-
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(0)
@@ -18,12 +17,14 @@ func modifyEnvFile(key, value string) error {
 	if err != nil {
 		return fmt.Errorf("failed to read .env file: %w", err)
 	}
+
 	fileContent := string(fileBytes)
 
 	lines := strings.Split(fileContent, "\n")
 	for i, line := range lines {
 		if strings.HasPrefix(strings.TrimSpace(line), key+"=") {
 			lines[i] = key + "=" + value
+
 			break
 		}
 	}

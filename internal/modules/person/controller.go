@@ -7,13 +7,20 @@ import (
 	"strconv"
 
 	"github.com/andresmeireles/speaker/internal/db/entity"
-	"github.com/andresmeireles/speaker/internal/logger"
+	"github.com/andresmeireles/speaker/internal/tools/servicelocator"
 	web "github.com/andresmeireles/speaker/internal/web/decoder"
 )
 
 type PersonController struct {
 	personRepository PersonRepository
 	actions          Actions
+}
+
+func (c PersonController) New(s servicelocator.ServiceLocator) any {
+	return PersonController{
+		personRepository: servicelocator.Get[PersonRepository](s),
+		actions:          servicelocator.Get[Actions](s),
+	}
 }
 
 func (p PersonController) GetPersons(w http.ResponseWriter, r *http.Request) {
@@ -105,7 +112,7 @@ func (p PersonController) DeletePerson(w http.ResponseWriter, r *http.Request) {
 func (p PersonController) UpdatePerson(w http.ResponseWriter, r *http.Request) {
 	person, err := web.DecodePostBody[entity.Person](r.Body)
 	if err != nil {
-		logger.Error("error cannot decode", err)
+		slog.Error("error cannot decode", err)
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(err.Error()))
 

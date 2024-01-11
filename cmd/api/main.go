@@ -3,7 +3,9 @@ package main
 import (
 	"os"
 
+	"github.com/andresmeireles/speaker/internal"
 	"github.com/andresmeireles/speaker/internal/logger"
+	servicelocator "github.com/andresmeireles/speaker/internal/tools/servicelocator"
 	"github.com/andresmeireles/speaker/internal/web/router"
 	"github.com/joho/godotenv"
 )
@@ -29,5 +31,11 @@ func main() {
 
 	logger.Logger()
 
-	router.Run(os.Getenv("APP_PORT"))
+	sl := servicelocator.NewServiceLocator()
+
+	for _, service := range internal.Services() {
+		servicelocator.Set(sl, service)
+	}
+
+	router.Run(os.Getenv("APP_PORT"), *sl)
 }

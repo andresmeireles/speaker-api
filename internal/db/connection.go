@@ -6,11 +6,18 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/andresmeireles/speaker/internal/tools/servicelocator"
 	_ "github.com/lib/pq"
 	_ "github.com/mattn/go-sqlite3"
 )
 
-func GetDB() (*sql.DB, error) {
+type Connection struct{}
+
+func (c Connection) New(_ servicelocator.ServiceLocator) any {
+	return Connection{}
+}
+
+func (c Connection) GetDB() (*sql.DB, error) {
 	driver := os.Getenv("DB_DRIVER")
 	connectionString, err := queryStringByDrive(driver)
 

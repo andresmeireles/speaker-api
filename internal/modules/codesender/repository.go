@@ -7,18 +7,27 @@ import (
 	"github.com/andresmeireles/speaker/internal/db/entity"
 	"github.com/andresmeireles/speaker/internal/db/repository"
 	"github.com/andresmeireles/speaker/internal/modules/user"
+	"github.com/andresmeireles/speaker/internal/tools/servicelocator"
 )
 
 type AuthCodeRepository struct {
+	repository     repository.Repository[entity.AuthCode]
 	userRepository user.UserRepository
 }
 
-func (a AuthCodeRepository) Add(authCode entity.AuthCode) error {
-	return repository.Add[entity.AuthCode](authCode)
+func (r AuthCodeRepository) New(s servicelocator.ServiceLocator) any {
+	return AuthCodeRepository{
+		repository:     servicelocator.Get[repository.Repository[entity.AuthCode]](s),
+		userRepository: servicelocator.Get[user.UserRepository](s),
+	}
+}
+
+func (r AuthCodeRepository) Add(authCode entity.AuthCode) error {
+	return r.repository.Add(authCode)
 }
 
 func (a AuthCodeRepository) GetById(authCodeId int) (entity.AuthCode, error) {
-	row, err := repository.GetById[entity.AuthCode](authCodeId)
+	row, err := a.repository.GetById(authCodeId)
 	if err != nil {
 		return entity.AuthCode{}, err
 	}
@@ -33,7 +42,7 @@ func (a AuthCodeRepository) GetById(authCodeId int) (entity.AuthCode, error) {
 
 func (a AuthCodeRepository) GetAll() ([]entity.AuthCode, error) {
 	codes := make([]entity.AuthCode, 0)
-	rows, err := repository.GetAll[entity.AuthCode]()
+	rows, err := a.repository.GetAll()
 
 	if err != nil {
 		return codes, err
@@ -54,7 +63,7 @@ func (a AuthCodeRepository) GetAll() ([]entity.AuthCode, error) {
 
 func (a AuthCodeRepository) GetByCode(code string) (entity.AuthCode, error) {
 	query := "SELECT * FROM auth_codes WHERE code = $1 LIMIT 1"
-	row, err := repository.SingleQuery(query, code)
+	row, err := a.repository.SingleQuery(query, code)
 
 	if err != nil {
 		return entity.AuthCode{}, err
@@ -80,9 +89,9 @@ func (a AuthCodeRepository) GetByCode(code string) (entity.AuthCode, error) {
 }
 
 func (a AuthCodeRepository) Update(authCode entity.AuthCode) error {
-	return repository.Update(authCode)
+	return a.repository.Update(authCode)
 }
 
 func (a AuthCodeRepository) Delete(authCode entity.AuthCode) error {
-	return repository.Delete(authCode)
+	return a.repository.Delete(authCode)
 }

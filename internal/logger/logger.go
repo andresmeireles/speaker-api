@@ -32,13 +32,3 @@ func Logger() {
 	logger := slog.New(handler)
 	slog.SetDefault(logger)
 }
-
-func Error(values ...any) {
-	Logger()
-	slog.Error("Some Error Message", values)
-}
-
-func Info(values ...any) {
-	Logger()
-	slog.Info("Some Info Message", values)
-}

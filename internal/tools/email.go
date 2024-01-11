@@ -8,6 +8,8 @@ import (
 	"os"
 	"regexp"
 	"strings"
+
+	"github.com/andresmeireles/speaker/internal/tools/servicelocator"
 )
 
 type Email struct {
@@ -18,7 +20,21 @@ type Email struct {
 	from     string
 }
 
-func NewEmail(smtpHost, password, smtpPort, from string) *Email {
+func (e *Email) New(s servicelocator.ServiceLocator) any {
+	host := os.Getenv("SMTP_HOST")
+	port := os.Getenv("SMTP_PORT")
+	password := os.Getenv("SMTP_PASSWORD")
+	email := os.Getenv("SMTP_USER")
+	client := newEmail(host, password, port, email)
+
+	if os.Getenv("APP_MODE") != "dev" && !client.isEmail(email) {
+		panic("invalid email")
+	}
+
+	return client
+}
+
+func newEmail(smtpHost, password, smtpPort, from string) *Email {
 	return &Email{
 		smtpHost: smtpHost,
 		smtpPort: smtpPort,
@@ -26,20 +42,6 @@ func NewEmail(smtpHost, password, smtpPort, from string) *Email {
 		from:     from,
 		to:       make([]string, 0),
 	}
-}
-
-func NewDefaultEmail() (*Email, error) {
-	host := os.Getenv("SMTP_HOST")
-	port := os.Getenv("SMTP_PORT")
-	password := os.Getenv("SMTP_PASSWORD")
-	email := os.Getenv("SMTP_USER")
-	client := NewEmail(host, password, port, email)
-
-	if os.Getenv("APP_MODE") != "dev" && !client.isEmail(email) {
-		return nil, fmt.Errorf("invalid email %s", email)
-	}
-
-	return client, nil
 }
 
 func (e *Email) SetFrom(from string) error {

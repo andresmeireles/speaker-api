@@ -3,21 +3,16 @@ package repository
 import (
 	"fmt"
 	"strings"
-
-	"github.com/andresmeireles/speaker/internal/db"
-	"github.com/andresmeireles/speaker/internal/db/entity"
 )
 
-func Update[T entity.Entity](en T) error {
-	db, err := db.GetDB()
-
+func (r Repository[T]) Update(en T) error {
+	db, err := r.conn.GetDB()
 	if err != nil {
 		return err
 	}
-
 	defer db.Close()
 
-	keys, _, values := Split(en)
+	keys, _, values := r.split(en)
 	sets := ""
 	lastParam := len(values) + 1
 
@@ -36,7 +31,6 @@ func Update[T entity.Entity](en T) error {
 	values = append(values, en.GetId())
 
 	_, err = db.Exec(query, values...)
-
 	if err != nil {
 		return err
 	}

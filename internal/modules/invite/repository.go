@@ -8,18 +8,27 @@ import (
 	"github.com/andresmeireles/speaker/internal/db/entity"
 	"github.com/andresmeireles/speaker/internal/db/repository"
 	"github.com/andresmeireles/speaker/internal/modules/person"
+	"github.com/andresmeireles/speaker/internal/tools/servicelocator"
 )
 
 type InviteRepository struct {
+	repository       repository.Repository[entity.Invite]
 	personRepository person.PersonRepository
 }
 
+func (r InviteRepository) New(s servicelocator.ServiceLocator) any {
+	return InviteRepository{
+		repository:       servicelocator.Get[repository.Repository[entity.Invite]](s),
+		personRepository: servicelocator.Get[person.PersonRepository](s),
+	}
+}
+
 func (r InviteRepository) Add(invite entity.Invite) error {
-	return repository.Add(invite)
+	return r.repository.Add(invite)
 }
 
 func (r InviteRepository) Query(query string, values ...any) (*sql.Rows, error) {
-	return repository.Query(query, values...)
+	return r.repository.Query(query, values...)
 }
 
 func (r InviteRepository) GetAllOrdered(field string, asc bool) ([]entity.Invite, error) {
@@ -32,7 +41,7 @@ func (r InviteRepository) GetAllOrdered(field string, asc bool) ([]entity.Invite
 		query += field + " DESC"
 	}
 
-	rows, err := repository.Query(query)
+	rows, err := r.repository.Query(query)
 	if err != nil {
 		return nil, err
 	}
@@ -50,7 +59,7 @@ func (r InviteRepository) GetAllOrdered(field string, asc bool) ([]entity.Invite
 }
 
 func (r InviteRepository) GetAll() ([]entity.Invite, error) {
-	rows, err := repository.GetAll[entity.Invite]()
+	rows, err := r.repository.GetAll()
 	if err != nil {
 		return nil, err
 	}
@@ -70,7 +79,7 @@ func (r InviteRepository) GetAll() ([]entity.Invite, error) {
 }
 
 func (r InviteRepository) GetById(id int) (*entity.Invite, error) {
-	row, err := repository.GetById[entity.Invite](id)
+	row, err := r.repository.GetById(id)
 	if err != nil {
 		return nil, err
 	}
@@ -86,7 +95,7 @@ func (r InviteRepository) GetById(id int) (*entity.Invite, error) {
 func (r InviteRepository) GetByPersonId(id int) ([]entity.Invite, error) {
 	invites := make([]entity.Invite, 0)
 	query := "SELECT * FROM invites WHERE person_id = $1"
-	rows, err := repository.Query(query, id)
+	rows, err := r.repository.Query(query, id)
 
 	if err != nil {
 		return nil, err
@@ -130,7 +139,7 @@ func (r InviteRepository) scan(scanFunc func(dest ...any) error) (*entity.Invite
 }
 
 func (r InviteRepository) Update(invite entity.Invite) error {
-	return repository.Update(invite)
+	return r.repository.Update(invite)
 }
 
 func (r InviteRepository) Delete(invite entity.Invite) error {
@@ -145,5 +154,5 @@ func (r InviteRepository) Delete(invite entity.Invite) error {
 		return fmt.Errorf("person has more than one invite")
 	}
 
-	return repository.Delete(invite)
+	return r.repository.Delete(invite)
 }

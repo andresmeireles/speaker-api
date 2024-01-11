@@ -7,6 +7,7 @@ import (
 
 	"github.com/andresmeireles/speaker/internal/modules/codesender"
 	"github.com/andresmeireles/speaker/internal/modules/user"
+	"github.com/andresmeireles/speaker/internal/tools/servicelocator"
 	web "github.com/andresmeireles/speaker/internal/web/decoder"
 )
 
@@ -14,6 +15,18 @@ type AuthController struct {
 	actions           Actions
 	codesenderActions codesender.Actions
 	userRepository    user.UserRepository
+}
+
+func (c AuthController) New(s servicelocator.ServiceLocator) any {
+	c.actions = servicelocator.Get[Actions](s)
+	c.codesenderActions = servicelocator.Get[codesender.Actions](s)
+	c.userRepository = servicelocator.Get[user.UserRepository](s)
+
+	return AuthController{
+		actions:           c.actions,
+		codesenderActions: c.codesenderActions,
+		userRepository:    c.userRepository,
+	}
 }
 
 func (c AuthController) ReceiveEmail(w http.ResponseWriter, r *http.Request) {

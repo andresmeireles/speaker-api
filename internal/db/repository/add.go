@@ -2,20 +2,17 @@ package repository
 
 import (
 	"fmt"
-
-	"github.com/andresmeireles/speaker/internal/db"
-	"github.com/andresmeireles/speaker/internal/db/entity"
 )
 
-func Add[T entity.Entity](en T) error {
-	db, err := db.GetDB()
+func (r Repository[T]) Add(en T) error {
+	db, err := r.conn.GetDB()
 	if err != nil {
 		return err
 	}
 
 	defer db.Close()
 
-	keys, interrogations, values := Split(en)
+	keys, interrogations, values := r.split(en)
 	query := fmt.Sprintf(
 		"INSERT INTO %s (%s) VALUES (%s)",
 		en.Table(),

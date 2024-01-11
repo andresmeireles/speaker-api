@@ -3,8 +3,7 @@ package web
 import (
 	"encoding/json"
 	"io"
-
-	"github.com/andresmeireles/speaker/internal/logger"
+	"log/slog"
 )
 
 func DecodePostBody[T any](body io.Reader) (T, error) {
@@ -13,7 +12,7 @@ func DecodePostBody[T any](body io.Reader) (T, error) {
 	err := json.NewDecoder(body).Decode(&parser)
 
 	if err != nil {
-		logger.Error(err)
+		slog.Error("error when decode post body", err)
 	}
 
 	return parser, err

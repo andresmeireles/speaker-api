@@ -3,96 +3,81 @@ package repository_test
 // import (
 // 	"testing"
 
+// 	"github.com/andresmeireles/speaker/internal/db"
 // 	"github.com/andresmeireles/speaker/internal/db/entity"
 // 	"github.com/andresmeireles/speaker/internal/db/repository"
 // )
 
+// const (
+// 	PERSON_NAME = "Person 1"
+// )
+
 // func TestGetById(t *testing.T) {
-// 	// arrange
-// 	person := entity.Person{
-// 		Name: "Person 1",
+// 	d, _ := db.GetDB()
+// 	r := repository.Repository[entity.Person]{
+// 		Db: d,
 // 	}
-
-// 	repository.Add(person)
-
-// 	// act
-// 	row := repository.GetById[entity.Person](1)
-
-// 	entity := new(entity.Person)
-
-// 	if err := row.Scan(entity.Id, entity.Name); err != nil {
-// 		t.Fatalf("expected nil, got %s", err)
+// 	ru := repository.Repository[entity.User]{
+// 		Db: d,
 // 	}
+// 	t.Run("get by id", func(t *testing.T) {
+// 		// arrange
+// 		person := entity.Person{
+// 			Name: PERSON_NAME,
+// 		}
 
-// 	// assert
-// 	if entity.GetId() != 1 {
-// 		t.Fatalf("expected 1, got %d", entity.GetId())
-// 	}
-// 	if entity.Name != "Person 1" {
-// 		t.Fatalf("expected Person 1, got %s", entity.Name)
-// 	}
-// }
+// 		r.Add(person)
 
-// func TestBiggerEntity(t *testing.T) {
-// 	// arrange
-// 	u := entity.User{
-// 		Name:  "Person 1",
-// 		Email: "123",
-// 	}
-// 	repository.Add(u)
+// 		// act
+// 		row, err := r.GetById(1)
+// 		if err != nil {
+// 			t.Fatalf("expected nil, got %s", err)
+// 		}
 
-// 	// act
-// 	row := repository.GetById[entity.User](1)
+// 		entity := new(entity.Person)
+// 		if err := row.Scan(entity.Id, entity.Name); err != nil {
+// 			t.Fatalf("expected nil, got %s", err)
+// 		}
 
-// 	// assert
-// 	if user.GetId() != 1 {
-// 		t.Fatalf("expected 1, got %d", user.GetId())
-// 	}
-// 	if user.Name != "Person 1" {
-// 		t.Fatalf("expected Person 1, got %s", user.Name)
-// 	}
-// 	if user.Email != "123" {
-// 		t.Fatalf("expected 123, got %s", user.Email)
-// 	}
-// }
+// 		// assert
+// 		if entity.GetId() != 1 {
+// 			t.Fatalf("expected 1, got %d", entity.GetId())
+// 		}
+// 		if entity.Name != PERSON_NAME {
+// 			t.Fatalf("expected Person 1, got %s", entity.Name)
+// 		}
+// 	})
 
-// func TestNotFound(t *testing.T) {
-// 	// arrange
-// 	person := entity.Person{
-// 		Name: "Person 1",
-// 	}
-// 	repository.Add(person)
+// 	t.Run("search bigger entity", func(t *testing.T) {
+// 		// arrange
+// 		u := entity.User{
+// 			Name:  "Person 1",
+// 			Email: "123",
+// 		}
+// 		ru.Add(u)
 
-// 	// act
-// 	res, _ := repository.GetById[entity.Person](2, person)
+// 		// act
+// 		_, err := r.GetById(1)
 
-// 	// assert
-// 	if res != nil {
-// 		t.Fatalf("expected error, got nil")
-// 	}
-// }
+// 		// assert
+// 		if err != nil {
+// 			t.Fatalf("expected nil, got %s", err)
+// 		}
+// 	})
 
-// func TestCallForthElement(t *testing.T) {
-// 	// arrange
-// 	person := entity.Person{
-// 		Name: "Person",
-// 	}
-// 	repository.Add(person)
-// 	person.Name = "Person 1"
-// 	repository.Add(person)
-// 	person.Name = "Person 2"
-// 	repository.Add(person)
-// 	person.Name = "Person 3"
-// 	repository.Add(person)
+// 	t.Run("not found", func(t *testing.T) {
+// 		// arrange
+// 		person := entity.Person{
+// 			Name: "Person 1",
+// 		}
+// 		r.Add(person)
 
-// 	// act
-// 	res, _ := repository.GetById[entity.Person](3, person)
+// 		// act
+// 		res, _ := r.GetById(2)
 
-// 	// assert
-// 	if res.Name != "Person 3" {
-// 		t.Fatalf("expected Person 3, got %s", res.Name)
-// 	}
-// 	if res.GetId() != 3 {
-// 		t.Fatalf("expected 3, got %d", res.GetId())
-// 	}
+// 		// assert
+// 		if res != nil {
+// 			t.Fatalf("expected error, got nil")
+// 		}
+// 	})
 // }

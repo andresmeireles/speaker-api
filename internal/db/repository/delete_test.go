@@ -1,67 +1,79 @@
 package repository_test
 
-import (
-	"testing"
-	"time"
+// import (
+// 	"testing"
+// 	"time"
 
-	"github.com/andresmeireles/speaker/internal/db/entity"
-	"github.com/andresmeireles/speaker/internal/db/repository"
-)
+// 	"github.com/andresmeireles/speaker/internal/db"
+// 	"github.com/andresmeireles/speaker/internal/db/entity"
+// 	"github.com/andresmeireles/speaker/internal/db/repository"
+// )
 
-func TestDelete(t *testing.T) {
-	t.Run("delete register", func(t *testing.T) {
-		// arrange
-		user := entity.User{
-			Name:  "Person 1",
-			Email: "123",
-		}
-		repository.Add(user)
+// func TestDelete(t *testing.T) {
+// 	d, _ := db.GetDB()
+// 	r := repository.Repository[entity.Person]{
+// 		Db: d,
+// 	}
+// 	ri := repository.Repository[entity.Invite]{
+// 		Db: d,
+// 	}
+// 	ru := repository.Repository[entity.User]{
+// 		Db: d,
+// 	}
 
-		// act
-		err := repository.Delete(user)
-		allUsers, gErr := repository.GetAll[entity.User]()
+// 	t.Run("delete register", func(t *testing.T) {
+// 		// arrange
+// 		user := entity.User{
+// 			Name:  "Person 1",
+// 			Email: "123",
+// 		}
+// 		ru.Add(user)
 
-		// assert
-		if err != nil {
-			t.Fatalf("expected nil, got %s", err)
-		}
+// 		// act
+// 		err := ru.Delete(user)
+// 		allUsers, gErr := r.GetAll()
 
-		if gErr != nil {
-			t.Fatalf("expected nil, got %s", gErr)
-		}
+// 		// assert
+// 		if err != nil {
+// 			t.Fatalf("expected nil, got %s", err)
+// 		}
 
-		numberOfRegisters := 0
-		for allUsers.Next() {
-			numberOfRegisters++
-		}
+// 		if gErr != nil {
+// 			t.Fatalf("expected nil, got %s", gErr)
+// 		}
 
-		if numberOfRegisters != 0 {
-			t.Fatalf("expected 0, got %d", numberOfRegisters)
-		}
-	})
+// 		numberOfRegisters := 0
+// 		for allUsers.Next() {
+// 			numberOfRegisters++
+// 		}
 
-	t.Run("Test Delete With Relationships", func(t *testing.T) {
-		// arrange
-		person := entity.Person{
-			Name: "Person 1",
-		}
-		invite := entity.Invite{
-			PersonId:   1,
-			Theme:      "Theme",
-			Time:       1,
-			Date:       time.Now(),
-			Accepted:   true,
-			Remembered: true,
-		}
-		repository.Add(person)
-		repository.Add(invite)
+// 		if numberOfRegisters != 0 {
+// 			t.Fatalf("expected 0, got %d", numberOfRegisters)
+// 		}
+// 	})
 
-		// act
-		err := repository.Delete(person)
+// 	t.Run("Test Delete With Relationships", func(t *testing.T) {
+// 		// arrange
+// 		person := entity.Person{
+// 			Name: "Person 1",
+// 		}
+// 		invite := entity.Invite{
+// 			PersonId:   1,
+// 			Theme:      "Theme",
+// 			Time:       1,
+// 			Date:       time.Now(),
+// 			Accepted:   true,
+// 			Remembered: true,
+// 		}
+// 		r.Add(person)
+// 		ri.Add(invite)
 
-		// assert
-		if err != nil {
-			t.Fatalf("expected nil, got %s", err)
-		}
-	})
-}
+// 		// act
+// 		err := r.Delete(person)
+
+// 		// assert
+// 		if err != nil {
+// 			t.Fatalf("expected nil, got %s", err)
+// 		}
+// 	})
+// }

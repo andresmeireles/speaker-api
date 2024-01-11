@@ -10,6 +10,7 @@ import (
 	"github.com/andresmeireles/speaker/internal/modules/codesender"
 	"github.com/andresmeireles/speaker/internal/modules/user"
 	"github.com/andresmeireles/speaker/internal/tools"
+	"github.com/andresmeireles/speaker/internal/tools/servicelocator"
 	"github.com/golang-jwt/jwt/v5"
 )
 
@@ -20,6 +21,20 @@ type Actions struct {
 	userRepository   user.UserRepository
 	email            *tools.Email
 	codeSenderAction codesender.Actions
+}
+
+func (a Actions) New(s servicelocator.ServiceLocator) any {
+	ra := servicelocator.Get[AuthRepository](s)
+	ru := servicelocator.Get[user.UserRepository](s)
+	e := servicelocator.Get[*tools.Email](s)
+	cs := servicelocator.Get[codesender.Actions](s)
+
+	return Actions{
+		repository:       ra,
+		userRepository:   ru,
+		email:            e,
+		codeSenderAction: cs,
+	}
 }
 
 func (a Actions) Logout(userId int) error {

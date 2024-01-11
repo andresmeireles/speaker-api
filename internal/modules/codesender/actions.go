@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/andresmeireles/speaker/internal/db/entity"
+	"github.com/andresmeireles/speaker/internal/tools/servicelocator"
 )
 
 type Actions struct {
@@ -15,6 +16,12 @@ type Actions struct {
 }
 
 const EXPIRE_TIME_MINUTES = 5
+
+func (a Actions) New(s servicelocator.ServiceLocator) any {
+	return Actions{
+		repository: servicelocator.Get[AuthCodeRepository](s),
+	}
+}
 
 func (a Actions) CreateCode(user entity.User) (string, error) {
 	randGenerator := rand.New(rand.NewSource(time.Now().Unix()))

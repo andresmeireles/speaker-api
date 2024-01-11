@@ -5,9 +5,9 @@ import (
 	"log/slog"
 	"net/http"
 
-	"github.com/andresmeireles/speaker/internal/logger"
 	"github.com/andresmeireles/speaker/internal/modules/config"
 	"github.com/andresmeireles/speaker/internal/modules/person"
+	"github.com/andresmeireles/speaker/internal/tools/servicelocator"
 	web "github.com/andresmeireles/speaker/internal/web/decoder"
 )
 
@@ -18,11 +18,20 @@ type InviteController struct {
 	action           Actions
 }
 
+func (i InviteController) New(s servicelocator.ServiceLocator) any {
+	return InviteController{
+		inviteRepository: servicelocator.Get[InviteRepository](s),
+		personRepository: servicelocator.Get[person.PersonRepository](s),
+		configRepository: servicelocator.Get[config.ConfigRepository](s),
+		action:           servicelocator.Get[Actions](s),
+	}
+}
+
 func (i InviteController) Create(w http.ResponseWriter, r *http.Request) {
 	invite, err := web.DecodePostBody[InvitePost](r.Body)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		logger.Error("error on create invite controller, cannot decode", err)
+		slog.Error("error on create invite controller, cannot decode", err)
 		w.Write([]byte(err.Error()))
 
 		return
@@ -115,11 +124,7 @@ func (i InviteController) SendInvite(inviteId int, w http.ResponseWriter, r *htt
 		w.Write([]byte(err.Error()))
 	}
 
-	rememberMessage, err := ParseRememberMessage(
-		i.inviteRepository,
-		i.configRepository,
-		inviteId,
-	)
+	rememberMessage, err := i.action.ParseRememberMessage(inviteId)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(err.Error()))
@@ -130,7 +135,7 @@ func (i InviteController) SendInvite(inviteId int, w http.ResponseWriter, r *htt
 		"remember": rememberMessage,
 	})
 	if err != nil {
-		logger.Error("error on send invite controller, cannot parse to json", err)
+		slog.Error("error on send invite controller, cannot parse to json", err)
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(err.Error()))
 
@@ -147,7 +152,7 @@ func (i InviteController) DeleteInvite(inviteId int, w http.ResponseWriter, r *h
 
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		logger.Error("error on delete invite controller, when remove invite", err)
+		slog.Error("error on delete invite controller, when remove invite", err)
 		w.Write([]byte(err.Error()))
 
 		return

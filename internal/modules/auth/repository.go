@@ -4,23 +4,31 @@ import (
 	"database/sql"
 	"fmt"
 
-	"github.com/andresmeireles/speaker/internal/db"
 	"github.com/andresmeireles/speaker/internal/db/entity"
 	"github.com/andresmeireles/speaker/internal/db/repository"
+	"github.com/andresmeireles/speaker/internal/tools/servicelocator"
 )
 
-type AuthRepository struct{}
+type AuthRepository struct {
+	repository repository.Repository[entity.Auth]
+}
 
-func (a AuthRepository) GetByHash(hash string) (entity.Auth, error) {
-	db, err := db.GetDB()
-	if err != nil {
-		panic(err)
+func (r AuthRepository) New(s servicelocator.ServiceLocator) any {
+	re := servicelocator.Get[repository.Repository[entity.Auth]](s)
+
+	return AuthRepository{
+		repository: re,
 	}
-	defer db.Close()
+}
 
+func (r AuthRepository) GetByHash(hash string) (entity.Auth, error) {
 	auth := new(entity.Auth)
-	query := "SELECT * FROM auths WHERE hash = $1"
-	row := db.QueryRow(query, hash)
+	query := "SELECT * FROM auths WHERE hash = $1 LIMIT 1"
+	row, err := r.repository.SingleQuery(query, hash)
+
+	if err != nil {
+		return entity.Auth{}, err
+	}
 
 	if err := row.Scan(&auth.Id, &auth.UserId, &auth.Hash, &auth.Expired); err != nil {
 		if err == sql.ErrNoRows {
@@ -34,15 +42,15 @@ func (a AuthRepository) GetByHash(hash string) (entity.Auth, error) {
 }
 
 func (a AuthRepository) AuthCodeByUser(authCode string, userId int) (*entity.AuthCode, error) {
-	db, err := db.GetDB()
-	if err != nil {
-		panic(err) // RESOLVER ISSO NO FUTURO
-	}
-	defer db.Close()
-
 	var code entity.AuthCode
+
 	query := "SELECT * FROM auth_code WHERE code = ? AND user_id = ?"
-	row := db.QueryRow(query, authCode, userId)
+	row, err := a.repository.SingleQuery(query, authCode, userId)
+
+	if err != nil {
+		return nil, err
+	}
+
 	if err := row.Scan(&code); err != nil {
 		if err == sql.ErrNoRows {
 			return nil, nil
@@ -52,13 +60,13 @@ func (a AuthRepository) AuthCodeByUser(authCode string, userId int) (*entity.Aut
 	return &code, nil
 }
 
-func (a AuthRepository) Add(auth entity.Auth) error {
-	return repository.Add(auth)
+func (r AuthRepository) Add(auth entity.Auth) error {
+	return r.repository.Add(auth)
 }
 
-func (a AuthRepository) GetById(id int) (*entity.Auth, error) {
+func (r AuthRepository) GetById(id int) (*entity.Auth, error) {
 	auth := new(entity.Auth)
-	authRow, err := repository.GetById[entity.Auth](id)
+	authRow, err := r.repository.GetById(id)
 
 	if err != nil {
 		return nil, err
@@ -71,10 +79,10 @@ func (a AuthRepository) GetById(id int) (*entity.Auth, error) {
 	return auth, nil
 }
 
-func (a AuthRepository) GetAll() ([]entity.Auth, error) {
+func (r AuthRepository) GetAll() ([]entity.Auth, error) {
 	auth := new(entity.Auth)
 	auths := make([]entity.Auth, 0)
-	authRows, err := repository.GetAll[entity.Auth]()
+	authRows, err := r.repository.GetAll()
 
 	if err != nil {
 		return nil, err
@@ -91,17 +99,17 @@ func (a AuthRepository) GetAll() ([]entity.Auth, error) {
 	return auths, nil
 }
 
-func (a AuthRepository) ExpireTokenByUserId(userId int) error {
+func (r AuthRepository) ExpireTokenByUserId(userId int) error {
 	query := "UPDATE auths SET expired = true WHERE user_id = $1 AND expired = false"
-	_, err := repository.Query(query, userId)
+	_, err := r.repository.Query(query, userId)
 
 	return err
 }
 
 func (a AuthRepository) Update(auth entity.Auth) error {
-	return repository.Update(auth)
+	return a.repository.Update(auth)
 }
 
 func (a AuthRepository) Delete(auth entity.Auth) error {
-	return repository.Delete(auth)
+	return a.repository.Delete(auth)
 }

@@ -4,10 +4,17 @@ import (
 	"database/sql"
 
 	"github.com/andresmeireles/speaker/internal/db/entity"
+	"github.com/andresmeireles/speaker/internal/tools/servicelocator"
 )
 
 type Actions struct {
 	configRepository ConfigRepository
+}
+
+func (a Actions) New(s servicelocator.ServiceLocator) any {
+	return Actions{
+		configRepository: servicelocator.Get[ConfigRepository](s),
+	}
 }
 
 // Create or update a config.

@@ -8,16 +8,27 @@ import (
 	"time"
 
 	"github.com/andresmeireles/speaker/internal/db/entity"
-	"github.com/andresmeireles/speaker/internal/db/repository"
-	"github.com/andresmeireles/speaker/internal/logger"
 	"github.com/andresmeireles/speaker/internal/modules/config"
 	"github.com/andresmeireles/speaker/internal/modules/person"
+	"github.com/andresmeireles/speaker/internal/tools/servicelocator"
 )
 
 type Actions struct {
 	inviteRepository InviteRepository
 	personRepository person.PersonRepository
 	configRepository config.ConfigRepository
+}
+
+func (a Actions) New(s servicelocator.ServiceLocator) any {
+	inviteRepository := servicelocator.Get[InviteRepository](s)
+	personRepository := servicelocator.Get[person.PersonRepository](s)
+	configRepository := servicelocator.Get[config.ConfigRepository](s)
+
+	return Actions{
+		inviteRepository: inviteRepository,
+		personRepository: personRepository,
+		configRepository: configRepository,
+	}
 }
 
 func (a Actions) ParseInviteWithTemplate(inviteId int) (string, error) {
@@ -40,19 +51,15 @@ func (a Actions) ParseInviteWithTemplate(inviteId int) (string, error) {
 	return inviteText, nil
 }
 
-func ParseRememberMessage(
-	inviteRepository repository.Repository[entity.Invite],
-	configRepository config.ConfigRepository,
-	inviteId int,
-) (string, error) {
-	invite, err := inviteRepository.GetById(inviteId)
+func (a Actions) ParseRememberMessage(inviteId int) (string, error) {
+	invite, err := a.inviteRepository.GetById(inviteId)
 	if err != nil {
 		slog.Error("error when get invite", err)
 
 		return "", err
 	}
 
-	config, err := configRepository.GetByName("remember")
+	config, err := a.configRepository.GetByName("remember")
 	if err != nil {
 		slog.Error("error when get config", err)
 
@@ -115,7 +122,7 @@ func (a Actions) CreateInvite(
 func RemoveInvite(id int, repository InviteRepository) error {
 	invite, err := repository.GetById(id)
 	if err != nil {
-		logger.Error("error on delete invite, when get invite by id", id, err)
+		slog.Error("error on delete invite, when get invite by id", "invite id", id, err)
 
 		return err
 	}
@@ -169,7 +176,7 @@ func validateInviteData(inviteData InvitePost) error {
 func (a Actions) acceptInvite(inviteId int) error {
 	_, err := a.inviteRepository.GetById(inviteId)
 	if err != nil {
-		slog.Error("error on accept invite, when get invite by id", inviteId, err)
+		slog.Error("error on accept invite, when get invite by id", "invite id", inviteId, err)
 
 		return err
 	}
@@ -178,7 +185,7 @@ func (a Actions) acceptInvite(inviteId int) error {
 	_, err = a.inviteRepository.Query(acceptQuery, inviteId)
 
 	if err != nil {
-		slog.Error("error on accept invite, when get invite by id;", inviteId, err)
+		slog.Error("error on accept invite, when get invite by id;", "invite id", inviteId, err)
 	}
 
 	return err
@@ -187,7 +194,7 @@ func (a Actions) acceptInvite(inviteId int) error {
 func (a Actions) rememberInvite(inviteId int) error {
 	_, err := a.inviteRepository.GetById(inviteId)
 	if err != nil {
-		slog.Error("error on accept invite, when get invite by id", inviteId, err)
+		slog.Error("error on accept invite, when get invite by id", "invite id", inviteId, err)
 
 		return err
 	}
@@ -196,7 +203,7 @@ func (a Actions) rememberInvite(inviteId int) error {
 	_, err = a.inviteRepository.Query(acceptQuery, inviteId)
 
 	if err != nil {
-		slog.Error("error on accept invite, when get invite by id;", inviteId, err)
+		slog.Error("error on accept invite, when get invite by id;", "invite id", inviteId, err)
 	}
 
 	return err

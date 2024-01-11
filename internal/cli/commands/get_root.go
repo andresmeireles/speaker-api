@@ -16,9 +16,11 @@ func Root() (string, error) {
 	for {
 		goModPath := filepath.Join(dir, "go.mod")
 		_, err := os.Stat(goModPath)
+
 		if err == nil {
 			return dir, nil
 		}
+
 		if !os.IsNotExist(err) {
 			return "", err
 		}
@@ -28,6 +30,7 @@ func Root() (string, error) {
 		if parentDir == dir {
 			break
 		}
+
 		dir = parentDir
 	}
 

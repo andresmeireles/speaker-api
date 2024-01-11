@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/andresmeireles/speaker/internal/modules/auth"
+	"github.com/andresmeireles/speaker/internal/tools/servicelocator"
 )
 
 func getToken(req *http.Request) (string, error) {
@@ -23,7 +24,11 @@ func getToken(req *http.Request) (string, error) {
 	return cookie.Value, nil
 }
 
-func CheckTokenOnCookie(next http.Handler) http.Handler {
+// check if user cookie is valid, if not check if has authorization token and
+// check if is valid.
+func CheckTokenOnCookie(next http.Handler, sl servicelocator.ServiceLocator) http.Handler {
+	authActions := servicelocator.Get[auth.Actions](sl)
+
 	return http.HandlerFunc(func(response http.ResponseWriter, request *http.Request) {
 		token, err := getToken(request)
 		if err != nil {
@@ -33,7 +38,6 @@ func CheckTokenOnCookie(next http.Handler) http.Handler {
 
 			return
 		}
-		authActions := auth.NewActions()
 		authEntity, err := auth.AuthRepository{}.GetByHash(token)
 		if err != nil {
 			slog.Error("error on repository", "cookie", err)

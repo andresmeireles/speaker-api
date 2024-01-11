@@ -5,12 +5,21 @@ import (
 
 	"github.com/andresmeireles/speaker/internal/db/entity"
 	"github.com/andresmeireles/speaker/internal/db/repository"
+	"github.com/andresmeireles/speaker/internal/tools/servicelocator"
 )
 
-type ConfigRepository struct{}
+type ConfigRepository struct {
+	repository repository.Repository[entity.Config]
+}
+
+func (c ConfigRepository) New(s servicelocator.ServiceLocator) any {
+	return ConfigRepository{
+		repository: servicelocator.Get[repository.Repository[entity.Config]](s),
+	}
+}
 
 func (c ConfigRepository) GetAll() ([]entity.Config, error) {
-	rows, err := repository.GetAll[entity.Config]()
+	rows, err := c.repository.GetAll()
 
 	if err != nil {
 		return nil, err
@@ -30,7 +39,7 @@ func (c ConfigRepository) GetAll() ([]entity.Config, error) {
 }
 
 func (c ConfigRepository) GetById(id int) (*entity.Config, error) {
-	row, err := repository.GetById[entity.Config](id)
+	row, err := c.repository.GetById(id)
 
 	if err != nil {
 		return nil, err
@@ -48,7 +57,7 @@ func (c ConfigRepository) GetById(id int) (*entity.Config, error) {
 func (c ConfigRepository) GetByName(name string) (*entity.Config, error) {
 	config := new(entity.Config)
 	query := fmt.Sprintf("SELECT * FROM %s WHERE name = $1 LIMIT 1", config.Table())
-	result, err := repository.SingleQuery(query, name)
+	result, err := c.repository.SingleQuery(query, name)
 
 	if err != nil {
 		return nil, result.Err()
@@ -62,7 +71,7 @@ func (c ConfigRepository) GetByName(name string) (*entity.Config, error) {
 }
 
 func (c ConfigRepository) Add(config entity.Config) error {
-	err := repository.Add(config)
+	err := c.repository.Add(config)
 
 	if err != nil && err.Error() == "pq: duplicate key value violates unique constraint \"configs_name_key\"" {
 		return fmt.Errorf("config with name %s already exists", config.Name)
@@ -72,9 +81,9 @@ func (c ConfigRepository) Add(config entity.Config) error {
 }
 
 func (c ConfigRepository) Update(config entity.Config) error {
-	return repository.Update(config)
+	return c.repository.Update(config)
 }
 
 func (c ConfigRepository) Delete(config entity.Config) error {
-	return repository.Delete(config)
+	return c.repository.Delete(config)
 }

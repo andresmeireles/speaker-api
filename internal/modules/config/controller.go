@@ -5,12 +5,20 @@ import (
 	"net/http"
 
 	"github.com/andresmeireles/speaker/internal/db/entity"
+	"github.com/andresmeireles/speaker/internal/tools/servicelocator"
 	web "github.com/andresmeireles/speaker/internal/web/decoder"
 )
 
 type ConfigController struct {
 	configRepository ConfigRepository
 	actions          Actions
+}
+
+func (c ConfigController) New(s servicelocator.ServiceLocator) any {
+	return ConfigController{
+		configRepository: servicelocator.Get[ConfigRepository](s),
+		actions:          servicelocator.Get[Actions](s),
+	}
 }
 
 func (c ConfigController) WriteConfig(w http.ResponseWriter, r *http.Request) {

@@ -4,10 +4,18 @@ import (
 	"encoding/json"
 	"log/slog"
 	"net/http"
+
+	"github.com/andresmeireles/speaker/internal/tools/servicelocator"
 )
 
 type UserController struct {
 	repository UserRepository
+}
+
+func (c UserController) New(s servicelocator.ServiceLocator) any {
+	return UserController{
+		repository: servicelocator.Get[UserRepository](s),
+	}
 }
 
 func (c UserController) Me(w http.ResponseWriter, r *http.Request) {

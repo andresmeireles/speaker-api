@@ -38,6 +38,11 @@ func SetCredentials() {
 	os.Setenv("SMTP_PORT", "465")
 	os.Setenv("SMTP_USER", "email@gmail.com")
 	os.Setenv("SMTP_PASSWORD", "password")
+	os.Setenv("APP_MODE", "test")
+
+	// db envs
+	root, _ := commands.Root()
+	os.Setenv("DB_MIGRATIONS_PATH", root+"/build/migrations")
 }
 
 func TeardownLocalDB() {
