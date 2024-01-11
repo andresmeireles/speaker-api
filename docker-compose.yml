@@ -12,6 +12,8 @@ services:
       - ".:/app"
     depends_on:
       - db
+    environment:
+      IS_CI: true
 
   db:
     image: postgres:latest

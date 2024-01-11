@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/andresmeireles/speaker/internal/db/entity"
+	"github.com/andresmeireles/speaker/internal/db/repository"
 	"github.com/andresmeireles/speaker/internal/modules/person"
 	"github.com/andresmeireles/speaker/testdata"
 )
@@ -12,10 +13,15 @@ func TestMain(m *testing.M) {
 	testdata.SetupDatabase(m)
 }
 
+func cleanDb() {
+	r := testdata.GetService[repository.Repository[entity.Person]]()
+	r.Query("DELETE FROM persons")
+}
+
 func TestUpdate(t *testing.T) {
 	t.Run("should update person name", func(t *testing.T) {
 		// arrange
-		repo := person.PersonRepository{}
+		repo := testdata.GetService[person.PersonRepository]()
 		p1 := entity.Person{
 			Name: "Andre",
 		}
@@ -24,9 +30,14 @@ func TestUpdate(t *testing.T) {
 			Name: "Yasmim",
 		}
 		repo.Add(p2)
+		p, err := repo.GetByName("Andre")
+
+		if err != nil {
+			t.Fatalf("expected nil, got %s", err)
+		}
 
 		// act
-		dbP1, err := repo.GetById(1)
+		dbP1, err := repo.GetById(p.Id)
 
 		if err != nil {
 			t.Fatalf("expected nil, got %s", err)

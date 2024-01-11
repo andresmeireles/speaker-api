@@ -28,9 +28,16 @@ func SetupLocalDB() error {
 }
 
 func SetCredentials() {
+	os.Setenv("APP_MODE", "test")
 	os.Setenv("DB_DRIVER", "postgres")
 	os.Setenv("DB_HOST", "localhost")
 	os.Setenv("DB_PORT", "5433")
+
+	if os.Getenv("IS_CI") == "true" {
+		os.Setenv("DB_HOST", "testdb")
+		os.Setenv("DB_PORT", "5432")
+	}
+
 	os.Setenv("DB_USERNAME", "speaker")
 	os.Setenv("DB_PASSWORD", "speaker")
 	os.Setenv("APP_KEY", "e7bca8464289691d92f60271")
@@ -38,7 +45,6 @@ func SetCredentials() {
 	os.Setenv("SMTP_PORT", "465")
 	os.Setenv("SMTP_USER", "email@gmail.com")
 	os.Setenv("SMTP_PASSWORD", "password")
-	os.Setenv("APP_MODE", "test")
 
 	// db envs
 	root, _ := commands.Root()

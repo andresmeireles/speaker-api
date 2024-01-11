@@ -32,6 +32,7 @@ func (c ConfigRepository) GetAll() ([]entity.Config, error) {
 		if err := rows.Scan(&config.Id, &config.Name, &config.Value); err != nil {
 			return nil, err
 		}
+
 		configs = append(configs, config)
 	}
 
@@ -54,13 +55,13 @@ func (c ConfigRepository) GetById(id int) (*entity.Config, error) {
 	return &config, nil
 }
 
-func (c ConfigRepository) GetByName(name string) (*entity.Config, error) {
+func (r ConfigRepository) GetByName(name string) (*entity.Config, error) {
 	config := new(entity.Config)
 	query := fmt.Sprintf("SELECT * FROM %s WHERE name = $1 LIMIT 1", config.Table())
-	result, err := c.repository.SingleQuery(query, name)
+	result, err := r.repository.SingleQuery(query, name)
 
 	if err != nil {
-		return nil, result.Err()
+		return nil, err
 	}
 
 	if err := result.Scan(&config.Id, &config.Name, &config.Value); err != nil {

@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/andresmeireles/speaker/internal/db/entity"
+	"github.com/andresmeireles/speaker/internal/db/repository"
 	"github.com/andresmeireles/speaker/internal/modules/config"
 	"github.com/andresmeireles/speaker/testdata"
 )
@@ -12,97 +13,112 @@ func TestMain(m *testing.M) {
 	testdata.SetupDatabase(m)
 }
 
-func TestRepository(t *testing.T) {
-	t.Run("should return configs", func(t *testing.T) {
-		// arrange
-		conf := entity.Config{
-			Name:  "key",
-			Value: "value",
-		}
-		conf2 := entity.Config{
-			Name:  "key2",
-			Value: "value2",
-		}
-		repository := config.ConfigRepository{}
-		err := repository.Add(conf)
+func clearDB() {
+	repository := testdata.GetService[repository.Repository[entity.Config]]()
+	q := "DELETE FROM configs"
+	repository.SingleQuery(q)
+}
 
-		if err != nil {
-			t.Fatalf("expected nil, got %s", err)
-		}
+func TestCreateConfig(t *testing.T) {
+	clearDB()
 
-		err = repository.Add(conf2)
+	// arrange
+	conf := entity.Config{
+		Name:  "key",
+		Value: "value",
+	}
+	conf2 := entity.Config{
+		Name:  "key2",
+		Value: "value2",
+	}
+	repository := testdata.GetService[config.ConfigRepository]()
+	err := repository.Add(conf)
 
-		if err != nil {
-			t.Fatalf("expected nil, got %s", err)
-		}
+	if err != nil {
+		t.Fatalf("expected nil, got %s", err)
+	}
 
-		// act
-		configs, err := repository.GetAll()
+	err = repository.Add(conf2)
 
-		// assert
-		if err != nil {
-			t.Fatalf("expected nil, got %s", err)
-		}
+	if err != nil {
+		t.Fatalf("expected nil, got %s", err)
+	}
 
-		if len(configs) != 2 {
-			t.Fatalf("expected 2, got %d", len(configs))
-		}
-	})
+	// act
+	configs, err := repository.GetAll()
 
-	t.Run("should not save config with same name", func(t *testing.T) {
-		// arrange
-		conf := entity.Config{
-			Name:  "key",
-			Value: "value",
-		}
-		repository := config.ConfigRepository{}
-		err := repository.Add(conf)
+	// assert
+	if err != nil {
+		t.Fatalf("expected nil, got %s", err)
+	}
 
-		if err != nil {
-			t.Fatalf("expected nil, got %s", err)
-		}
+	if len(configs) != 2 {
+		t.Fatalf("expected 2, got %d", len(configs))
+	}
+}
 
-		conf2 := entity.Config{
-			Name:  "key",
-			Value: "value2",
-		}
+func TestFailToCreateWithSameId(t *testing.T) {
+	clearDB()
 
-		// act
-		err = repository.Add(conf2)
+	// arrange
+	conf := entity.Config{
+		Name:  "key3",
+		Value: "value",
+	}
+	repository := testdata.GetService[config.ConfigRepository]()
+	err := repository.Add(conf)
 
-		// assert
-		if err == nil {
-			t.Fatalf("expected error, got nil")
-		}
+	if err != nil {
+		t.Fatalf("expected nil, got %s", err)
+	}
 
-		if err.Error() != "config with name key already exists" {
-			t.Fatalf("expected config with name key already exists, got %s", err.Error())
-		}
-	})
+	conf2 := entity.Config{
+		Name:  "key3",
+		Value: "value2",
+	}
 
-	t.Run("should return config by id", func(t *testing.T) {
-		// arrange
-		conf := entity.Config{
-			Name:  "key",
-			Value: "value",
-		}
-		repository := config.ConfigRepository{}
-		err := repository.Add(conf)
+	// act
+	err = repository.Add(conf2)
 
-		if err != nil {
-			t.Fatalf("expected nil, got %s", err)
-		}
+	// assert
+	if err == nil {
+		t.Fatalf("expected error, got nil")
+	}
 
-		// act
-		config, err := repository.GetById(1)
+	if err.Error() != "config with name key3 already exists" {
+		t.Fatalf("expected config with name key already exists, got %s", err.Error())
+	}
+}
 
-		// assert
-		if err != nil {
-			t.Fatalf("expected nil, got %s", err)
-		}
+func TestReturnById(t *testing.T) {
+	clearDB()
 
-		if config.Name != "key" {
-			t.Fatalf("expected key, got %s", config.Name)
-		}
-	})
+	// arrange
+	conf := entity.Config{
+		Name:  "key4",
+		Value: "value",
+	}
+	repository := testdata.GetService[config.ConfigRepository]()
+	err := repository.Add(conf)
+
+	if err != nil {
+		t.Fatalf("expected nil, got %s", err)
+	}
+
+	c, err := repository.GetByName("key4")
+	if err != nil {
+		t.Fatalf("expected nil, got %s", err)
+	}
+
+	// act
+	config, err := repository.GetById(c.Id)
+
+	// assert
+	if err != nil {
+		t.Fatalf("expected nil, got %s", err)
+	}
+
+	if config.Name != "key4" {
+		t.Fatalf("expected key4, got %s", config.Name)
+	}
 }

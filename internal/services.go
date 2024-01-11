@@ -14,7 +14,7 @@ import (
 	"github.com/andresmeireles/speaker/internal/tools/servicelocator"
 )
 
-func controllers() []servicelocator.Instantiable {
+func Controllers() []servicelocator.Instantiable {
 	return []servicelocator.Instantiable{
 		user.UserController{},
 		config.ConfigController{},
@@ -24,7 +24,7 @@ func controllers() []servicelocator.Instantiable {
 	}
 }
 
-func repos() []servicelocator.Instantiable {
+func Repos() []servicelocator.Instantiable {
 	return []servicelocator.Instantiable{
 		user.UserRepository{},
 		config.ConfigRepository{},
@@ -35,7 +35,7 @@ func repos() []servicelocator.Instantiable {
 	}
 }
 
-func actions() []servicelocator.Instantiable {
+func Actions() []servicelocator.Instantiable {
 	return []servicelocator.Instantiable{
 		config.Actions{},
 		codesender.Actions{},
@@ -45,7 +45,7 @@ func actions() []servicelocator.Instantiable {
 	}
 }
 
-func misc() []servicelocator.Instantiable {
+func Misc() []servicelocator.Instantiable {
 	return []servicelocator.Instantiable{
 		db.Connection{},
 
@@ -62,41 +62,10 @@ func misc() []servicelocator.Instantiable {
 
 func Services() []servicelocator.Instantiable {
 	services := make([]servicelocator.Instantiable, 0)
-	services = append(services, misc()...)
-	services = append(services, repos()...)
-	services = append(services, actions()...)
-	services = append(services, controllers()...)
-	// return []servicelocator.Instantiable{
-	// 	db.Connection{},
+	services = append(services, Misc()...)
+	services = append(services, Repos()...)
+	services = append(services, Actions()...)
+	services = append(services, Controllers()...)
 
-	// 	repository.Repository[entity.Auth]{},
-	// 	repository.Repository[entity.AuthCode]{},
-	// 	repository.Repository[entity.Person]{},
-	// 	repository.Repository[entity.Config]{},
-	// 	repository.Repository[entity.User]{},
-	// 	repository.Repository[entity.Invite]{},
-
-	// 	user.UserRepository{},
-	// 	user.UserController{},
-
-	// 	config.ConfigRepository{},
-	// 	config.Actions{},
-	// 	config.ConfigController{},
-
-	// 	codesender.Actions{},
-	// 	codesender.AuthCodeRepository{},
-
-	// 	auth.Actions{},
-	// 	auth.AuthRepository{},
-	// 	auth.AuthController{},
-
-	// 	invite.Actions{},
-	// 	invite.InviteRepository{},
-	// 	invite.InviteController{},
-
-	// 	person.Actions{},
-	// 	person.PersonRepository{},
-	// 	person.PersonRepository{},
-	// }
 	return services
 }
