@@ -6,9 +6,6 @@ on:
   pull_request:
     branches: ["main"]
 
-env:
-  IS_CI: false
-
 jobs:
   build:
     runs-on: ubuntu-latest

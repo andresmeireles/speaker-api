@@ -22,11 +22,15 @@ func SetAppKey() *cobra.Command {
 			hashedBytes := hash.Sum(nil)
 			hashString := hex.EncodeToString(hashedBytes)
 
-			err := modifyEnvFile("APP_KEY", hashString)
+			if os.Getenv("APP_MODE") == "dev" {
+				err := modifyEnvFile("APP_KEY", hashString)
 
-			if err != nil {
-				fmt.Println(err)
-				os.Exit(1)
+				if err != nil {
+					fmt.Println(err)
+					os.Exit(1)
+				}
+			} else {
+				os.Setenv("APP_KEY", hashString)
 			}
 
 			fmt.Println("App key set")
