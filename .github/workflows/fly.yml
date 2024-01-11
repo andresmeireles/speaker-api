@@ -2,7 +2,7 @@ name: Deploy on Fly
 
 on:
   workflow_run:
-    workflows: ["go"]
+    workflows: ["Go"]
     types:
       - completed
     branches: ["main"]
