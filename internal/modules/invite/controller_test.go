@@ -19,7 +19,7 @@ func TestMain(m *testing.M) {
 func TestController(t *testing.T) {
 	t.Run("should execute creation", func(t *testing.T) {
 		// arrange
-		personRepo := person.PersonRepository{}
+		personRepo := testdata.GetService[person.PersonRepository]()
 		err := personRepo.Add(entity.Person{Name: "Andre"})
 
 		if err != nil {
