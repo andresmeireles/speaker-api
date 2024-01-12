@@ -5,7 +5,7 @@ import (
 	"log/slog"
 	"net/http"
 
-	"github.com/andresmeireles/speaker/internal/modules/auth"
+	"github.com/andresmeireles/speaker/internal/auth"
 	"github.com/andresmeireles/speaker/internal/tools/servicelocator"
 )
 

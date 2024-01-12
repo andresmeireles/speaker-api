@@ -4,8 +4,8 @@ import (
 	"os"
 
 	"github.com/andresmeireles/speaker/internal"
-	"github.com/andresmeireles/speaker/internal/logger"
-	servicelocator "github.com/andresmeireles/speaker/internal/tools/servicelocator"
+	"github.com/andresmeireles/speaker/internal/tools/logger"
+	"github.com/andresmeireles/speaker/internal/tools/servicelocator"
 	"github.com/andresmeireles/speaker/internal/web/router"
 	"github.com/joho/godotenv"
 )

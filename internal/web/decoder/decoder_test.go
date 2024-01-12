@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/andresmeireles/speaker/internal/db/entity"
+	"github.com/andresmeireles/speaker/internal/person"
 	web "github.com/andresmeireles/speaker/internal/web/decoder"
 )
 
@@ -14,7 +14,7 @@ func TestDecodePostBody(t *testing.T) {
 		body := strings.NewReader(`{"id": 1, "name": "Person 1", "FIELD": "VALUE"}`)
 
 		// act
-		person, err := web.DecodePostBody[entity.Person](body)
+		person, err := web.DecodePostBody[person.Person](body)
 
 		// assert
 		if err != nil {
@@ -34,8 +34,8 @@ func TestDecodePostBody(t *testing.T) {
 		bodyWithName := strings.NewReader(`{"name": "Person 1"}`)
 
 		// act
-		personWithId, errWithId := web.DecodePostBody[entity.Person](bodyWithId)
-		personWithName, errWithName := web.DecodePostBody[entity.Person](bodyWithName)
+		personWithId, errWithId := web.DecodePostBody[person.Person](bodyWithId)
+		personWithName, errWithName := web.DecodePostBody[person.Person](bodyWithName)
 
 		// assert
 		if errWithId != nil || errWithName != nil {

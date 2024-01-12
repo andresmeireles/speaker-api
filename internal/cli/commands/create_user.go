@@ -4,8 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/andresmeireles/speaker/internal/db/entity"
-	"github.com/andresmeireles/speaker/internal/modules/user"
+	"github.com/andresmeireles/speaker/internal/user"
 	"github.com/spf13/cobra"
 )
 
@@ -26,7 +25,7 @@ func CreateUser() *cobra.Command {
 			}
 
 			userRepository := user.UserRepository{}
-			user := entity.User{
+			user := user.User{
 				Name:  name,
 				Email: email,
 			}

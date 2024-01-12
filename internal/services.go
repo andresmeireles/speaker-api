@@ -1,17 +1,16 @@
 package internal
 
 import (
+	"github.com/andresmeireles/speaker/internal/auth"
+	"github.com/andresmeireles/speaker/internal/codesender"
+	"github.com/andresmeireles/speaker/internal/config"
 	"github.com/andresmeireles/speaker/internal/db"
-	"github.com/andresmeireles/speaker/internal/db/entity"
-	"github.com/andresmeireles/speaker/internal/db/repository"
-	"github.com/andresmeireles/speaker/internal/modules/auth"
-	"github.com/andresmeireles/speaker/internal/modules/codesender"
-	"github.com/andresmeireles/speaker/internal/modules/config"
-	"github.com/andresmeireles/speaker/internal/modules/invite"
-	"github.com/andresmeireles/speaker/internal/modules/person"
-	"github.com/andresmeireles/speaker/internal/modules/user"
+	"github.com/andresmeireles/speaker/internal/invite"
+	"github.com/andresmeireles/speaker/internal/person"
+	"github.com/andresmeireles/speaker/internal/repository"
 	"github.com/andresmeireles/speaker/internal/tools"
 	"github.com/andresmeireles/speaker/internal/tools/servicelocator"
+	"github.com/andresmeireles/speaker/internal/user"
 )
 
 func Controllers() []servicelocator.Instantiable {
@@ -51,12 +50,12 @@ func Misc() []servicelocator.Instantiable {
 
 		&tools.Email{},
 
-		repository.Repository[entity.Auth]{},
-		repository.Repository[entity.AuthCode]{},
-		repository.Repository[entity.Person]{},
-		repository.Repository[entity.Config]{},
-		repository.Repository[entity.User]{},
-		repository.Repository[entity.Invite]{},
+		repository.Repository[auth.Auth]{},
+		repository.Repository[codesender.AuthCode]{},
+		repository.Repository[person.Person]{},
+		repository.Repository[config.Config]{},
+		repository.Repository[user.User]{},
+		repository.Repository[invite.Invite]{},
 	}
 }
 
