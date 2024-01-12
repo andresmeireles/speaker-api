@@ -5,8 +5,6 @@ import (
 	"fmt"
 )
 
-func (r Repository[T]) GetById(id int) (*sql.Row, error) {
-	var e T
-
-	return r.SingleQuery(fmt.Sprintf("SELECT * FROM %s WHERE id = $1", e.Table()), id)
+func (r Repository) GetById(table string, id int) (*sql.Row, error) {
+	return r.SingleQuery(fmt.Sprintf("SELECT * FROM %s WHERE id = $1", table), id)
 }

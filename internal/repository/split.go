@@ -3,6 +3,8 @@ package repository
 import (
 	"fmt"
 	"strconv"
+
+	"github.com/andresmeireles/speaker/internal/db"
 )
 
 // Splits the entity into keys, interrogations and values.
@@ -12,7 +14,7 @@ import (
 // Interrogations are comma separated values with "?" equivalent to keys.
 //
 // Values are the values of the entity.
-func (r Repository[T]) split(en T) (string, string, []any) {
+func (r Repository) split(en db.Entity) (string, string, []any) {
 	keys := ""
 	interrogations := ""
 	values := make([]any, 0)

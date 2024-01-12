@@ -8,12 +8,12 @@ import (
 )
 
 type PersonRepository struct {
-	repository repository.Repository[Person]
+	repository repository.Repository
 }
 
 func (r PersonRepository) New(s servicelocator.ServiceLocator) any {
 	return PersonRepository{
-		repository: servicelocator.Get[repository.Repository[Person]](s),
+		repository: servicelocator.Get[repository.Repository](s),
 	}
 }
 
@@ -22,12 +22,12 @@ func (r PersonRepository) Add(person Person) error {
 }
 
 func (r PersonRepository) GetById(id int) (*Person, error) {
-	row, err := r.repository.GetById(id)
+	person := new(Person)
+	row, err := r.repository.GetById(person.Table(), id)
 	if err != nil {
 		return nil, err
 	}
 
-	person := new(Person)
 	if err := row.Scan(
 		&person.Id,
 		&person.Name,
@@ -59,7 +59,7 @@ func (r PersonRepository) Update(person Person) error {
 }
 
 func (r PersonRepository) GetAll() ([]Person, error) {
-	rows, err := r.repository.GetAll()
+	rows, err := r.repository.GetAll(Person{}.Table())
 	if err != nil {
 		return nil, err
 	}

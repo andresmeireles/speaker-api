@@ -13,7 +13,7 @@ func TestMain(m *testing.M) {
 }
 
 func TestAdd(t *testing.T) {
-	r := testdata.GetService[repository.Repository[person.Person]]()
+	r := testdata.GetService[repository.Repository]()
 
 	t.Run("add register", func(t *testing.T) {
 		// arrange

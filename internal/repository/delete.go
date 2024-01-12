@@ -2,9 +2,11 @@ package repository
 
 import (
 	"fmt"
+
+	"github.com/andresmeireles/speaker/internal/db"
 )
 
-func (r Repository[T]) Delete(en T) error {
+func (r Repository) Delete(en db.Entity) error {
 	db, err := r.conn.GetDB()
 	if err != nil {
 		return err

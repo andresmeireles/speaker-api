@@ -8,17 +8,17 @@ import (
 )
 
 type ConfigRepository struct {
-	repository repository.Repository[Config]
+	repository repository.Repository
 }
 
 func (c ConfigRepository) New(s servicelocator.ServiceLocator) any {
 	return ConfigRepository{
-		repository: servicelocator.Get[repository.Repository[Config]](s),
+		repository: servicelocator.Get[repository.Repository](s),
 	}
 }
 
 func (c ConfigRepository) GetAll() ([]Config, error) {
-	rows, err := c.repository.GetAll()
+	rows, err := c.repository.GetAll(Config{}.Table())
 
 	if err != nil {
 		return nil, err
@@ -39,19 +39,18 @@ func (c ConfigRepository) GetAll() ([]Config, error) {
 }
 
 func (c ConfigRepository) GetById(id int) (*Config, error) {
-	row, err := c.repository.GetById(id)
+	config := new(Config)
+	row, err := c.repository.GetById(config.Table(), id)
 
 	if err != nil {
 		return nil, err
 	}
 
-	var config Config
-
 	if err := row.Scan(&config.Id, &config.Name, &config.Value); err != nil {
 		return nil, err
 	}
 
-	return &config, nil
+	return config, nil
 }
 
 func (r ConfigRepository) GetByName(name string) (*Config, error) {

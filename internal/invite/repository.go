@@ -11,13 +11,13 @@ import (
 )
 
 type InviteRepository struct {
-	repository       repository.Repository[Invite]
+	repository       repository.Repository
 	personRepository person.PersonRepository
 }
 
 func (r InviteRepository) New(s servicelocator.ServiceLocator) any {
 	return InviteRepository{
-		repository:       servicelocator.Get[repository.Repository[Invite]](s),
+		repository:       servicelocator.Get[repository.Repository](s),
 		personRepository: servicelocator.Get[person.PersonRepository](s),
 	}
 }
@@ -58,7 +58,7 @@ func (r InviteRepository) GetAllOrdered(field string, asc bool) ([]Invite, error
 }
 
 func (r InviteRepository) GetAll() ([]Invite, error) {
-	rows, err := r.repository.GetAll()
+	rows, err := r.repository.GetAll(Invite{}.Table())
 	if err != nil {
 		return nil, err
 	}
@@ -78,7 +78,7 @@ func (r InviteRepository) GetAll() ([]Invite, error) {
 }
 
 func (r InviteRepository) GetById(id int) (*Invite, error) {
-	row, err := r.repository.GetById(id)
+	row, err := r.repository.GetById(Invite{}.Table(), id)
 	if err != nil {
 		return nil, err
 	}

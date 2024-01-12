@@ -10,12 +10,12 @@ import (
 )
 
 type UserRepository struct {
-	repository repository.Repository[User]
+	repository repository.Repository
 }
 
 func (u UserRepository) New(s servicelocator.ServiceLocator) any {
 	return UserRepository{
-		repository: servicelocator.Get[repository.Repository[User]](s),
+		repository: servicelocator.Get[repository.Repository](s),
 	}
 }
 
@@ -51,12 +51,13 @@ func (u UserRepository) GetByEmail(email string) (User, error) {
 }
 
 func (r UserRepository) GetById(id int) (User, error) {
-	row, err := r.repository.GetById(id)
+	user := new(User)
+	row, err := r.repository.GetById(user.Table(), id)
+
 	if err != nil {
 		return User{}, err
 	}
 
-	user := new(User)
 	if err = row.Scan(&user.Id, &user.Name, &user.Email); err != nil {
 		if err == sql.ErrNoRows {
 			return User{}, fmt.Errorf("user with id %d not found", id)

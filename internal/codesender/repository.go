@@ -10,13 +10,13 @@ import (
 )
 
 type AuthCodeRepository struct {
-	repository     repository.Repository[AuthCode]
+	repository     repository.Repository
 	userRepository user.UserRepository
 }
 
 func (r AuthCodeRepository) New(s servicelocator.ServiceLocator) any {
 	return AuthCodeRepository{
-		repository:     servicelocator.Get[repository.Repository[AuthCode]](s),
+		repository:     servicelocator.Get[repository.Repository](s),
 		userRepository: servicelocator.Get[user.UserRepository](s),
 	}
 }
@@ -26,22 +26,23 @@ func (r AuthCodeRepository) Add(authCode AuthCode) error {
 }
 
 func (a AuthCodeRepository) GetById(authCodeId int) (AuthCode, error) {
-	row, err := a.repository.GetById(authCodeId)
+	authCode := new(AuthCode)
+	row, err := a.repository.GetById(authCode.Table(), authCodeId)
+
 	if err != nil {
 		return AuthCode{}, err
 	}
 
-	var authCode AuthCode
 	if err := row.Scan(&authCode.Id, &authCode.Code, &authCode.User, &authCode.ExpiresAt); err != nil {
 		return AuthCode{}, err
 	}
 
-	return authCode, nil
+	return *authCode, nil
 }
 
 func (a AuthCodeRepository) GetAll() ([]AuthCode, error) {
 	codes := make([]AuthCode, 0)
-	rows, err := a.repository.GetAll()
+	rows, err := a.repository.GetAll(AuthCode{}.Table())
 
 	if err != nil {
 		return codes, err

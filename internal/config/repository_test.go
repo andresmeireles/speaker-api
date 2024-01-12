@@ -13,7 +13,7 @@ func TestMain(m *testing.M) {
 }
 
 func clearDB() {
-	repository := testdata.GetService[repository.Repository[config.Config]]()
+	repository := testdata.GetService[repository.Repository]()
 	q := "DELETE FROM configs"
 	repository.SingleQuery(q)
 }

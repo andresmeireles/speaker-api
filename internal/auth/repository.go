@@ -10,11 +10,11 @@ import (
 )
 
 type AuthRepository struct {
-	repository repository.Repository[Auth]
+	repository repository.Repository
 }
 
 func (r AuthRepository) New(s servicelocator.ServiceLocator) any {
-	re := servicelocator.Get[repository.Repository[Auth]](s)
+	re := servicelocator.Get[repository.Repository](s)
 
 	return AuthRepository{
 		repository: re,
@@ -66,7 +66,7 @@ func (r AuthRepository) Add(auth Auth) error {
 
 func (r AuthRepository) GetById(id int) (*Auth, error) {
 	auth := new(Auth)
-	authRow, err := r.repository.GetById(id)
+	authRow, err := r.repository.GetById(auth.Table(), id)
 
 	if err != nil {
 		return nil, err
@@ -82,7 +82,7 @@ func (r AuthRepository) GetById(id int) (*Auth, error) {
 func (r AuthRepository) GetAll() ([]Auth, error) {
 	auth := new(Auth)
 	auths := make([]Auth, 0)
-	authRows, err := r.repository.GetAll()
+	authRows, err := r.repository.GetAll(auth.Table())
 
 	if err != nil {
 		return nil, err

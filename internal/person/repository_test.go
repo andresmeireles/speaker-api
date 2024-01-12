@@ -13,7 +13,7 @@ func TestMain(m *testing.M) {
 }
 
 func cleanDb() {
-	r := testdata.GetService[repository.Repository[person.Person]]()
+	r := testdata.GetService[repository.Repository]()
 	r.Query("DELETE FROM persons")
 }
 

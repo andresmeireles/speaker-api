@@ -5,8 +5,6 @@ import (
 	"fmt"
 )
 
-func (r Repository[T]) GetAll() (*sql.Rows, error) {
-	en := *new(T)
-
-	return r.Query(fmt.Sprintf("SELECT * FROM %s", en.Table()))
+func (r Repository) GetAll(table string) (*sql.Rows, error) {
+	return r.Query(fmt.Sprintf("SELECT * FROM %s", table))
 }

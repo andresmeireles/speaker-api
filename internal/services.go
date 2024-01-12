@@ -50,12 +50,7 @@ func Misc() []servicelocator.Instantiable {
 
 		&tools.Email{},
 
-		repository.Repository[auth.Auth]{},
-		repository.Repository[codesender.AuthCode]{},
-		repository.Repository[person.Person]{},
-		repository.Repository[config.Config]{},
-		repository.Repository[user.User]{},
-		repository.Repository[invite.Invite]{},
+		repository.Repository{},
 	}
 }
 

@@ -3,9 +3,11 @@ package repository
 import (
 	"fmt"
 	"strings"
+
+	"github.com/andresmeireles/speaker/internal/db"
 )
 
-func (r Repository[T]) Update(en T) error {
+func (r Repository) Update(en db.Entity) error {
 	db, err := r.conn.GetDB()
 	if err != nil {
 		return err

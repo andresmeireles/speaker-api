@@ -4,7 +4,7 @@ import (
 	"database/sql"
 )
 
-func (r Repository[T]) SingleQuery(q string, args ...any) (*sql.Row, error) {
+func (r Repository) SingleQuery(q string, args ...any) (*sql.Row, error) {
 	db, err := r.conn.GetDB()
 	if err != nil {
 		return nil, err
@@ -24,7 +24,7 @@ func (r Repository[T]) SingleQuery(q string, args ...any) (*sql.Row, error) {
 	return row, nil
 }
 
-func (r Repository[T]) Query(q string, args ...any) (*sql.Rows, error) {
+func (r Repository) Query(q string, args ...any) (*sql.Rows, error) {
 	db, err := r.conn.GetDB()
 	if err != nil {
 		return nil, err
