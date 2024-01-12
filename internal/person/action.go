@@ -6,6 +6,11 @@ import (
 	"github.com/andresmeireles/speaker/internal/tools/servicelocator"
 )
 
+type ActionsInterface interface {
+	Write(person Person) error
+	RemovePerson(personId int) error
+}
+
 type Actions struct {
 	repository PersonRepository
 }

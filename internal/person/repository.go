@@ -11,6 +11,15 @@ type PersonRepository struct {
 	repository repository.Repository
 }
 
+type PersonRepositoryInterface interface {
+	Add(person Person) error
+	GetById(id int) (*Person, error)
+	GetByName(name string) (*Person, error)
+	Update(person Person) error
+	GetAll() ([]Person, error)
+	Delete(person Person) error
+}
+
 func (r PersonRepository) New(s servicelocator.ServiceLocator) any {
 	return PersonRepository{
 		repository: servicelocator.Get[repository.Repository](s),
@@ -24,6 +33,7 @@ func (r PersonRepository) Add(person Person) error {
 func (r PersonRepository) GetById(id int) (*Person, error) {
 	person := new(Person)
 	row, err := r.repository.GetById(person.Table(), id)
+
 	if err != nil {
 		return nil, err
 	}

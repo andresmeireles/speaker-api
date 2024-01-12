@@ -63,3 +63,14 @@ func Services() []servicelocator.Instantiable {
 
 	return services
 }
+
+func DIContainer(sl *servicelocator.ServiceLocator) {
+	injections := []any{
+		// person
+		person.NewController,
+	}
+
+	for _, injection := range injections {
+		servicelocator.SetC(injection, sl)
+	}
+}

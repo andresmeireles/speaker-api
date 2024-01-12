@@ -3,22 +3,23 @@ package person_test
 import (
 	"net/http"
 	"net/http/httptest"
-	"strconv"
 	"strings"
 	"testing"
 
 	"github.com/andresmeireles/speaker/internal/person"
 	"github.com/andresmeireles/speaker/testdata"
+	"github.com/stretchr/testify/mock"
 )
 
 func TestController(t *testing.T) {
-	controller := testdata.GetService[person.PersonController]()
-	repo := testdata.GetService[person.PersonRepository]()
+	repositoryMock := testdata.PersonRepositoryMock{}
+	actionsMock := testdata.PersonActionMock{}
+
+	controller := person.NewController(&repositoryMock, &actionsMock)
 
 	t.Run("should write a new person", func(t *testing.T) {
-		cleanDb()
-
 		// arrange
+		actionsMock.On("Write", mock.Anything).Return(nil)
 		reader := strings.NewReader(`{"name":"Andre"}`)
 		request, err := http.NewRequest(http.MethodPost, "/speakers", reader)
 
@@ -44,24 +45,17 @@ func TestController(t *testing.T) {
 
 	t.Run("should rewrite config", func(t *testing.T) {
 		// arrange
-		cleanDb()
-		repo.Add(person.Person{Name: "Andre"})
-		p, e := repo.GetAll()
-
-		if e != nil {
-			t.Fatalf("expected nil, got %s", e)
-		}
-
-		l := p[len(p)-1]
-		id := strconv.Itoa(l.Id)
-		reader := strings.NewReader(`{"speaker": "` + id + `"}`)
+		reader := strings.NewReader(`{"speaker": "1"}`)
 		recorder := httptest.NewRecorder()
 		request, err := http.NewRequest(http.MethodDelete, "/speakers", reader)
-		handler := http.HandlerFunc(controller.DeletePerson)
 
 		if err != nil {
 			t.Fatal(err)
 		}
+
+		repositoryMock.On("GetById", mock.Anything).Return(&person.Person{}, nil)
+		repositoryMock.On("Delete", mock.Anything).Return(nil)
+		handler := http.HandlerFunc(controller.DeletePerson)
 
 		// act
 		handler.ServeHTTP(recorder, request)

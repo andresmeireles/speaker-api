@@ -4,20 +4,13 @@ import (
 	"testing"
 
 	"github.com/andresmeireles/speaker/internal/person"
-	"github.com/andresmeireles/speaker/internal/repository"
 	"github.com/andresmeireles/speaker/testdata"
 )
 
-func TestMain(m *testing.M) {
-	testdata.SetupDatabase(m)
-}
-
-func cleanDb() {
-	r := testdata.GetService[repository.Repository]()
-	r.Query("DELETE FROM persons")
-}
-
 func TestUpdate(t *testing.T) {
+	testdata.SetCredentials()
+	testdata.SetupLocalDB()
+
 	t.Run("should update person name", func(t *testing.T) {
 		// arrange
 		repo := testdata.GetService[person.PersonRepository]()
@@ -54,4 +47,6 @@ func TestUpdate(t *testing.T) {
 			t.Fatalf("Expected André Meireles, got %s", dbP1.Name)
 		}
 	})
+
+	testdata.TeardownLocalDB()
 }

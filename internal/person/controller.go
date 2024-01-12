@@ -11,8 +11,15 @@ import (
 )
 
 type PersonController struct {
-	personRepository PersonRepository
-	actions          Actions
+	personRepository PersonRepositoryInterface
+	actions          ActionsInterface
+}
+
+func NewController(repository PersonRepositoryInterface, actions ActionsInterface) PersonController {
+	return PersonController{
+		personRepository: repository,
+		actions:          actions,
+	}
 }
 
 func (c PersonController) New(s servicelocator.ServiceLocator) any {
