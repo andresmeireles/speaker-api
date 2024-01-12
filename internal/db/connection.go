@@ -13,6 +13,10 @@ import (
 
 type Connection struct{}
 
+func NewConnection() Connection {
+	return Connection{}
+}
+
 func (c Connection) New(_ servicelocator.ServiceLocator) any {
 	return Connection{}
 }

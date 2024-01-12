@@ -27,7 +27,7 @@ func Repos() []servicelocator.Instantiable {
 	return []servicelocator.Instantiable{
 		user.UserRepository{},
 		config.ConfigRepository{},
-		codesender.AuthCodeRepository{},
+		codesender.Repository{},
 		auth.AuthRepository{},
 		person.PersonRepository{},
 		invite.InviteRepository{},
@@ -66,8 +66,18 @@ func Services() []servicelocator.Instantiable {
 
 func DIContainer(sl *servicelocator.ServiceLocator) {
 	injections := []any{
+		// with no deps
+		db.NewConnection,
+
+		// repository
+		repository.NewRepository,
+
 		// person
 		person.NewController,
+
+		// codesender
+		codesender.NewAction,
+		codesender.NewRepository,
 	}
 
 	for _, injection := range injections {

@@ -12,14 +12,20 @@ import (
 )
 
 type Actions struct {
-	repository AuthCodeRepository
+	repository repositoryInterface
 }
 
 const EXPIRE_TIME_MINUTES = 5
 
+func NewAction(repository repositoryInterface) Actions {
+	return Actions{
+		repository: repository,
+	}
+}
+
 func (a Actions) New(s servicelocator.ServiceLocator) any {
 	return Actions{
-		repository: servicelocator.Get[AuthCodeRepository](s),
+		repository: servicelocator.Get[Repository](s),
 	}
 }
 
