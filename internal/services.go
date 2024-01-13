@@ -66,8 +66,6 @@ func Services() []servicelocator.Instantiable {
 	return services
 }
 
-func SetInterfaces(sl *servicelocator.ServiceLocator) {}
-
 func DIContainer(sl *servicelocator.ServiceLocator) {
 	injections := []servicelocator.Dependency{
 		// with no deps
@@ -94,7 +92,6 @@ func DIContainer(sl *servicelocator.ServiceLocator) {
 
 		// action
 		servicelocator.AddDependency[codesender.Actions](codesender.NewAction),
-		servicelocator.AddDependency[person.Actions](person.NewAction),
 		servicelocator.AddDependency[invite.Actions](invite.NewAction),
 		servicelocator.AddDependency[auth.Actions](auth.NewAction),
 		servicelocator.AddDependency[config.Actions](config.NewActions),

@@ -17,6 +17,7 @@ func Commands() {
 		commands.SetAppKey(),
 		commands.CreateUser(),
 		commands.ListUser(),
+		commands.ShowNumberOfUnusedDependencies(),
 	)
 
 	err := cmd.Execute()

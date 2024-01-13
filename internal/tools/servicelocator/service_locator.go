@@ -34,3 +34,7 @@ func (s *ServiceLocator) GetE(name string) (any, error) {
 
 	return service, nil
 }
+
+func (s ServiceLocator) GetServices() map[string]any {
+	return s.services
+}
