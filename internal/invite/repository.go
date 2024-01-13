@@ -15,6 +15,13 @@ type InviteRepository struct {
 	personRepository person.PersonRepository
 }
 
+func NewRepository(repository repository.Repository) InviteRepository {
+	return InviteRepository{
+		repository:       repository,
+		personRepository: person.NewRepository(repository),
+	}
+}
+
 func (r InviteRepository) New(s servicelocator.ServiceLocator) any {
 	return InviteRepository{
 		repository:       servicelocator.Get[repository.Repository](s),

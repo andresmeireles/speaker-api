@@ -1,6 +1,7 @@
 package servicelocator
 
 import (
+	"fmt"
 	"reflect"
 )
 
@@ -16,11 +17,12 @@ func Set(servicelocator *ServiceLocator, newFunc Instantiable) {
 }
 
 func SetC(injection any, sl *ServiceLocator) {
-	label := reflect.TypeOf(injection).String()
-	hasParameters := reflect.TypeOf(injection).NumField() > 0
+	hasParameters := reflect.TypeOf(injection).NumIn() > 0
 
 	if !hasParameters {
 		instance := reflect.ValueOf(injection).Call([]reflect.Value{})[0]
+		label := reflect.TypeOf(instance.Interface()).String()
+		fmt.Println(label)
 		sl.Set(label, instance.Interface())
 
 		return
@@ -29,16 +31,19 @@ func SetC(injection any, sl *ServiceLocator) {
 	params := parameters(injection)
 	resolveParams := resolve(params, *sl)
 	resolveInjection := reflect.ValueOf(injection).Call(resolveParams)[0].Interface()
+	label := reflect.TypeOf(resolveInjection).String()
+	fmt.Println(label)
+
 	sl.Set(label, resolveInjection)
 }
 
 func parameters(injection any) []string {
 	ref := reflect.TypeOf(injection)
-	numFields := ref.NumField()
+	numFields := ref.NumIn()
 	fields := make([]string, numFields)
 
 	for i := 0; i < numFields; i++ {
-		fields[i] = ref.Field(i).Type.String()
+		fields[i] = ref.In(i).String()
 	}
 
 	return fields

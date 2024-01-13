@@ -18,6 +18,18 @@ type Actions struct {
 	configRepository config.ConfigRepository
 }
 
+func NewAction(
+	inviteRepository InviteRepository,
+	personRepository person.PersonRepository,
+	configRepository config.ConfigRepository,
+) Actions {
+	return Actions{
+		inviteRepository: inviteRepository,
+		personRepository: personRepository,
+		configRepository: configRepository,
+	}
+}
+
 func (a Actions) New(s servicelocator.ServiceLocator) any {
 	inviteRepository := servicelocator.Get[InviteRepository](s)
 	personRepository := servicelocator.Get[person.PersonRepository](s)

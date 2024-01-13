@@ -13,6 +13,10 @@ type ConfigController struct {
 	actions          Actions
 }
 
+func NewController(repo ConfigRepository, action Actions) ConfigController {
+	return ConfigController{repo, action}
+}
+
 func (c ConfigController) New(s servicelocator.ServiceLocator) any {
 	return ConfigController{
 		configRepository: servicelocator.Get[ConfigRepository](s),

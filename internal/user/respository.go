@@ -13,6 +13,12 @@ type UserRepository struct {
 	repository repository.Repository
 }
 
+func NewRepository(repository repository.Repository) UserRepository {
+	return UserRepository{
+		repository: repository,
+	}
+}
+
 func (u UserRepository) New(s servicelocator.ServiceLocator) any {
 	return UserRepository{
 		repository: servicelocator.Get[repository.Repository](s),

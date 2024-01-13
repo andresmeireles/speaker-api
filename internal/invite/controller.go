@@ -18,6 +18,20 @@ type InviteController struct {
 	action           Actions
 }
 
+func NewController(
+	ir InviteRepository,
+	pr person.PersonRepository,
+	cr config.ConfigRepository,
+	a Actions,
+) InviteController {
+	return InviteController{
+		inviteRepository: ir,
+		personRepository: pr,
+		configRepository: cr,
+		action:           a,
+	}
+}
+
 func (i InviteController) New(s servicelocator.ServiceLocator) any {
 	return InviteController{
 		inviteRepository: servicelocator.Get[InviteRepository](s),

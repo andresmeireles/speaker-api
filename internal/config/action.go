@@ -10,6 +10,12 @@ type Actions struct {
 	configRepository ConfigRepository
 }
 
+func NewActions(configRepository ConfigRepository) Actions {
+	return Actions{
+		configRepository: configRepository,
+	}
+}
+
 func (a Actions) New(s servicelocator.ServiceLocator) any {
 	return Actions{
 		configRepository: servicelocator.Get[ConfigRepository](s),

@@ -32,10 +32,6 @@ func main() {
 	logger.Logger()
 
 	sl := servicelocator.NewServiceLocator()
-
-	for _, service := range internal.Services() {
-		servicelocator.Set(sl, service)
-	}
-
+	internal.DIContainer(sl)
 	router.Run(os.Getenv("APP_PORT"), *sl)
 }

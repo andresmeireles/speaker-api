@@ -17,6 +17,14 @@ type AuthController struct {
 	userRepository    user.UserRepository
 }
 
+func NewController(action Actions, codeSenderActions codesender.Actions, userRepo user.UserRepository) AuthController {
+	return AuthController{
+		actions:           action,
+		codesenderActions: codeSenderActions,
+		userRepository:    userRepo,
+	}
+}
+
 func (c AuthController) New(s servicelocator.ServiceLocator) any {
 	c.actions = servicelocator.Get[Actions](s)
 	c.codesenderActions = servicelocator.Get[codesender.Actions](s)

@@ -22,6 +22,20 @@ type Actions struct {
 	codeSenderAction codesender.Actions
 }
 
+func NewAction(
+	repository AuthRepository,
+	userRepository user.UserRepository,
+	email *tools.Email,
+	codeSenderAction codesender.Actions,
+) Actions {
+	return Actions{
+		repository:       repository,
+		userRepository:   userRepository,
+		email:            email,
+		codeSenderAction: codeSenderAction,
+	}
+}
+
 func (a Actions) New(s servicelocator.ServiceLocator) any {
 	ra := servicelocator.Get[AuthRepository](s)
 	ru := servicelocator.Get[user.UserRepository](s)

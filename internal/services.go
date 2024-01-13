@@ -1,6 +1,8 @@
 package internal
 
 import (
+	"os"
+
 	"github.com/andresmeireles/speaker/internal/auth"
 	"github.com/andresmeireles/speaker/internal/codesender"
 	"github.com/andresmeireles/speaker/internal/config"
@@ -64,23 +66,47 @@ func Services() []servicelocator.Instantiable {
 	return services
 }
 
+func SetInterfaces(sl *servicelocator.ServiceLocator) {}
+
 func DIContainer(sl *servicelocator.ServiceLocator) {
-	injections := []any{
+	injections := []servicelocator.Dependency{
 		// with no deps
-		db.NewConnection,
+		servicelocator.AddDependency[db.Connection](db.NewConnection),
+		servicelocator.AddDependency[*tools.Email](func() *tools.Email {
+			host := os.Getenv("SMTP_HOST")
+			port := os.Getenv("SMTP_PORT")
+			password := os.Getenv("SMTP_PASSWORD")
+			email := os.Getenv("SMTP_USER")
+
+			return tools.NewEmail(host, password, port, email)
+		}),
 
 		// repository
-		repository.NewRepository,
+		servicelocator.AddInterface("repository.RepositoryInterface", repository.NewRepository),
+		servicelocator.AddDependency[repository.Repository](repository.NewRepository),
+		servicelocator.AddInterface("codesender.repositoryInterface", codesender.NewRepository),
+		servicelocator.AddInterface("person.PersonRepositoryInterface", person.NewRepository),
+		servicelocator.AddDependency[user.UserRepository](user.NewRepository),
+		servicelocator.AddDependency[invite.InviteRepository](invite.NewRepository),
+		servicelocator.AddDependency[person.PersonRepository](person.NewRepository),
+		servicelocator.AddDependency[auth.AuthRepository](auth.NewRepository),
+		servicelocator.AddDependency[config.ConfigRepository](config.NewRepository),
 
-		// person
-		person.NewController,
+		// action
+		servicelocator.AddDependency[codesender.Actions](codesender.NewAction),
+		servicelocator.AddDependency[person.Actions](person.NewAction),
+		servicelocator.AddDependency[invite.Actions](invite.NewAction),
+		servicelocator.AddDependency[auth.Actions](auth.NewAction),
+		servicelocator.AddDependency[config.Actions](config.NewActions),
+		servicelocator.AddInterface("person.ActionsInterface", person.NewAction),
 
-		// codesender
-		codesender.NewAction,
-		codesender.NewRepository,
+		// controller
+		servicelocator.AddDependency[person.PersonController](person.NewController),
+		servicelocator.AddDependency[user.UserController](user.NewController),
+		servicelocator.AddDependency[config.ConfigController](config.NewController),
+		servicelocator.AddDependency[auth.AuthController](auth.NewController),
+		servicelocator.AddDependency[invite.InviteController](invite.NewController),
 	}
 
-	for _, injection := range injections {
-		servicelocator.SetC(injection, sl)
-	}
+	servicelocator.SetRecursive(sl, injections)
 }

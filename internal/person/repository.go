@@ -7,10 +7,6 @@ import (
 	"github.com/andresmeireles/speaker/internal/tools/servicelocator"
 )
 
-type PersonRepository struct {
-	repository repository.Repository
-}
-
 type PersonRepositoryInterface interface {
 	Add(person Person) error
 	GetById(id int) (*Person, error)
@@ -18,6 +14,16 @@ type PersonRepositoryInterface interface {
 	Update(person Person) error
 	GetAll() ([]Person, error)
 	Delete(person Person) error
+}
+
+type PersonRepository struct {
+	repository repository.Repository
+}
+
+func NewRepository(repository repository.Repository) PersonRepository {
+	return PersonRepository{
+		repository: repository,
+	}
 }
 
 func (r PersonRepository) New(s servicelocator.ServiceLocator) any {

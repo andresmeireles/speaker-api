@@ -1,5 +1,7 @@
 package servicelocator
 
+import "fmt"
+
 type ServiceLocator struct {
 	services map[string]any
 }
@@ -21,4 +23,14 @@ func (s *ServiceLocator) Get(name string) any {
 	}
 
 	return service
+}
+
+func (s *ServiceLocator) GetE(name string) (any, error) {
+	service := s.services[name]
+	if service == nil {
+		// fmt.Println("service: " + name + ". not found")
+		return nil, fmt.Errorf("")
+	}
+
+	return service, nil
 }

@@ -11,6 +11,12 @@ type ConfigRepository struct {
 	repository repository.Repository
 }
 
+func NewRepository(repository repository.Repository) ConfigRepository {
+	return ConfigRepository{
+		repository: repository,
+	}
+}
+
 func (c ConfigRepository) New(s servicelocator.ServiceLocator) any {
 	return ConfigRepository{
 		repository: servicelocator.Get[repository.Repository](s),

@@ -12,6 +12,10 @@ type UserController struct {
 	repository UserRepository
 }
 
+func NewController(repository UserRepository) UserController {
+	return UserController{repository}
+}
+
 func (c UserController) New(s servicelocator.ServiceLocator) any {
 	return UserController{
 		repository: servicelocator.Get[UserRepository](s),

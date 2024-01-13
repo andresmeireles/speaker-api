@@ -15,6 +15,12 @@ type Actions struct {
 	repository PersonRepository
 }
 
+func NewAction(repository PersonRepository) Actions {
+	return Actions{
+		repository: repository,
+	}
+}
+
 func (a Actions) New(s servicelocator.ServiceLocator) any {
 	return Actions{
 		repository: servicelocator.Get[PersonRepository](s),

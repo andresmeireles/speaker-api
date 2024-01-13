@@ -25,7 +25,7 @@ func (e *Email) New(s servicelocator.ServiceLocator) any {
 	port := os.Getenv("SMTP_PORT")
 	password := os.Getenv("SMTP_PASSWORD")
 	email := os.Getenv("SMTP_USER")
-	client := newEmail(host, password, port, email)
+	client := NewEmail(host, password, port, email)
 
 	if os.Getenv("APP_MODE") != "dev" && !client.isEmail(email) {
 		panic("invalid email")
@@ -34,7 +34,7 @@ func (e *Email) New(s servicelocator.ServiceLocator) any {
 	return client
 }
 
-func newEmail(smtpHost, password, smtpPort, from string) *Email {
+func NewEmail(smtpHost, password, smtpPort, from string) *Email {
 	return &Email{
 		smtpHost: smtpHost,
 		smtpPort: smtpPort,
