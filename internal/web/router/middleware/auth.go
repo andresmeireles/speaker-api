@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/andresmeireles/speaker/internal/auth"
+	"github.com/andresmeireles/speaker/internal/tools/responses"
 	"github.com/andresmeireles/speaker/internal/tools/servicelocator"
 )
 
@@ -40,21 +41,18 @@ func CheckTokenOnCookie(next http.Handler, sl servicelocator.ServiceLocator) htt
 		}
 		authEntity, err := auth.AuthRepository{}.GetByHash(token)
 		if err != nil {
-			slog.Error("error on repository", "cookie", err)
-			unauthorized(response)
+			responses.Unauthorized(response)
 
 			return
 		}
 		if authEntity.Expired {
-			slog.Error("auth expired", "cookie", err)
-			unauthorized(response)
+			responses.Unauthorized(response)
 
 			return
 		}
 		if ok := authActions.ValidateJwt(authEntity.Hash); !ok {
-			slog.Error("auth expired")
 			authActions.Logout(authEntity.UserId)
-			unauthorized(response)
+			responses.Unauthorized(response)
 
 			return
 		}
@@ -62,9 +60,4 @@ func CheckTokenOnCookie(next http.Handler, sl servicelocator.ServiceLocator) htt
 		ctx := context.WithValue(request.Context(), "user_id", authEntity.UserId)
 		next.ServeHTTP(response, request.WithContext(ctx))
 	})
-}
-
-func unauthorized(res http.ResponseWriter) {
-	res.WriteHeader(http.StatusUnauthorized)
-	res.Write([]byte("Unauthorized"))
 }

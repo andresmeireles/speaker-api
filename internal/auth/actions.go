@@ -13,7 +13,10 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-const HOURS_TO_EXPIRE = 24
+const (
+	HOURS_TO_EXPIRE = 24
+	DAYS_OF_WEEK    = 7
+)
 
 type Actions struct {
 	repository       AuthRepository
@@ -88,16 +91,21 @@ func (a Actions) ValidateJwt(token string) bool {
 	return int64(exp) > time.Now().Unix()
 }
 
-func (a Actions) CreateJWT(user user.User) (Auth, error) {
+func (a Actions) CreateJWT(user user.User, remember bool) (Auth, error) {
 	appKey := os.Getenv("APP_KEY")
 	if appKey == "" {
 		return Auth{}, fmt.Errorf("APP_KEY not set")
 	}
 
+	expireTime := time.Hour * HOURS_TO_EXPIRE
+	if remember {
+		expireTime *= (DAYS_OF_WEEK * 2)
+	}
+
 	jwtToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"iss": "andres.meireles",
 		"sub": user.Email,
-		"exp": time.Now().Add(time.Hour * HOURS_TO_EXPIRE).Unix(),
+		"exp": time.Now().Add(expireTime).Unix(),
 	})
 	token, err := jwtToken.SignedString([]byte(appKey))
 

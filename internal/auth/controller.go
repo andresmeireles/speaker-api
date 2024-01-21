@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/andresmeireles/speaker/internal/codesender"
+	"github.com/andresmeireles/speaker/internal/tools/responses"
 	"github.com/andresmeireles/speaker/internal/tools/servicelocator"
 	"github.com/andresmeireles/speaker/internal/user"
 	web "github.com/andresmeireles/speaker/internal/web/decoder"
@@ -71,35 +72,28 @@ func (c AuthController) ReceiveEmail(w http.ResponseWriter, r *http.Request) {
 func (c AuthController) ReceiveCode(w http.ResponseWriter, r *http.Request) {
 	form, err := web.DecodePostBody[CodeForm](r.Body)
 	if err != nil {
-		slog.Error("Failed to decode code", err)
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("error"))
+		responses.DecodeError(w, err)
 
 		return
 	}
 
 	err = c.codesenderActions.VerifyCode(form.Email, form.Code)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(err.Error()))
+		responses.BadResponse(w, err)
 
 		return
 	}
 
 	user, err := c.userRepository.GetByEmail(form.Email)
 	if err != nil {
-		slog.Error("Failed to get user", err)
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(err.Error()))
+		responses.BadResponse(w, err)
 
 		return
 	}
 
-	jwt, err := c.actions.CreateJWT(user)
+	jwt, err := c.actions.CreateJWT(user, form.Remember)
 	if err != nil {
-		slog.Error("Failed to create jwt", err)
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(err.Error()))
+		responses.BadResponse(w, err)
 
 		return
 	}
@@ -111,9 +105,7 @@ func (c AuthController) ReceiveCode(w http.ResponseWriter, r *http.Request) {
 	responseJson, err := json.Marshal(response)
 
 	if err != nil {
-		slog.Error("Failed to marshal response", err)
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(err.Error()))
+		responses.BadResponse(w, err)
 
 		return
 	}
