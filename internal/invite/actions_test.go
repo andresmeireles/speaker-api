@@ -28,8 +28,6 @@ func TestParseTemplate(t *testing.T) {
 			Theme:      "Theme",
 			Time:       5,
 			Date:       time.Date(2006, 12, 20, 0, 0, 0, 0, time.UTC),
-			Accepted:   true,
-			Remembered: true,
 			References: "bola",
 		}
 

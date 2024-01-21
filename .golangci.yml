@@ -6,3 +6,4 @@ linters:
     - ifshort
     - scopelint
     - depguard
+    - godot
