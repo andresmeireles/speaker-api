@@ -4,12 +4,15 @@ import (
 	"testing"
 
 	"github.com/andresmeireles/speaker/internal/cli/commands"
+	"github.com/andresmeireles/speaker/testdata/mocks"
 )
 
 func TestCreateUser(t *testing.T) {
 	t.Run("create user", func(t *testing.T) {
 		// arrange
-		command := commands.CreateUser()
+		userRepository := mocks.UserRepository{}
+
+		command := commands.CreateUser(&userRepository)
 		command.SetArgs([]string{"-n", "Person 1", "-e", "123"})
 
 		// act

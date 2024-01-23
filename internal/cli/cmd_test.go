@@ -4,11 +4,15 @@ import (
 	"testing"
 
 	"github.com/andresmeireles/speaker/internal/cli"
+	"github.com/andresmeireles/speaker/internal/tools/servicelocator"
 )
 
 func TestCommands(t *testing.T) {
+	// arrange
+	sl := servicelocator.NewServiceLocator()
+
 	// act
-	cli.Commands()
+	cli.Commands(*sl)
 
 	// assert
 	if t.Failed() {

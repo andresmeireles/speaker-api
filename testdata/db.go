@@ -1,11 +1,21 @@
 package testdata
 
 import (
+	"database/sql"
 	"os"
 	"testing"
 
 	"github.com/andresmeireles/speaker/internal/cli/commands"
 )
+
+func GetTestDB() *sql.DB {
+	db, err := sql.Open("sqlite3", ":memory")
+	if err != nil {
+		panic(err)
+	}
+
+	return db
+}
 
 func SetupDatabase(m *testing.M) {
 	SetCredentials()

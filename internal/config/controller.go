@@ -19,7 +19,7 @@ func NewController(repo ConfigRepository, action Actions) ConfigController {
 
 func (c ConfigController) New(s servicelocator.ServiceLocator) any {
 	return ConfigController{
-		configRepository: servicelocator.Get[ConfigRepository](s),
+		configRepository: servicelocator.Get[Repository](s),
 		actions:          servicelocator.Get[Actions](s),
 	}
 }

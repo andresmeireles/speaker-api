@@ -16,3 +16,7 @@ type UpdateInviteData struct {
 	Date       string `json:"date"`
 	References string `json:"references"`
 }
+
+type WasDone struct {
+	Done bool `json:"done"`
+}

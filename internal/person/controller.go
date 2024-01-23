@@ -6,26 +6,18 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/andresmeireles/speaker/internal/tools/servicelocator"
 	web "github.com/andresmeireles/speaker/internal/web/decoder"
 )
 
 type PersonController struct {
-	personRepository PersonRepositoryInterface
+	personRepository PersonRepository
 	actions          ActionsInterface
 }
 
-func NewController(repository PersonRepositoryInterface, actions ActionsInterface) PersonController {
+func NewController(repository PersonRepository, actions ActionsInterface) PersonController {
 	return PersonController{
 		personRepository: repository,
 		actions:          actions,
-	}
-}
-
-func (c PersonController) New(s servicelocator.ServiceLocator) any {
-	return PersonController{
-		personRepository: servicelocator.Get[PersonRepository](s),
-		actions:          servicelocator.Get[Actions](s),
 	}
 }
 

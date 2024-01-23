@@ -23,11 +23,9 @@ func TestInvite(t *testing.T) {
 			Person: person.Person{
 				Name: "Person 1",
 			},
-			Theme:      "Theme",
-			Time:       1,
-			Date:       time.Now(),
-			Accepted:   true,
-			Remembered: true,
+			Theme: "Theme",
+			Time:  1,
+			Date:  time.Now(),
 		}
 
 		// act

@@ -4,17 +4,16 @@ import (
 	"database/sql"
 
 	"github.com/andresmeireles/speaker/internal/db"
-	servicelocator "github.com/andresmeireles/speaker/internal/tools/servicelocator"
 )
 
 type RepositoryInterface interface {
 	Add(en db.Entity) error
 	Delete(en db.Entity) error
+	GetAll(table string) (*sql.Rows, error)
+	GetById(table string, id int) (*sql.Row, error)
+	SingleQuery(q string, args ...any) (*sql.Row, error)
+	Query(q string, args ...any) (*sql.Rows, error)
 	Update(en db.Entity) error
-	GetById(id int) (db.Entity, error)
-	GetAll() ([]db.Entity, error)
-	Query(query string, values ...any) (*sql.Rows, error)
-	SingleQuery(query string, values ...any) (*sql.Row, error)
 }
 
 type Repository struct {
@@ -25,10 +24,4 @@ func NewRepository(connection db.Connection) Repository {
 	return Repository{
 		conn: connection,
 	}
-}
-
-func (r Repository) New(sl servicelocator.ServiceLocator) any {
-	conn := servicelocator.Get[db.Connection](sl)
-
-	return Repository{conn}
 }

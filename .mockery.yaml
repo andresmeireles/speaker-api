@@ -1,0 +1,9 @@
+with-expecter: True
+dir: "testdata/mocks"
+mockname: "{{.InterfaceName}}"
+outpkg: "mocks"
+filename: "{{.InterfaceName}}.go"
+packages:
+  github.com/andresmeireles/speaker/internal:
+    config:
+      recursive: True

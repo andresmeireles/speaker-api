@@ -20,7 +20,7 @@ func migrationSource() string {
 }
 
 func migrationSetup() *migrate.Migrate {
-	conn := getService[db.Connection]()
+	conn := db.NewConnection()
 	db, err := conn.GetDB()
 
 	if err != nil {

@@ -20,14 +20,14 @@ const (
 
 type Actions struct {
 	repository       AuthRepository
-	userRepository   user.UserRepository
+	userRepository   user.Repository
 	email            *tools.Email
 	codeSenderAction codesender.Actions
 }
 
 func NewAction(
 	repository AuthRepository,
-	userRepository user.UserRepository,
+	userRepository user.Repository,
 	email *tools.Email,
 	codeSenderAction codesender.Actions,
 ) Actions {
@@ -41,7 +41,7 @@ func NewAction(
 
 func (a Actions) New(s servicelocator.ServiceLocator) any {
 	ra := servicelocator.Get[AuthRepository](s)
-	ru := servicelocator.Get[user.UserRepository](s)
+	ru := servicelocator.Get[user.Repository](s)
 	e := servicelocator.Get[*tools.Email](s)
 	cs := servicelocator.Get[codesender.Actions](s)
 

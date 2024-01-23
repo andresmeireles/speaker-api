@@ -2,8 +2,6 @@ package config
 
 import (
 	"database/sql"
-
-	"github.com/andresmeireles/speaker/internal/tools/servicelocator"
 )
 
 type Actions struct {
@@ -16,17 +14,11 @@ func NewActions(configRepository ConfigRepository) Actions {
 	}
 }
 
-func (a Actions) New(s servicelocator.ServiceLocator) any {
-	return Actions{
-		configRepository: servicelocator.Get[ConfigRepository](s),
-	}
-}
-
 // Create or update a config.
 func (a Actions) Write(name, value string) error {
 	config, err := a.configRepository.GetByName(name)
 	if err == sql.ErrNoRows {
-		return createConfig(name, value, a.configRepository)
+		return a.createConfig(name, value)
 	}
 
 	if err != nil {
@@ -38,13 +30,13 @@ func (a Actions) Write(name, value string) error {
 	return a.configRepository.Update(*config)
 }
 
-func createConfig(name, value string, repository ConfigRepository) error {
+func (a Actions) createConfig(name, value string) error {
 	newConfig := Config{
 		Name:  name,
 		Value: value,
 	}
 
-	if err := repository.Add(newConfig); err != nil {
+	if err := a.configRepository.Add(newConfig); err != nil {
 		return err
 	}
 

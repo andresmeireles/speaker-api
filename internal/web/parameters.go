@@ -2,7 +2,6 @@ package web
 
 import (
 	"fmt"
-	"log/slog"
 	"net/http"
 	"strconv"
 
@@ -14,36 +13,27 @@ func badFormattedUrl(w http.ResponseWriter) {
 	w.Write([]byte("bad formatted url"))
 }
 
-func GetParameter(
-	r *http.Request,
-	name string,
-) (string, error, func(w http.ResponseWriter)) {
+func GetParameter(r *http.Request, name string) string {
 	if name == "" {
-		return "", fmt.Errorf("no parameter"), badFormattedUrl
+		panic("cannot search empty parameter")
 	}
 
 	parameter := chi.URLParam(r, name)
 
-	return parameter, nil, nil
+	if parameter == "" {
+		panic("no parameter " + name + " in " + r.URL.Path)
+	}
+
+	return parameter
 }
 
-func GetIntParameter(
-	r *http.Request,
-	name string,
-) (int, error, func(w http.ResponseWriter)) {
-	parameter, err, errorFunc := GetParameter(r, name)
-	if err != nil {
-		slog.Error("error on decode", err)
-
-		return 0, err, errorFunc
-	}
-
+func GetIntParameter(r *http.Request, name string) int {
+	parameter := GetParameter(r, name)
 	intParameter, err := strconv.Atoi(parameter)
-	if err != nil {
-		slog.Error("error on decode", err)
 
-		return 0, err, badFormattedUrl
+	if err != nil {
+		panic(fmt.Sprintf("failed to parse parameter %s in %s", name, r.URL.Path))
 	}
 
-	return intParameter, nil, nil
+	return intParameter
 }

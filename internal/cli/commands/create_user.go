@@ -1,14 +1,13 @@
 package commands
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/andresmeireles/speaker/internal/user"
 	"github.com/spf13/cobra"
 )
 
-func CreateUser() *cobra.Command {
+func CreateUser(userRepository user.UserRepository) *cobra.Command {
 	var name, email string
 
 	command := &cobra.Command{
@@ -16,15 +15,14 @@ func CreateUser() *cobra.Command {
 		Short: "Create user",
 		Run: func(cmd *cobra.Command, args []string) {
 			if name == "" {
-				fmt.Println("Name is required")
+				os.Stderr.Write([]byte("Name is required\n"))
 				os.Exit(1)
 			}
 			if email == "" {
-				fmt.Println("Email is required")
+				os.Stderr.Write([]byte("Email is required\n"))
 				os.Exit(1)
 			}
 
-			userRepository := user.UserRepository{}
 			user := user.User{
 				Name:  name,
 				Email: email,
@@ -32,11 +30,11 @@ func CreateUser() *cobra.Command {
 			err := userRepository.Add(user)
 
 			if err != nil {
-				fmt.Println(err)
+				os.Stderr.WriteString("Error when creating user\n")
 				os.Exit(1)
 			}
 
-			fmt.Println("User created")
+			os.Stdout.WriteString("User created\n")
 		},
 	}
 

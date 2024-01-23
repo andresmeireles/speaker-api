@@ -28,8 +28,7 @@ func (s *ServiceLocator) Get(name string) any {
 func (s *ServiceLocator) GetE(name string) (any, error) {
 	service := s.services[name]
 	if service == nil {
-		// fmt.Println("service: " + name + ". not found")
-		return nil, fmt.Errorf("")
+		return nil, fmt.Errorf("service not found: %s", name)
 	}
 
 	return service, nil

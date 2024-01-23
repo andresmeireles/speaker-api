@@ -34,6 +34,11 @@ func Run(port string, services servicelocator.ServiceLocator) {
 func routes(ctx context.Context, router *chi.Mux, sl servicelocator.ServiceLocator) {
 	authController := servicelocator.Get[auth.AuthController](sl)
 
+	router.Get("/ping/jorge/{id}", func(w http.ResponseWriter, r *http.Request) {
+		id := web.GetParameter(r, "id")
+		w.Write([]byte(id))
+	})
+
 	router.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("OK"))
@@ -50,7 +55,6 @@ func routes(ctx context.Context, router *chi.Mux, sl servicelocator.ServiceLocat
 	})
 }
 
-//nolint:funlen
 func protectedRoutes(r chi.Router, sl servicelocator.ServiceLocator) {
 	authController := servicelocator.Get[auth.AuthController](sl)
 	configController := servicelocator.Get[config.ConfigController](sl)
@@ -72,52 +76,32 @@ func protectedRoutes(r chi.Router, sl servicelocator.ServiceLocator) {
 
 	r.Get("/invites", inviteController.GetAllInvites)
 	r.Get("/invites/{id}", func(w http.ResponseWriter, r *http.Request) {
-		id, err, handlerFunc := web.GetIntParameter(r, "id")
-		if err != nil {
-			handlerFunc(w)
-		} else {
-			inviteController.GetInvite(id, w, r)
-		}
+		id := web.GetIntParameter(r, "id")
+		inviteController.GetInvite(id, w, r)
 	})
 	r.Get("/invites/message/{id}", func(w http.ResponseWriter, r *http.Request) {
-		id, err, handlerFunc := web.GetIntParameter(r, "id")
-		if err != nil {
-			handlerFunc(w)
-		} else {
-			inviteController.SendInvite(id, w, r)
-		}
+		id := web.GetIntParameter(r, "id")
+		inviteController.SendInvite(id, w, r)
 	})
 	r.Post("/invites", inviteController.Create)
 	r.Put("/invites/accept/{id}", func(w http.ResponseWriter, r *http.Request) {
-		id, err, handlerFunc := web.GetIntParameter(r, "id")
-		if err != nil {
-			handlerFunc(w)
-		} else {
-			inviteController.Accepted(id, w, r)
-		}
+		id := web.GetIntParameter(r, "id")
+		inviteController.Accepted(id, w, r)
 	})
 	r.Put("/invites/remember/{id}", func(w http.ResponseWriter, r *http.Request) {
-		id, err, handlerFunc := web.GetIntParameter(r, "id")
-		if err != nil {
-			handlerFunc(w)
-		} else {
-			inviteController.Remember(id, w, r)
-		}
+		id := web.GetIntParameter(r, "id")
+		inviteController.Remember(id, w, r)
+	})
+	r.Put("/invites/done/{id}", func(w http.ResponseWriter, r *http.Request) {
+		id := web.GetIntParameter(r, "id")
+		inviteController.WasDone(id, w, r)
 	})
 	r.Put("/invites/{id}", func(w http.ResponseWriter, r *http.Request) {
-		id, err, handlerFunc := web.GetIntParameter(r, "id")
-		if err != nil {
-			handlerFunc(w)
-		} else {
-			inviteController.Update(id, w, r)
-		}
+		id := web.GetIntParameter(r, "id")
+		inviteController.Update(id, w, r)
 	})
 	r.Delete("/invites/{id}", func(w http.ResponseWriter, r *http.Request) {
-		id, err, handlerFunc := web.GetIntParameter(r, "id")
-		if err != nil {
-			handlerFunc(w)
-		} else {
-			inviteController.DeleteInvite(id, w, r)
-		}
+		id := web.GetIntParameter(r, "id")
+		inviteController.DeleteInvite(w, r, id)
 	})
 }

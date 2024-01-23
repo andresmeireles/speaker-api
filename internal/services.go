@@ -15,57 +15,6 @@ import (
 	"github.com/andresmeireles/speaker/internal/user"
 )
 
-func Controllers() []servicelocator.Instantiable {
-	return []servicelocator.Instantiable{
-		user.UserController{},
-		config.ConfigController{},
-		auth.AuthController{},
-		invite.InviteController{},
-		person.PersonController{},
-	}
-}
-
-func Repos() []servicelocator.Instantiable {
-	return []servicelocator.Instantiable{
-		user.UserRepository{},
-		config.ConfigRepository{},
-		codesender.Repository{},
-		auth.AuthRepository{},
-		person.PersonRepository{},
-		invite.InviteRepository{},
-	}
-}
-
-func Actions() []servicelocator.Instantiable {
-	return []servicelocator.Instantiable{
-		config.Actions{},
-		codesender.Actions{},
-		auth.Actions{},
-		invite.Actions{},
-		person.Actions{},
-	}
-}
-
-func Misc() []servicelocator.Instantiable {
-	return []servicelocator.Instantiable{
-		db.Connection{},
-
-		&tools.Email{},
-
-		repository.Repository{},
-	}
-}
-
-func Services() []servicelocator.Instantiable {
-	services := make([]servicelocator.Instantiable, 0)
-	services = append(services, Misc()...)
-	services = append(services, Repos()...)
-	services = append(services, Actions()...)
-	services = append(services, Controllers()...)
-
-	return services
-}
-
 func DIContainer(sl *servicelocator.ServiceLocator) {
 	injections := []servicelocator.Dependency{
 		// with no deps
@@ -80,22 +29,24 @@ func DIContainer(sl *servicelocator.ServiceLocator) {
 		}),
 
 		// repository
-		servicelocator.AddInterface("repository.RepositoryInterface", repository.NewRepository),
+		// servicelocator.AddInterface("repository.RepositoryInterface", repository.NewRepository),
+		servicelocator.AddDependency[repository.RepositoryInterface](repository.NewRepository),
 		servicelocator.AddDependency[repository.Repository](repository.NewRepository),
-		servicelocator.AddInterface("codesender.repositoryInterface", codesender.NewRepository),
-		servicelocator.AddInterface("person.PersonRepositoryInterface", person.NewRepository),
+		servicelocator.AddDependency[codesender.CodeSenderRepository](codesender.NewRepository),
+		servicelocator.AddDependency[person.PersonRepository](person.NewRepository),
+		servicelocator.AddDependency[user.Repository](user.NewRepository),
 		servicelocator.AddDependency[user.UserRepository](user.NewRepository),
 		servicelocator.AddDependency[invite.InviteRepository](invite.NewRepository),
-		servicelocator.AddDependency[person.PersonRepository](person.NewRepository),
+		servicelocator.AddDependency[person.Repository](person.NewRepository),
 		servicelocator.AddDependency[auth.AuthRepository](auth.NewRepository),
 		servicelocator.AddDependency[config.ConfigRepository](config.NewRepository),
 
-		// action
+		// action / service
 		servicelocator.AddDependency[codesender.Actions](codesender.NewAction),
-		servicelocator.AddDependency[invite.Actions](invite.NewAction),
 		servicelocator.AddDependency[auth.Actions](auth.NewAction),
 		servicelocator.AddDependency[config.Actions](config.NewActions),
-		servicelocator.AddInterface("person.ActionsInterface", person.NewAction),
+		servicelocator.AddDependency[person.ActionsInterface](person.NewAction),
+		servicelocator.AddDependency[invite.InviteService](invite.NewAction),
 
 		// controller
 		servicelocator.AddDependency[person.PersonController](person.NewController),
@@ -105,5 +56,5 @@ func DIContainer(sl *servicelocator.ServiceLocator) {
 		servicelocator.AddDependency[invite.InviteController](invite.NewController),
 	}
 
-	servicelocator.SetRecursive(sl, injections)
+	servicelocator.Set(sl, injections)
 }

@@ -7,25 +7,18 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/andresmeireles/speaker/internal/tools/servicelocator"
 	"github.com/andresmeireles/speaker/internal/user"
 )
 
 type Actions struct {
-	repository repositoryInterface
+	repository CodeSenderRepository
 }
 
 const EXPIRE_TIME_MINUTES = 5
 
-func NewAction(repository repositoryInterface) Actions {
+func NewAction(repository CodeSenderRepository) Actions {
 	return Actions{
 		repository: repository,
-	}
-}
-
-func (a Actions) New(s servicelocator.ServiceLocator) any {
-	return Actions{
-		repository: servicelocator.Get[Repository](s),
 	}
 }
 

@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/andresmeireles/speaker/internal/tools/servicelocator"
 	_ "github.com/lib/pq"
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -14,10 +13,6 @@ import (
 type Connection struct{}
 
 func NewConnection() Connection {
-	return Connection{}
-}
-
-func (c Connection) New(_ servicelocator.ServiceLocator) any {
 	return Connection{}
 }
 

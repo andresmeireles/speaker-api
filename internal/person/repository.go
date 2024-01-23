@@ -7,7 +7,7 @@ import (
 	"github.com/andresmeireles/speaker/internal/tools/servicelocator"
 )
 
-type PersonRepositoryInterface interface {
+type PersonRepository interface {
 	Add(person Person) error
 	GetById(id int) (*Person, error)
 	GetByName(name string) (*Person, error)
@@ -16,27 +16,27 @@ type PersonRepositoryInterface interface {
 	Delete(person Person) error
 }
 
-type PersonRepository struct {
+type Repository struct {
 	repository repository.Repository
 }
 
 func NewRepository(repository repository.Repository) PersonRepository {
-	return PersonRepository{
+	return Repository{
 		repository: repository,
 	}
 }
 
-func (r PersonRepository) New(s servicelocator.ServiceLocator) any {
-	return PersonRepository{
+func (r Repository) New(s servicelocator.ServiceLocator) any {
+	return Repository{
 		repository: servicelocator.Get[repository.Repository](s),
 	}
 }
 
-func (r PersonRepository) Add(person Person) error {
+func (r Repository) Add(person Person) error {
 	return r.repository.Add(person)
 }
 
-func (r PersonRepository) GetById(id int) (*Person, error) {
+func (r Repository) GetById(id int) (*Person, error) {
 	person := new(Person)
 	row, err := r.repository.GetById(person.Table(), id)
 
@@ -54,7 +54,7 @@ func (r PersonRepository) GetById(id int) (*Person, error) {
 	return person, nil
 }
 
-func (r PersonRepository) GetByName(name string) (*Person, error) {
+func (r Repository) GetByName(name string) (*Person, error) {
 	person := new(Person)
 	query := fmt.Sprintf("SELECT * FROM %s WHERE name = $1 LIMIT 1", person.Table())
 	row, err := r.repository.SingleQuery(query, name)
@@ -70,11 +70,11 @@ func (r PersonRepository) GetByName(name string) (*Person, error) {
 	return person, nil
 }
 
-func (r PersonRepository) Update(person Person) error {
+func (r Repository) Update(person Person) error {
 	return r.repository.Update(person)
 }
 
-func (r PersonRepository) GetAll() ([]Person, error) {
+func (r Repository) GetAll() ([]Person, error) {
 	rows, err := r.repository.GetAll(Person{}.Table())
 	if err != nil {
 		return nil, err
@@ -97,6 +97,6 @@ func (r PersonRepository) GetAll() ([]Person, error) {
 	return people, nil
 }
 
-func (r PersonRepository) Delete(person Person) error {
+func (r Repository) Delete(person Person) error {
 	return r.repository.Delete(person)
 }

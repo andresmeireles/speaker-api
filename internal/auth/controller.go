@@ -15,10 +15,10 @@ import (
 type AuthController struct {
 	actions           Actions
 	codesenderActions codesender.Actions
-	userRepository    user.UserRepository
+	userRepository    user.Repository
 }
 
-func NewController(action Actions, codeSenderActions codesender.Actions, userRepo user.UserRepository) AuthController {
+func NewController(action Actions, codeSenderActions codesender.Actions, userRepo user.Repository) AuthController {
 	return AuthController{
 		actions:           action,
 		codesenderActions: codeSenderActions,
@@ -29,7 +29,7 @@ func NewController(action Actions, codeSenderActions codesender.Actions, userRep
 func (c AuthController) New(s servicelocator.ServiceLocator) any {
 	c.actions = servicelocator.Get[Actions](s)
 	c.codesenderActions = servicelocator.Get[codesender.Actions](s)
-	c.userRepository = servicelocator.Get[user.UserRepository](s)
+	c.userRepository = servicelocator.Get[user.Repository](s)
 
 	return AuthController{
 		actions:           c.actions,

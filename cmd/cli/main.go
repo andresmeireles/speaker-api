@@ -3,7 +3,9 @@ package main
 import (
 	"os"
 
+	"github.com/andresmeireles/speaker/internal"
 	"github.com/andresmeireles/speaker/internal/cli"
+	"github.com/andresmeireles/speaker/internal/tools/servicelocator"
 	"github.com/joho/godotenv"
 )
 
@@ -26,5 +28,8 @@ func main() {
 		}
 	}
 
-	cli.Commands()
+	sl := servicelocator.NewServiceLocator()
+	internal.DIContainer(sl)
+
+	cli.Commands(*sl)
 }

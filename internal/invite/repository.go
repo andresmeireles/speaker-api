@@ -4,40 +4,44 @@ import (
 	"database/sql"
 	"fmt"
 	"log/slog"
+	"sort"
 
 	"github.com/andresmeireles/speaker/internal/person"
 	"github.com/andresmeireles/speaker/internal/repository"
-	"github.com/andresmeireles/speaker/internal/tools/servicelocator"
 )
 
-type InviteRepository struct {
+type InviteRepository interface {
+	Add(invite Invite) error
+	Query(query string, values ...any) (*sql.Rows, error)
+	GetAllOrdered(field string, asc bool) ([]Invite, error)
+	GetByPersonId(id int) ([]Invite, error)
+	GetById(id int) (*Invite, error)
+	Update(invite Invite) error
+	UpdateStatus(invite Invite, status int) error
+	Delete(invite Invite) error
+}
+
+type Repository struct {
 	repository       repository.Repository
 	personRepository person.PersonRepository
 }
 
-func NewRepository(repository repository.Repository) InviteRepository {
-	return InviteRepository{
+func NewRepository(repository repository.Repository) Repository {
+	return Repository{
 		repository:       repository,
 		personRepository: person.NewRepository(repository),
 	}
 }
 
-func (r InviteRepository) New(s servicelocator.ServiceLocator) any {
-	return InviteRepository{
-		repository:       servicelocator.Get[repository.Repository](s),
-		personRepository: servicelocator.Get[person.PersonRepository](s),
-	}
-}
-
-func (r InviteRepository) Add(invite Invite) error {
+func (r Repository) Add(invite Invite) error {
 	return r.repository.Add(invite)
 }
 
-func (r InviteRepository) Query(query string, values ...any) (*sql.Rows, error) {
+func (r Repository) Query(query string, values ...any) (*sql.Rows, error) {
 	return r.repository.Query(query, values...)
 }
 
-func (r InviteRepository) GetAllOrdered(field string, asc bool) ([]Invite, error) {
+func (r Repository) GetAllOrdered(field string, asc bool) ([]Invite, error) {
 	invites := make([]Invite, 0)
 	query := "SELECT * FROM invites ORDER BY "
 
@@ -64,7 +68,7 @@ func (r InviteRepository) GetAllOrdered(field string, asc bool) ([]Invite, error
 	return invites, nil
 }
 
-func (r InviteRepository) GetAll() ([]Invite, error) {
+func (r Repository) GetAll() ([]Invite, error) {
 	rows, err := r.repository.GetAll(Invite{}.Table())
 	if err != nil {
 		return nil, err
@@ -84,7 +88,7 @@ func (r InviteRepository) GetAll() ([]Invite, error) {
 	return invites, nil
 }
 
-func (r InviteRepository) GetById(id int) (*Invite, error) {
+func (r Repository) GetById(id int) (*Invite, error) {
 	row, err := r.repository.GetById(Invite{}.Table(), id)
 	if err != nil {
 		return nil, err
@@ -98,7 +102,7 @@ func (r InviteRepository) GetById(id int) (*Invite, error) {
 	return invite, nil
 }
 
-func (r InviteRepository) GetByPersonId(id int) ([]Invite, error) {
+func (r Repository) GetByPersonId(id int) ([]Invite, error) {
 	invites := make([]Invite, 0)
 	query := "SELECT * FROM invites WHERE person_id = $1"
 	rows, err := r.repository.Query(query, id)
@@ -119,7 +123,7 @@ func (r InviteRepository) GetByPersonId(id int) ([]Invite, error) {
 	return invites, nil
 }
 
-func (r InviteRepository) scan(scanFunc func(dest ...any) error) (*Invite, error) {
+func (r Repository) scan(scanFunc func(dest ...any) error) (*Invite, error) {
 	invite := new(Invite)
 	if err := scanFunc(
 		&invite.Id,
@@ -127,9 +131,8 @@ func (r InviteRepository) scan(scanFunc func(dest ...any) error) (*Invite, error
 		&invite.References,
 		&invite.Date,
 		&invite.Time,
-		&invite.Accepted,
-		&invite.Remembered,
 		&invite.PersonId,
+		&invite.Status,
 	); err != nil {
 		return nil, err
 	}
@@ -144,11 +147,11 @@ func (r InviteRepository) scan(scanFunc func(dest ...any) error) (*Invite, error
 	return invite, nil
 }
 
-func (r InviteRepository) Update(invite Invite) error {
+func (r Repository) Update(invite Invite) error {
 	return r.repository.Update(invite)
 }
 
-func (r InviteRepository) Delete(invite Invite) error {
+func (r Repository) Delete(invite Invite) error {
 	invitesPerPerson, err := r.GetByPersonId(invite.PersonId)
 	if err != nil {
 		return err
@@ -161,4 +164,18 @@ func (r InviteRepository) Delete(invite Invite) error {
 	}
 
 	return r.repository.Delete(invite)
+}
+
+func (r Repository) UpdateStatus(invite Invite, status int) error {
+	statuses := Invite{}.StatusList()
+	index := sort.SearchInts(statuses, status)
+	isAllowedIndex := index < len(statuses) && statuses[index] == status
+
+	if !isAllowedIndex {
+		return fmt.Errorf("status not allowed")
+	}
+
+	invite.Status = status
+
+	return r.Update(invite)
 }

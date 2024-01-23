@@ -3,37 +3,34 @@ package invite_test
 import (
 	"net/http"
 	"net/http/httptest"
-	"strconv"
 	"strings"
 	"testing"
 
 	"github.com/andresmeireles/speaker/internal/invite"
-	"github.com/andresmeireles/speaker/internal/person"
-	"github.com/andresmeireles/speaker/testdata"
+	"github.com/andresmeireles/speaker/testdata/mocks"
 )
 
-func TestMain(m *testing.M) {
-	testdata.SetupDatabase(m)
-}
-
 func TestController(t *testing.T) {
+	inviteRepoMock := mocks.InviteRepository{}
+	personRepoMock := mocks.PersonRepository{}
+	configRepoMock := mocks.ConfigRepository{}
+	inviteServiceMock := mocks.InviteService{}
+
+	controller := invite.NewController(
+		&inviteRepoMock,
+		&personRepoMock,
+		&configRepoMock,
+		&inviteServiceMock,
+	)
+
 	t.Run("should execute creation", func(t *testing.T) {
 		// arrange
-		personRepo := testdata.GetService[person.PersonRepository]()
-		err := personRepo.Add(person.Person{Name: "Andre"})
+		inviteServiceMock.EXPECT().
+			CreateInvite(invite.InvitePost{PersonId: 1, Date: "2006-01-02T15:04:05.000Z", Theme: "Theme", Time: 1}).
+			Return(invite.Invite{}, nil).
+			Once()
 
-		if err != nil {
-			t.Fatalf("expected nil, got %s", err)
-		}
-
-		pN, err := personRepo.GetByName("Andre")
-		if err != nil {
-			t.Fatalf("expected nil, got %s", err)
-		}
-
-		pNS := strconv.Itoa(pN.Id)
-		controller := testdata.GetService[invite.InviteController]()
-		reader := strings.NewReader(`{"person_id":` + pNS + `,"date":"2006-01-02T15:04:05.000Z","theme":"Theme","time":1}`)
+		reader := strings.NewReader(`{"person_id":1,"date":"2006-01-02T15:04:05.000Z","theme":"Theme","time":1}`)
 		recorder := httptest.NewRecorder()
 		request, err := http.NewRequest(http.MethodPost, "/invites", reader)
 		handler := http.HandlerFunc(controller.Create)

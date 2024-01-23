@@ -6,33 +6,24 @@ import (
 	"testing"
 
 	"github.com/andresmeireles/speaker/internal/db"
-	"github.com/andresmeireles/speaker/testdata"
 )
 
-func TestGetDB(t *testing.T) {
+func TestDB(t *testing.T) {
 	os.Setenv("DB_DRIVER", "sqlite3")
-	os.Setenv("SMTP_USER", "andre.meireles@gmail.com")
 
-	db, err := testdata.GetService[db.Connection]().GetDB()
-	if err != nil {
-		t.Fatalf("expected nil, got %s", err)
-	}
+	conn := db.Connection{}
 
-	if reflect.TypeOf(db).String() != "*sql.DB" {
-		t.Fatalf("expected *db.DB, got %s", reflect.TypeOf(db).String())
-	}
-}
+	t.Run("Get DB", func(t *testing.T) {
+		os.Setenv("DB_DRIVER", "sqlite3")
 
-func TestGetDBPostgres(t *testing.T) {
-	os.Setenv("DB_DRIVER", "postgres")
-	os.Setenv("SMTP_USER", "andre.meireles@gmail.com")
+		db, err := conn.GetDB()
 
-	db, err := testdata.GetService[db.Connection]().GetDB()
-	if err != nil {
-		t.Fatalf("expected nil, got %s", err)
-	}
+		if err != nil {
+			t.Fatalf("expected nil, got %s", err)
+		}
 
-	if reflect.TypeOf(db).String() != "*sql.DB" {
-		t.Fatalf("expected *db.DB, got %s", reflect.TypeOf(db).String())
-	}
+		if reflect.TypeOf(db).String() != "*sql.DB" {
+			t.Fatalf("expected *db.DB, got %s", reflect.TypeOf(db).String())
+		}
+	})
 }

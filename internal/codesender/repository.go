@@ -9,7 +9,7 @@ import (
 	"github.com/andresmeireles/speaker/internal/user"
 )
 
-type repositoryInterface interface {
+type CodeSenderRepository interface {
 	Add(authCode AuthCode) error
 	GetById(authCodeId int) (AuthCode, error)
 	GetAll() ([]AuthCode, error)
@@ -19,10 +19,10 @@ type repositoryInterface interface {
 
 type Repository struct {
 	repository     repository.Repository
-	userRepository user.UserRepository
+	userRepository user.Repository
 }
 
-func NewRepository(repository repository.Repository, userRepository user.UserRepository) Repository {
+func NewRepository(repository repository.Repository, userRepository user.Repository) Repository {
 	return Repository{
 		repository:     repository,
 		userRepository: userRepository,
@@ -32,7 +32,7 @@ func NewRepository(repository repository.Repository, userRepository user.UserRep
 func (r Repository) New(s servicelocator.ServiceLocator) any {
 	return Repository{
 		repository:     servicelocator.Get[repository.Repository](s),
-		userRepository: servicelocator.Get[user.UserRepository](s),
+		userRepository: servicelocator.Get[user.Repository](s),
 	}
 }
 
