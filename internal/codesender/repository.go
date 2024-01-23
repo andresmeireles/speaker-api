@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"github.com/andresmeireles/speaker/internal/repository"
-	"github.com/andresmeireles/speaker/internal/tools/servicelocator"
 	"github.com/andresmeireles/speaker/internal/user"
 )
 
@@ -26,13 +25,6 @@ func NewRepository(repository repository.Repository, userRepository user.Reposit
 	return Repository{
 		repository:     repository,
 		userRepository: userRepository,
-	}
-}
-
-func (r Repository) New(s servicelocator.ServiceLocator) any {
-	return Repository{
-		repository:     servicelocator.Get[repository.Repository](s),
-		userRepository: servicelocator.Get[user.Repository](s),
 	}
 }
 

@@ -8,10 +8,6 @@ package config_test
 // 	"github.com/andresmeireles/speaker/testdata"
 // )
 
-// func TestMain(m *testing.M) {
-// 	testdata.SetupDatabase(m)
-// }
-
 // func clearDB() {
 // 	repository := testdata.GetService[repository.Repository]()
 // 	q := "DELETE FROM configs"

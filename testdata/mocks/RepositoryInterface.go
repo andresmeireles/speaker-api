@@ -114,9 +114,9 @@ func (_c *RepositoryInterface_Delete_Call) RunAndReturn(run func(db.Entity) erro
 	return _c
 }
 
-// GetAll provides a mock function with given fields:
-func (_m *RepositoryInterface) GetAll() (*sql.Rows, error) {
-	ret := _m.Called()
+// GetAll provides a mock function with given fields: table
+func (_m *RepositoryInterface) GetAll(table string) (*sql.Rows, error) {
+	ret := _m.Called(table)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetAll")
@@ -124,19 +124,19 @@ func (_m *RepositoryInterface) GetAll() (*sql.Rows, error) {
 
 	var r0 *sql.Rows
 	var r1 error
-	if rf, ok := ret.Get(0).(func() (*sql.Rows, error)); ok {
-		return rf()
+	if rf, ok := ret.Get(0).(func(string) (*sql.Rows, error)); ok {
+		return rf(table)
 	}
-	if rf, ok := ret.Get(0).(func() *sql.Rows); ok {
-		r0 = rf()
+	if rf, ok := ret.Get(0).(func(string) *sql.Rows); ok {
+		r0 = rf(table)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*sql.Rows)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func() error); ok {
-		r1 = rf()
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(table)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -150,13 +150,14 @@ type RepositoryInterface_GetAll_Call struct {
 }
 
 // GetAll is a helper method to define mock.On call
-func (_e *RepositoryInterface_Expecter) GetAll() *RepositoryInterface_GetAll_Call {
-	return &RepositoryInterface_GetAll_Call{Call: _e.mock.On("GetAll")}
+//   - table string
+func (_e *RepositoryInterface_Expecter) GetAll(table interface{}) *RepositoryInterface_GetAll_Call {
+	return &RepositoryInterface_GetAll_Call{Call: _e.mock.On("GetAll", table)}
 }
 
-func (_c *RepositoryInterface_GetAll_Call) Run(run func()) *RepositoryInterface_GetAll_Call {
+func (_c *RepositoryInterface_GetAll_Call) Run(run func(table string)) *RepositoryInterface_GetAll_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run()
+		run(args[0].(string))
 	})
 	return _c
 }
@@ -166,7 +167,7 @@ func (_c *RepositoryInterface_GetAll_Call) Return(_a0 *sql.Rows, _a1 error) *Rep
 	return _c
 }
 
-func (_c *RepositoryInterface_GetAll_Call) RunAndReturn(run func() (*sql.Rows, error)) *RepositoryInterface_GetAll_Call {
+func (_c *RepositoryInterface_GetAll_Call) RunAndReturn(run func(string) (*sql.Rows, error)) *RepositoryInterface_GetAll_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -230,11 +231,11 @@ func (_c *RepositoryInterface_GetById_Call) RunAndReturn(run func(string, int) (
 	return _c
 }
 
-// Query provides a mock function with given fields: query, values
-func (_m *RepositoryInterface) Query(query string, values ...interface{}) (*sql.Rows, error) {
+// Query provides a mock function with given fields: q, args
+func (_m *RepositoryInterface) Query(q string, args ...interface{}) (*sql.Rows, error) {
 	var _ca []interface{}
-	_ca = append(_ca, query)
-	_ca = append(_ca, values...)
+	_ca = append(_ca, q)
+	_ca = append(_ca, args...)
 	ret := _m.Called(_ca...)
 
 	if len(ret) == 0 {
@@ -244,10 +245,10 @@ func (_m *RepositoryInterface) Query(query string, values ...interface{}) (*sql.
 	var r0 *sql.Rows
 	var r1 error
 	if rf, ok := ret.Get(0).(func(string, ...interface{}) (*sql.Rows, error)); ok {
-		return rf(query, values...)
+		return rf(q, args...)
 	}
 	if rf, ok := ret.Get(0).(func(string, ...interface{}) *sql.Rows); ok {
-		r0 = rf(query, values...)
+		r0 = rf(q, args...)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*sql.Rows)
@@ -255,7 +256,7 @@ func (_m *RepositoryInterface) Query(query string, values ...interface{}) (*sql.
 	}
 
 	if rf, ok := ret.Get(1).(func(string, ...interface{}) error); ok {
-		r1 = rf(query, values...)
+		r1 = rf(q, args...)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -269,14 +270,14 @@ type RepositoryInterface_Query_Call struct {
 }
 
 // Query is a helper method to define mock.On call
-//   - query string
-//   - values ...interface{}
-func (_e *RepositoryInterface_Expecter) Query(query interface{}, values ...interface{}) *RepositoryInterface_Query_Call {
+//   - q string
+//   - args ...interface{}
+func (_e *RepositoryInterface_Expecter) Query(q interface{}, args ...interface{}) *RepositoryInterface_Query_Call {
 	return &RepositoryInterface_Query_Call{Call: _e.mock.On("Query",
-		append([]interface{}{query}, values...)...)}
+		append([]interface{}{q}, args...)...)}
 }
 
-func (_c *RepositoryInterface_Query_Call) Run(run func(query string, values ...interface{})) *RepositoryInterface_Query_Call {
+func (_c *RepositoryInterface_Query_Call) Run(run func(q string, args ...interface{})) *RepositoryInterface_Query_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		variadicArgs := make([]interface{}, len(args)-1)
 		for i, a := range args[1:] {
@@ -299,11 +300,11 @@ func (_c *RepositoryInterface_Query_Call) RunAndReturn(run func(string, ...inter
 	return _c
 }
 
-// SingleQuery provides a mock function with given fields: query, values
-func (_m *RepositoryInterface) SingleQuery(query string, values ...interface{}) (*sql.Row, error) {
+// SingleQuery provides a mock function with given fields: q, args
+func (_m *RepositoryInterface) SingleQuery(q string, args ...interface{}) (*sql.Row, error) {
 	var _ca []interface{}
-	_ca = append(_ca, query)
-	_ca = append(_ca, values...)
+	_ca = append(_ca, q)
+	_ca = append(_ca, args...)
 	ret := _m.Called(_ca...)
 
 	if len(ret) == 0 {
@@ -313,10 +314,10 @@ func (_m *RepositoryInterface) SingleQuery(query string, values ...interface{}) 
 	var r0 *sql.Row
 	var r1 error
 	if rf, ok := ret.Get(0).(func(string, ...interface{}) (*sql.Row, error)); ok {
-		return rf(query, values...)
+		return rf(q, args...)
 	}
 	if rf, ok := ret.Get(0).(func(string, ...interface{}) *sql.Row); ok {
-		r0 = rf(query, values...)
+		r0 = rf(q, args...)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*sql.Row)
@@ -324,7 +325,7 @@ func (_m *RepositoryInterface) SingleQuery(query string, values ...interface{}) 
 	}
 
 	if rf, ok := ret.Get(1).(func(string, ...interface{}) error); ok {
-		r1 = rf(query, values...)
+		r1 = rf(q, args...)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -338,14 +339,14 @@ type RepositoryInterface_SingleQuery_Call struct {
 }
 
 // SingleQuery is a helper method to define mock.On call
-//   - query string
-//   - values ...interface{}
-func (_e *RepositoryInterface_Expecter) SingleQuery(query interface{}, values ...interface{}) *RepositoryInterface_SingleQuery_Call {
+//   - q string
+//   - args ...interface{}
+func (_e *RepositoryInterface_Expecter) SingleQuery(q interface{}, args ...interface{}) *RepositoryInterface_SingleQuery_Call {
 	return &RepositoryInterface_SingleQuery_Call{Call: _e.mock.On("SingleQuery",
-		append([]interface{}{query}, values...)...)}
+		append([]interface{}{q}, args...)...)}
 }
 
-func (_c *RepositoryInterface_SingleQuery_Call) Run(run func(query string, values ...interface{})) *RepositoryInterface_SingleQuery_Call {
+func (_c *RepositoryInterface_SingleQuery_Call) Run(run func(q string, args ...interface{})) *RepositoryInterface_SingleQuery_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		variadicArgs := make([]interface{}, len(args)-1)
 		for i, a := range args[1:] {

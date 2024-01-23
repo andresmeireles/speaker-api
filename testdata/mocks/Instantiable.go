@@ -21,7 +21,7 @@ func (_m *Instantiable) EXPECT() *Instantiable_Expecter {
 }
 
 // New provides a mock function with given fields: s
-func (_m *Instantiable) New(s servicelocator.ServiceLocator) interface{} {
+func (_m *Instantiable) New(s servicelocator.SL) interface{} {
 	ret := _m.Called(s)
 
 	if len(ret) == 0 {
@@ -29,7 +29,7 @@ func (_m *Instantiable) New(s servicelocator.ServiceLocator) interface{} {
 	}
 
 	var r0 interface{}
-	if rf, ok := ret.Get(0).(func(servicelocator.ServiceLocator) interface{}); ok {
+	if rf, ok := ret.Get(0).(func(servicelocator.SL) interface{}); ok {
 		r0 = rf(s)
 	} else {
 		if ret.Get(0) != nil {
@@ -51,9 +51,9 @@ func (_e *Instantiable_Expecter) New(s interface{}) *Instantiable_New_Call {
 	return &Instantiable_New_Call{Call: _e.mock.On("New", s)}
 }
 
-func (_c *Instantiable_New_Call) Run(run func(s servicelocator.ServiceLocator)) *Instantiable_New_Call {
+func (_c *Instantiable_New_Call) Run(run func(s servicelocator.SL)) *Instantiable_New_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(servicelocator.ServiceLocator))
+		run(args[0].(servicelocator.SL))
 	})
 	return _c
 }
@@ -63,7 +63,7 @@ func (_c *Instantiable_New_Call) Return(_a0 interface{}) *Instantiable_New_Call 
 	return _c
 }
 
-func (_c *Instantiable_New_Call) RunAndReturn(run func(servicelocator.ServiceLocator) interface{}) *Instantiable_New_Call {
+func (_c *Instantiable_New_Call) RunAndReturn(run func(servicelocator.SL) interface{}) *Instantiable_New_Call {
 	_c.Call.Return(run)
 	return _c
 }

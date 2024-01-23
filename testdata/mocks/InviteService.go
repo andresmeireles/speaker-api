@@ -280,9 +280,9 @@ func (_c *InviteService_RememberInvite_Call) RunAndReturn(run func(int) error) *
 	return _c
 }
 
-// RemoveInvite provides a mock function with given fields: inviteId
-func (_m *InviteService) RemoveInvite(inviteId int) error {
-	ret := _m.Called(inviteId)
+// RemoveInvite provides a mock function with given fields: id
+func (_m *InviteService) RemoveInvite(id int) error {
+	ret := _m.Called(id)
 
 	if len(ret) == 0 {
 		panic("no return value specified for RemoveInvite")
@@ -290,7 +290,7 @@ func (_m *InviteService) RemoveInvite(inviteId int) error {
 
 	var r0 error
 	if rf, ok := ret.Get(0).(func(int) error); ok {
-		r0 = rf(inviteId)
+		r0 = rf(id)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -304,12 +304,12 @@ type InviteService_RemoveInvite_Call struct {
 }
 
 // RemoveInvite is a helper method to define mock.On call
-//   - inviteId int
-func (_e *InviteService_Expecter) RemoveInvite(inviteId interface{}) *InviteService_RemoveInvite_Call {
-	return &InviteService_RemoveInvite_Call{Call: _e.mock.On("RemoveInvite", inviteId)}
+//   - id int
+func (_e *InviteService_Expecter) RemoveInvite(id interface{}) *InviteService_RemoveInvite_Call {
+	return &InviteService_RemoveInvite_Call{Call: _e.mock.On("RemoveInvite", id)}
 }
 
-func (_c *InviteService_RemoveInvite_Call) Run(run func(inviteId int)) *InviteService_RemoveInvite_Call {
+func (_c *InviteService_RemoveInvite_Call) Run(run func(id int)) *InviteService_RemoveInvite_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		run(args[0].(int))
 	})

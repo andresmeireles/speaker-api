@@ -4,16 +4,16 @@ import (
 	"testing"
 
 	"github.com/andresmeireles/speaker/internal/cli/commands"
-	"github.com/andresmeireles/speaker/testdata"
+	"github.com/andresmeireles/speaker/testdata/mocks"
 )
 
-func TestMain(m *testing.M) {
-	testdata.SetupDatabase(m)
-}
-
 func TestMigrateUp(t *testing.T) {
+	// arrange
+	migration := mocks.Migration{}
+	migration.EXPECT().Up().Return(nil)
+
 	// act
-	err := commands.MigrateUp().Execute()
+	err := commands.MigrateUp(&migration).Execute()
 
 	// assert
 	if err != nil {

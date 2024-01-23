@@ -8,7 +8,6 @@ import (
 
 	"github.com/andresmeireles/speaker/internal/codesender"
 	"github.com/andresmeireles/speaker/internal/tools"
-	"github.com/andresmeireles/speaker/internal/tools/servicelocator"
 	"github.com/andresmeireles/speaker/internal/user"
 	"github.com/golang-jwt/jwt/v5"
 )
@@ -36,20 +35,6 @@ func NewAction(
 		userRepository:   userRepository,
 		email:            email,
 		codeSenderAction: codeSenderAction,
-	}
-}
-
-func (a Actions) New(s servicelocator.ServiceLocator) any {
-	ra := servicelocator.Get[AuthRepository](s)
-	ru := servicelocator.Get[user.Repository](s)
-	e := servicelocator.Get[*tools.Email](s)
-	cs := servicelocator.Get[codesender.Actions](s)
-
-	return Actions{
-		repository:       ra,
-		userRepository:   ru,
-		email:            e,
-		codeSenderAction: cs,
 	}
 }
 

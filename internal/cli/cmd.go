@@ -12,8 +12,7 @@ import (
 
 func Commands(sl servicelocator.ServiceLocator) {
 	cmd := &cobra.Command{}
-
-	c := []any{
+	commands := []any{
 		commands.MigrateUp,
 		commands.MigrateDown,
 		commands.SetAppKey,
@@ -21,13 +20,13 @@ func Commands(sl servicelocator.ServiceLocator) {
 		commands.ListUser,
 		commands.ShowNumberOfUnusedDependencies,
 	}
-	cds := []*cobra.Command{}
+	resolvedCommands := []*cobra.Command{}
 
-	for _, v := range c {
-		cds = append(cds, resolve(sl, v))
+	for _, v := range commands {
+		resolvedCommands = append(resolvedCommands, resolve(sl, v))
 	}
 
-	cmd.AddCommand(cds...)
+	cmd.AddCommand(resolvedCommands...)
 
 	err := cmd.Execute()
 	if err != nil {
@@ -60,5 +59,10 @@ func resolve(sl servicelocator.ServiceLocator, commandFunction any) *cobra.Comma
 		commandParams = append(commandParams, reflect.ValueOf(param))
 	}
 
-	return reflect.ValueOf(commandFunction).Call(commandParams)[0].Interface().(*cobra.Command)
+	r, ok := reflect.ValueOf(commandFunction).Call(commandParams)[0].Interface().(*cobra.Command)
+	if !ok {
+		panic("command function must return a *cobra.Command: " + commandKind.String())
+	}
+
+	return r
 }

@@ -11,14 +11,14 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func createDI() servicelocator.ServiceLocator {
+func createDI() servicelocator.SL {
 	sl := servicelocator.NewServiceLocator()
 	internal.DIContainer(sl)
 
 	return *sl
 }
 
-func showDependencyUses(sl servicelocator.ServiceLocator) map[string]int {
+func showDependencyUses(sl servicelocator.SL) map[string]int {
 	deps := map[string]int{}
 	implementations := []any{}
 

@@ -25,7 +25,7 @@ func AddDependency[T any](impementation any) Dependency {
 	}
 }
 
-func Set(sl *ServiceLocator, dependencies []Dependency) {
+func Set(sl ServiceLocator, dependencies []Dependency) {
 	deps := dependencies
 	maxIndex := len(deps)
 	index := 0
@@ -67,7 +67,7 @@ func Set(sl *ServiceLocator, dependencies []Dependency) {
 	}
 }
 
-func resolve(sl *ServiceLocator, dep Dependency) error {
+func resolve(sl ServiceLocator, dep Dependency) error {
 	if os.Getenv("APP_MODE") == "dev" {
 		fmt.Println("set", dep.Name)
 	}

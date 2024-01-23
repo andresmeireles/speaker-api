@@ -4,6 +4,7 @@ import (
 	"os"
 
 	"github.com/andresmeireles/speaker/internal/auth"
+	"github.com/andresmeireles/speaker/internal/cli/auxcmd"
 	"github.com/andresmeireles/speaker/internal/codesender"
 	"github.com/andresmeireles/speaker/internal/config"
 	"github.com/andresmeireles/speaker/internal/db"
@@ -15,7 +16,7 @@ import (
 	"github.com/andresmeireles/speaker/internal/user"
 )
 
-func DIContainer(sl *servicelocator.ServiceLocator) {
+func DIContainer(sl *servicelocator.SL) {
 	injections := []servicelocator.Dependency{
 		// with no deps
 		servicelocator.AddDependency[db.Connection](db.NewConnection),
@@ -54,6 +55,9 @@ func DIContainer(sl *servicelocator.ServiceLocator) {
 		servicelocator.AddDependency[config.ConfigController](config.NewController),
 		servicelocator.AddDependency[auth.AuthController](auth.NewController),
 		servicelocator.AddDependency[invite.InviteController](invite.NewController),
+
+		// cli cmd
+		servicelocator.AddDependency[auxcmd.Migration](auxcmd.NewMigration),
 	}
 
 	servicelocator.Set(sl, injections)

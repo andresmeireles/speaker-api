@@ -33,5 +33,5 @@ func main() {
 
 	sl := servicelocator.NewServiceLocator()
 	internal.DIContainer(sl)
-	router.Run(os.Getenv("APP_PORT"), *sl)
+	router.Run(os.Getenv("APP_PORT"), sl)
 }

@@ -10,10 +10,6 @@ package auth_test
 // 	"github.com/golang-jwt/jwt/v5"
 // )
 
-// func TestMain(m *testing.M) {
-// 	testdata.SetupDatabase(m)
-// }
-
 // func createJwt(expireDate int64) string {
 // 	tk := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 // 		"iss": "andres.meireles@email.com",

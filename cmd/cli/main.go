@@ -31,5 +31,5 @@ func main() {
 	sl := servicelocator.NewServiceLocator()
 	internal.DIContainer(sl)
 
-	cli.Commands(*sl)
+	cli.Commands(sl)
 }

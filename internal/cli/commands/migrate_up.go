@@ -1,72 +1,21 @@
 package commands
 
 import (
-	"database/sql"
 	"fmt"
 	"os"
 
-	"github.com/andresmeireles/speaker/internal/db"
+	"github.com/andresmeireles/speaker/internal/cli/auxcmd"
 	"github.com/spf13/cobra"
 
 	"github.com/golang-migrate/migrate/v4"
-	migrateDatabase "github.com/golang-migrate/migrate/v4/database"
-	"github.com/golang-migrate/migrate/v4/database/postgres"
-	"github.com/golang-migrate/migrate/v4/database/sqlite3"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 )
 
-func migrationSource() string {
-	return "file://" + os.Getenv("DB_MIGRATIONS_PATH")
-}
-
-func migrationSetup() *migrate.Migrate {
-	conn := db.NewConnection()
-	db, err := conn.GetDB()
-
-	if err != nil {
-		panic(err)
-	}
-
-	drive := os.Getenv("DB_DRIVER")
-	driver, err := getDrive(drive, db)
-
-	if err != nil {
-		panic(err)
-	}
-
-	migrationSource := migrationSource()
-	migration, err := migrate.NewWithDatabaseInstance(
-		migrationSource,
-		drive,
-		driver,
-	)
-
-	if err != nil {
-		fmt.Println("error!")
-		panic(err)
-	}
-
-	return migration
-}
-
-func getDrive(drive string, conn *sql.DB) (migrateDatabase.Driver, error) {
-	switch drive {
-	case "postgres":
-		return postgres.WithInstance(conn, &postgres.Config{})
-	case "sqlite3":
-		return sqlite3.WithInstance(conn, &sqlite3.Config{})
-	default:
-		panic("driver " + drive + " not supported")
-	}
-}
-
-func MigrateUp() *cobra.Command {
+func MigrateUp(migration auxcmd.Migration) *cobra.Command {
 	return &cobra.Command{
 		Use:   "mup",
 		Short: "Migrate up",
 		Run: func(cmd *cobra.Command, args []string) {
-			migration := migrationSetup()
-
 			err := migration.Up()
 
 			if err == migrate.ErrNoChange {

@@ -7,7 +7,6 @@ import (
 
 	"github.com/andresmeireles/speaker/internal/codesender"
 	"github.com/andresmeireles/speaker/internal/tools/responses"
-	"github.com/andresmeireles/speaker/internal/tools/servicelocator"
 	"github.com/andresmeireles/speaker/internal/user"
 	web "github.com/andresmeireles/speaker/internal/web/decoder"
 )
@@ -23,18 +22,6 @@ func NewController(action Actions, codeSenderActions codesender.Actions, userRep
 		actions:           action,
 		codesenderActions: codeSenderActions,
 		userRepository:    userRepo,
-	}
-}
-
-func (c AuthController) New(s servicelocator.ServiceLocator) any {
-	c.actions = servicelocator.Get[Actions](s)
-	c.codesenderActions = servicelocator.Get[codesender.Actions](s)
-	c.userRepository = servicelocator.Get[user.Repository](s)
-
-	return AuthController{
-		actions:           c.actions,
-		codesenderActions: c.codesenderActions,
-		userRepository:    c.userRepository,
 	}
 }
 

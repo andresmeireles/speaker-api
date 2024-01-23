@@ -53,6 +53,5 @@ func postgres() string {
 
 func sqlite() string {
 	// create a sqlite3 in memory db connection string
-	// return ":memory:"
-	return "sdb.db"
+	return ":memory:"
 }

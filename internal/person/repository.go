@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/andresmeireles/speaker/internal/repository"
-	"github.com/andresmeireles/speaker/internal/tools/servicelocator"
 )
 
 type PersonRepository interface {
@@ -23,12 +22,6 @@ type Repository struct {
 func NewRepository(repository repository.Repository) PersonRepository {
 	return Repository{
 		repository: repository,
-	}
-}
-
-func (r Repository) New(s servicelocator.ServiceLocator) any {
-	return Repository{
-		repository: servicelocator.Get[repository.Repository](s),
 	}
 }
 

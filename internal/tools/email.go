@@ -20,7 +20,7 @@ type Email struct {
 	from     string
 }
 
-func (e *Email) New(s servicelocator.ServiceLocator) any {
+func (e *Email) New(s servicelocator.SL) any {
 	host := os.Getenv("SMTP_HOST")
 	port := os.Getenv("SMTP_PORT")
 	password := os.Getenv("SMTP_PASSWORD")

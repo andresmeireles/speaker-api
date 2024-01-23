@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/andresmeireles/speaker/internal/tools/servicelocator"
 	web "github.com/andresmeireles/speaker/internal/web/decoder"
 )
 
@@ -15,13 +14,6 @@ type ConfigController struct {
 
 func NewController(repo ConfigRepository, action Actions) ConfigController {
 	return ConfigController{repo, action}
-}
-
-func (c ConfigController) New(s servicelocator.ServiceLocator) any {
-	return ConfigController{
-		configRepository: servicelocator.Get[Repository](s),
-		actions:          servicelocator.Get[Actions](s),
-	}
 }
 
 func (c ConfigController) WriteConfig(w http.ResponseWriter, r *http.Request) {
