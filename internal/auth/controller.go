@@ -2,11 +2,12 @@ package auth
 
 import (
 	"encoding/json"
-	"log/slog"
+	"fmt"
 	"net/http"
 
 	"github.com/andresmeireles/speaker/internal/codesender"
-	"github.com/andresmeireles/speaker/internal/tools/servicelocator"
+	"github.com/andresmeireles/speaker/internal/tools/env"
+	"github.com/andresmeireles/speaker/internal/tools/responses"
 	"github.com/andresmeireles/speaker/internal/user"
 	web "github.com/andresmeireles/speaker/internal/web/decoder"
 )
@@ -14,84 +15,67 @@ import (
 type AuthController struct {
 	actions           Actions
 	codesenderActions codesender.Actions
-	userRepository    user.UserRepository
+	userRepository    user.Repository
 }
 
-func (c AuthController) New(s servicelocator.ServiceLocator) any {
-	c.actions = servicelocator.Get[Actions](s)
-	c.codesenderActions = servicelocator.Get[codesender.Actions](s)
-	c.userRepository = servicelocator.Get[user.UserRepository](s)
-
+func NewController(action Actions, codeSenderActions codesender.Actions, userRepo user.Repository) AuthController {
 	return AuthController{
-		actions:           c.actions,
-		codesenderActions: c.codesenderActions,
-		userRepository:    c.userRepository,
+		actions:           action,
+		codesenderActions: codeSenderActions,
+		userRepository:    userRepo,
 	}
 }
 
 func (c AuthController) ReceiveEmail(w http.ResponseWriter, r *http.Request) {
 	email, err := web.DecodePostBody[EmailForm](r.Body)
 	if err != nil {
-		slog.Error("Failed to decode email", err)
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("error"))
+		responses.DecodeError(w, err)
 
 		return
 	}
 
 	hasEmail := c.actions.HasEmail(email.Email)
 	if !hasEmail {
-		slog.Error("Email not found", "email", email.Email)
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("email not found"))
+		responses.BadResponse(w, fmt.Errorf("email %s not found", email.Email))
 
 		return
 	}
 
 	err = c.actions.SendCode(email.Email)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(err.Error()))
+		responses.BadResponse(w, err)
 
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("Validation code was send to email"))
+	responses.Accepted(w, []byte("Code sent"))
 }
 
 func (c AuthController) ReceiveCode(w http.ResponseWriter, r *http.Request) {
 	form, err := web.DecodePostBody[CodeForm](r.Body)
 	if err != nil {
-		slog.Error("Failed to decode code", err)
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("error"))
+		responses.DecodeError(w, err)
 
 		return
 	}
 
 	err = c.codesenderActions.VerifyCode(form.Email, form.Code)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(err.Error()))
+		responses.BadResponse(w, err)
 
 		return
 	}
 
 	user, err := c.userRepository.GetByEmail(form.Email)
 	if err != nil {
-		slog.Error("Failed to get user", err)
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(err.Error()))
+		responses.BadResponse(w, err)
 
 		return
 	}
 
-	jwt, err := c.actions.CreateJWT(user)
+	jwt, err := c.actions.CreateJWT(user, form.Remember)
 	if err != nil {
-		slog.Error("Failed to create jwt", err)
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(err.Error()))
+		responses.BadResponse(w, err)
 
 		return
 	}
@@ -103,35 +87,46 @@ func (c AuthController) ReceiveCode(w http.ResponseWriter, r *http.Request) {
 	responseJson, err := json.Marshal(response)
 
 	if err != nil {
-		slog.Error("Failed to marshal response", err)
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(err.Error()))
+		responses.BadResponse(w, err)
 
 		return
 	}
 
-	w.WriteHeader(http.StatusCreated)
-	w.Write(responseJson)
+	responses.Accepted(w, responseJson)
 }
 
 func (c AuthController) Logout(w http.ResponseWriter, r *http.Request) {
 	userId, ok := r.Context().Value("user_id").(int)
 	if !ok {
-		w.WriteHeader(http.StatusUnauthorized)
-		w.Write([]byte("Unauthorized"))
+		responses.Unauthorized(w, fmt.Errorf("invalid token"))
 
 		return
 	}
 
 	err := c.actions.Logout(userId)
 	if err != nil {
-		slog.Error("Failed to logout", err)
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(err.Error()))
+		responses.BadResponse(w, err)
 
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("Logged out"))
+	responses.Ok(w, []byte("Logged out"))
+}
+
+func (c AuthController) DevAuth(w http.ResponseWriter, r *http.Request) {
+	isDev := env.IsDev()
+	if !isDev {
+		responses.BadResponse(w, fmt.Errorf("not in dev mode"))
+
+		return
+	}
+
+	auth, err := c.actions.CreateJWT(user.User{Id: 1, Email: "g6oRz@example.com"}, false)
+	if err != nil {
+		responses.BadResponse(w, err)
+
+		return
+	}
+
+	responses.Created(w, []byte(auth.Hash))
 }

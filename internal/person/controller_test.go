@@ -38,8 +38,10 @@ func TestController(t *testing.T) {
 			t.Fatalf("handler returned wrong status code: got %v want %v", status, http.StatusOK)
 		}
 
-		if recorder.Body.String() != "Person created" {
-			t.Errorf("handler returned unexpected body: got %v want %v", recorder.Body.String(), "Person created")
+		body := "Person successfully created"
+
+		if recorder.Body.String() != body {
+			t.Errorf("handler returned unexpected body: got %v want %v", recorder.Body.String(), body)
 		}
 	})
 
@@ -61,12 +63,14 @@ func TestController(t *testing.T) {
 		handler.ServeHTTP(recorder, request)
 
 		// assert
-		if status := recorder.Code; status != 202 {
+		if status := recorder.Code; status != http.StatusOK {
 			t.Fatalf("handler returned wrong status code: got %v want %v", status, http.StatusOK)
 		}
 
-		if recorder.Body.String() != "removed person" {
-			t.Errorf("handler returned unexpected body: got %v want %v", recorder.Body.String(), "Person created")
+		body := "Person successfully deleted"
+
+		if recorder.Body.String() != body {
+			t.Errorf("handler returned unexpected body: got %v want %v", recorder.Body.String(), body)
 		}
 	})
 }

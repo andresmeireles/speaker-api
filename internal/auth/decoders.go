@@ -5,6 +5,7 @@ type EmailForm struct {
 }
 
 type CodeForm struct {
-	Code  string `json:"code"`
-	Email string `json:"email"`
+	Code     string `json:"code"`
+	Email    string `json:"email"`
+	Remember bool   `json:"remember"`
 }

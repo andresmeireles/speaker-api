@@ -6,24 +6,29 @@ import (
 	"log/slog"
 
 	"github.com/andresmeireles/speaker/internal/repository"
-	"github.com/andresmeireles/speaker/internal/tools/servicelocator"
 )
 
-type UserRepository struct {
+type UserRepository interface {
+	Add(user User) error
+	GetById(id int) (User, error)
+	GetByEmail(email string) (User, error)
+}
+
+type Repository struct {
 	repository repository.Repository
 }
 
-func (u UserRepository) New(s servicelocator.ServiceLocator) any {
-	return UserRepository{
-		repository: servicelocator.Get[repository.Repository](s),
+func NewRepository(repository repository.Repository) Repository {
+	return Repository{
+		repository: repository,
 	}
 }
 
-func (u UserRepository) Add(user User) error {
+func (u Repository) Add(user User) error {
 	return u.repository.Add(user)
 }
 
-func (u UserRepository) GetByEmail(email string) (User, error) {
+func (u Repository) GetByEmail(email string) (User, error) {
 	row, err := u.repository.SingleQuery(
 		"SELECT * FROM users WHERE email = $1 LIMIT 1",
 		email,
@@ -50,7 +55,7 @@ func (u UserRepository) GetByEmail(email string) (User, error) {
 	return *user, nil
 }
 
-func (r UserRepository) GetById(id int) (User, error) {
+func (r Repository) GetById(id int) (User, error) {
 	user := new(User)
 	row, err := r.repository.GetById(user.Table(), id)
 

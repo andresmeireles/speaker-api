@@ -1,0 +1,2 @@
+ALTER TABLE invites DROP CONSTRAINT ck_status;
+ALTER TABLE invites DROP COLUMN status;

@@ -9,39 +9,46 @@ import (
 
 	"github.com/andresmeireles/speaker/internal/config"
 	"github.com/andresmeireles/speaker/internal/person"
-	"github.com/andresmeireles/speaker/internal/tools/servicelocator"
 )
 
-type Actions struct {
+type InviteService interface {
+	ParseInviteWithTemplate(inviteId int) (string, error)
+	ParseRememberMessage(inviteId int) (string, error)
+	CreateInvite(inviteData InvitePost) (Invite, error)
+	RemoveInvite(id int) error
+	AcceptInvite(inviteId int) error
+	RememberInvite(inviteId int) error
+	SetDoneStatus(inviteId int, done bool) error
+	UpdateInvite(updateInviteData UpdateInviteData, inviteId int) error
+	Reject(inviteId int) error
+}
+
+type Service struct {
 	inviteRepository InviteRepository
 	personRepository person.PersonRepository
 	configRepository config.ConfigRepository
 }
 
-func (a Actions) New(s servicelocator.ServiceLocator) any {
-	inviteRepository := servicelocator.Get[InviteRepository](s)
-	personRepository := servicelocator.Get[person.PersonRepository](s)
-	configRepository := servicelocator.Get[config.ConfigRepository](s)
-
-	return Actions{
+func NewAction(
+	inviteRepository InviteRepository,
+	personRepository person.PersonRepository,
+	configRepository config.ConfigRepository,
+) Service {
+	return Service{
 		inviteRepository: inviteRepository,
 		personRepository: personRepository,
 		configRepository: configRepository,
 	}
 }
 
-func (a Actions) ParseInviteWithTemplate(inviteId int) (string, error) {
+func (a Service) ParseInviteWithTemplate(inviteId int) (string, error) {
 	invite, err := a.inviteRepository.GetById(inviteId)
 	if err != nil {
-		slog.Error("error when get invite", err)
-
 		return "", err
 	}
 
 	config, err := a.configRepository.GetByName("template")
 	if err != nil {
-		slog.Error("error when get config", err)
-
 		return "", err
 	}
 
@@ -50,7 +57,15 @@ func (a Actions) ParseInviteWithTemplate(inviteId int) (string, error) {
 	return inviteText, nil
 }
 
-func (a Actions) ParseRememberMessage(inviteId int) (string, error) {
+// parseRememberMessage parses the remember message.
+//
+// Parameter(s): inviteId int
+//
+// Return type(s):
+//
+// string
+// error
+func (a Service) ParseRememberMessage(inviteId int) (string, error) {
 	invite, err := a.inviteRepository.GetById(inviteId)
 	if err != nil {
 		slog.Error("error when get invite", err)
@@ -81,13 +96,27 @@ func parseMessage(message string, invite Invite) string {
 	return parsedMessage
 }
 
-func (a Actions) CreateInvite(
-	inviteData InvitePost,
-) (Invite, error) {
+// CreateInvite creates an invite using the provided invite data.
+//
+// Parameter(s):
+//
+//	inviteData InvitePost
+//
+// Return type(s):
+//
+//	Invite
+//	error
+func (a Service) CreateInvite(inviteData InvitePost) (Invite, error) {
+	if inviteData.Theme == "" {
+		return Invite{}, errors.New("theme must be not empty")
+	}
+
+	if inviteData.Time <= 0 {
+		return Invite{}, errors.New("time must be greater than 0")
+	}
+
 	personEntity, err := a.personRepository.GetById(inviteData.PersonId)
 	if err != nil {
-		slog.Error("Error on get person", err)
-
 		return Invite{}, err
 	}
 
@@ -95,8 +124,6 @@ func (a Actions) CreateInvite(
 	date, err := time.Parse(layout, inviteData.Date)
 
 	if err != nil {
-		slog.Error("Error on parse", err)
-
 		return Invite{}, err
 	}
 
@@ -110,33 +137,27 @@ func (a Actions) CreateInvite(
 	err = a.inviteRepository.Add(iv)
 
 	if err != nil {
-		slog.Error("Error", err)
-
 		return Invite{}, err
 	}
 
 	return iv, nil
 }
 
-func RemoveInvite(id int, repository InviteRepository) error {
-	invite, err := repository.GetById(id)
+func (a Service) RemoveInvite(id int) error {
+	invite, err := a.inviteRepository.GetById(id)
 	if err != nil {
-		slog.Error("error on delete invite, when get invite by id", "invite id", id, err)
-
 		return err
 	}
 
-	return repository.Delete(*invite)
+	return a.inviteRepository.Delete(*invite)
 }
 
-func (a Actions) UpdateInvite(
+func (a Service) UpdateInvite(
 	updateInviteData UpdateInviteData,
 	inviteId int,
 ) error {
 	invite, err := a.inviteRepository.GetById(inviteId)
 	if err != nil {
-		slog.Error("error when get id", err)
-
 		return err
 	}
 
@@ -172,38 +193,42 @@ func validateInviteData(inviteData InvitePost) error {
 	return nil
 }
 
-func (a Actions) acceptInvite(inviteId int) error {
-	_, err := a.inviteRepository.GetById(inviteId)
-	if err != nil {
-		slog.Error("error on accept invite, when get invite by id", "invite id", inviteId, err)
-
-		return err
+func (a Service) SetDoneStatus(inviteId int, done bool) error {
+	d := STATUS_DONE
+	if !done {
+		d = STATUS_NOT_DONE
 	}
 
-	acceptQuery := "UPDATE invites SET accepted = true WHERE id = $1;"
-	_, err = a.inviteRepository.Query(acceptQuery, inviteId)
-
-	if err != nil {
-		slog.Error("error on accept invite, when get invite by id;", "invite id", inviteId, err)
-	}
-
-	return err
+	return a.updateStatus(inviteId, d)
 }
 
-func (a Actions) rememberInvite(inviteId int) error {
-	_, err := a.inviteRepository.GetById(inviteId)
-	if err != nil {
-		slog.Error("error on accept invite, when get invite by id", "invite id", inviteId, err)
+func (a Service) AcceptInvite(inviteId int) error {
+	return a.updateStatus(inviteId, STATUS_CONFIRMED)
+}
 
+func (a Service) RememberInvite(inviteId int) error {
+	return a.updateStatus(inviteId, STATUS_REMEMBERED)
+}
+
+func (a Service) Reject(inviteId int) error {
+	return a.updateStatus(inviteId, STATUS_REJECTED)
+}
+
+// updateStatus updates the status of an invite.
+//
+// Parameters:
+//
+//	inviteId int - the ID of the invite
+//	status int - the new status to update
+//
+// Return type:
+//
+// error
+func (a Service) updateStatus(inviteId int, status int) error {
+	invite, err := a.inviteRepository.GetById(inviteId)
+	if err != nil {
 		return err
 	}
 
-	acceptQuery := "UPDATE invites SET remembered=true WHERE id = $1;"
-	_, err = a.inviteRepository.Query(acceptQuery, inviteId)
-
-	if err != nil {
-		slog.Error("error on accept invite, when get invite by id;", "invite id", inviteId, err)
-	}
-
-	return err
+	return a.inviteRepository.UpdateStatus(*invite, status)
 }

@@ -2,8 +2,6 @@ package person
 
 import (
 	"database/sql"
-
-	"github.com/andresmeireles/speaker/internal/tools/servicelocator"
 )
 
 type ActionsInterface interface {
@@ -12,12 +10,12 @@ type ActionsInterface interface {
 }
 
 type Actions struct {
-	repository PersonRepository
+	repository Repository
 }
 
-func (a Actions) New(s servicelocator.ServiceLocator) any {
+func NewAction(repository Repository) Actions {
 	return Actions{
-		repository: servicelocator.Get[PersonRepository](s),
+		repository: repository,
 	}
 }
 

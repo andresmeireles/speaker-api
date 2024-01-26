@@ -1,0 +1,25 @@
+# docker must be up
+@baseUrl = http://localhost:8000
+@token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MDcyNzM4ODEsImlzcyI6ImFuZHJlLm1laXJlbGVzIiwic3ViIjoiZW1haWxAZW1haWwuY29tIn0.jxbBPCIdX-49FbKgO91DNzidah6o8kIdmg-za4qVNGY"
+
+GET {{baseUrl}} HTTP/1.1
+
+###
+
+POST {{baseUrl}}/devtoken HTTP/1.1
+Content-Type: application/json
+
+###
+
+# @name createInvite
+POST {{baseUrl}}/invites HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "person_id": 1,
+    "theme": "mastermind",
+    "time": 5,
+    "date": "",
+    "references": "references",
+}

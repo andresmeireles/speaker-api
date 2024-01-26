@@ -4,20 +4,26 @@ import (
 	"fmt"
 
 	"github.com/andresmeireles/speaker/internal/repository"
-	"github.com/andresmeireles/speaker/internal/tools/servicelocator"
 )
 
-type ConfigRepository struct {
-	repository repository.Repository
+type ConfigRepository interface {
+	GetAll() ([]Config, error)
+	GetById(id int) (*Config, error)
+	GetByName(name string) (*Config, error)
+	Add(config Config) error
+	Update(config Config) error
+	Delete(config Config) error
 }
 
-func (c ConfigRepository) New(s servicelocator.ServiceLocator) any {
-	return ConfigRepository{
-		repository: servicelocator.Get[repository.Repository](s),
-	}
+type Repository struct {
+	repository repository.RepositoryInterface
 }
 
-func (c ConfigRepository) GetAll() ([]Config, error) {
+func NewRepository(repository repository.RepositoryInterface) ConfigRepository {
+	return Repository{repository: repository}
+}
+
+func (c Repository) GetAll() ([]Config, error) {
 	rows, err := c.repository.GetAll(Config{}.Table())
 
 	if err != nil {
@@ -38,7 +44,7 @@ func (c ConfigRepository) GetAll() ([]Config, error) {
 	return configs, nil
 }
 
-func (c ConfigRepository) GetById(id int) (*Config, error) {
+func (c Repository) GetById(id int) (*Config, error) {
 	config := new(Config)
 	row, err := c.repository.GetById(config.Table(), id)
 
@@ -53,7 +59,7 @@ func (c ConfigRepository) GetById(id int) (*Config, error) {
 	return config, nil
 }
 
-func (r ConfigRepository) GetByName(name string) (*Config, error) {
+func (r Repository) GetByName(name string) (*Config, error) {
 	config := new(Config)
 	query := fmt.Sprintf("SELECT * FROM %s WHERE name = $1 LIMIT 1", config.Table())
 	result, err := r.repository.SingleQuery(query, name)
@@ -69,7 +75,7 @@ func (r ConfigRepository) GetByName(name string) (*Config, error) {
 	return config, nil
 }
 
-func (c ConfigRepository) Add(config Config) error {
+func (c Repository) Add(config Config) error {
 	err := c.repository.Add(config)
 
 	if err != nil && err.Error() == "pq: duplicate key value violates unique constraint \"configs_name_key\"" {
@@ -79,10 +85,10 @@ func (c ConfigRepository) Add(config Config) error {
 	return err
 }
 
-func (c ConfigRepository) Update(config Config) error {
+func (c Repository) Update(config Config) error {
 	return c.repository.Update(config)
 }
 
-func (c ConfigRepository) Delete(config Config) error {
+func (c Repository) Delete(config Config) error {
 	return c.repository.Delete(config)
 }

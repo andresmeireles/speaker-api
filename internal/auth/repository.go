@@ -6,18 +6,15 @@ import (
 
 	"github.com/andresmeireles/speaker/internal/codesender"
 	"github.com/andresmeireles/speaker/internal/repository"
-	"github.com/andresmeireles/speaker/internal/tools/servicelocator"
 )
 
 type AuthRepository struct {
 	repository repository.Repository
 }
 
-func (r AuthRepository) New(s servicelocator.ServiceLocator) any {
-	re := servicelocator.Get[repository.Repository](s)
-
+func NewRepository(repository repository.Repository) AuthRepository {
 	return AuthRepository{
-		repository: re,
+		repository: repository,
 	}
 }
 

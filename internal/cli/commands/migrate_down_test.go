@@ -4,11 +4,16 @@ import (
 	"testing"
 
 	"github.com/andresmeireles/speaker/internal/cli/commands"
+	"github.com/andresmeireles/speaker/testdata/mocks"
 )
 
 func TestMigrateDown(t *testing.T) {
+	// arrange
+	migration := mocks.Migration{}
+	migration.EXPECT().Down().Return(nil)
+
 	// act
-	err := commands.MigrateDown().Execute()
+	err := commands.MigrateDown(&migration).Execute()
 
 	// assert
 	if err != nil {

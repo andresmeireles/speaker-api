@@ -5,9 +5,7 @@ import (
 )
 
 func Get[T any](service ServiceLocator) T {
-	var instance T
-
-	serviceName := reflect.TypeOf(instance).String()
+	serviceName := reflect.TypeOf((*T)(nil)).Elem().String()
 	s, ok := service.Get(serviceName).(T)
 
 	if !ok {

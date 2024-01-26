@@ -1,55 +1,100 @@
+// TODO: clean this up
 package servicelocator
 
 import (
 	"reflect"
 )
 
-func Set(servicelocator *ServiceLocator, newFunc Instantiable) {
-	if servicelocator == nil {
-		panic("service locator is nil")
-	}
+const MAX_RECURSION = 1000
 
-	service := newFunc.New(*servicelocator)
-	name := reflect.TypeOf(service).String()
-
-	servicelocator.Set(name, service)
+type Dependency struct {
+	Name           string
+	refType        reflect.Type
+	Implementation any
 }
 
-func SetC(injection any, sl *ServiceLocator) {
-	label := reflect.TypeOf(injection).String()
-	hasParameters := reflect.TypeOf(injection).NumField() > 0
+func AddDependency[T any](impementation any) Dependency {
+	name := reflect.TypeOf((*T)(nil)).Elem()
 
-	if !hasParameters {
-		instance := reflect.ValueOf(injection).Call([]reflect.Value{})[0]
-		sl.Set(label, instance.Interface())
-
-		return
+	return Dependency{
+		Name:           name.String(),
+		refType:        name,
+		Implementation: impementation,
 	}
-
-	params := parameters(injection)
-	resolveParams := resolve(params, *sl)
-	resolveInjection := reflect.ValueOf(injection).Call(resolveParams)[0].Interface()
-	sl.Set(label, resolveInjection)
 }
 
-func parameters(injection any) []string {
-	ref := reflect.TypeOf(injection)
-	numFields := ref.NumField()
-	fields := make([]string, numFields)
+func Set(sl ServiceLocator, dependencies []Dependency) {
+	deps := dependencies
+	maxIndex := len(deps)
+	index := 0
+	totalIndex := 0
 
-	for i := 0; i < numFields; i++ {
-		fields[i] = ref.Field(i).Type.String()
+	for len(deps) != 0 {
+		if totalIndex == MAX_RECURSION {
+			panic("max recursion reached")
+		}
+
+		totalIndex++
+
+		if maxIndex == 1 {
+			err := resolve(sl, deps[0])
+			if err != nil {
+				panic("error when create last service " + err.Error())
+			}
+
+			return
+		}
+
+		if index > maxIndex-1 {
+			index = 0
+		}
+
+		err := resolve(sl, deps[index])
+		if err == nil {
+			indexToRemove := index
+			deps = append(deps[:indexToRemove], deps[indexToRemove+1:]...)
+			index = 0
+			maxIndex--
+
+			continue
+		}
+
+		index += 1
 	}
-
-	return fields
 }
 
-func resolve(params []string, sl ServiceLocator) []reflect.Value {
-	values := make([]reflect.Value, len(params))
+func resolve(sl ServiceLocator, dep Dependency) error {
+	ref := reflect.TypeOf(dep.Implementation)
+	numOfParams := ref.NumIn()
 
-	for i, param := range params {
-		values[i] = reflect.ValueOf(sl.Get(param))
+	if numOfParams == 0 {
+		imp := reflect.ValueOf(dep.Implementation).Call([]reflect.Value{})[0]
+		sl.Set(dep.Name, imp.Interface())
+
+		return nil
 	}
 
-	return values
+	values := make([]reflect.Value, 0)
+
+	for i := 0; i < numOfParams; i++ {
+		p := ref.In(i).String()
+		d, e := sl.GetE(p)
+
+		if e != nil {
+			return e
+		}
+
+		values = append(values, reflect.ValueOf(d))
+	}
+
+	imp := reflect.ValueOf(dep.Implementation).Call(values)[0]
+	isInterface := dep.refType.Kind() == reflect.Interface
+
+	if isInterface && !imp.Type().Implements(dep.refType) {
+		panic("service: " + imp.String() + " does not implement " + dep.refType.String())
+	}
+
+	sl.Set(dep.Name, imp.Interface())
+
+	return nil
 }

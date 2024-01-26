@@ -1,19 +1,22 @@
 package repository_test
 
 import (
+	"os"
 	"testing"
 
+	"github.com/andresmeireles/speaker/internal/db"
 	"github.com/andresmeireles/speaker/internal/person"
 	"github.com/andresmeireles/speaker/internal/repository"
-	"github.com/andresmeireles/speaker/testdata"
 )
 
 func TestMain(m *testing.M) {
-	testdata.SetupDatabase(m)
+	os.Setenv("DB_DRIVER", "sqlite3")
 }
 
 func TestAdd(t *testing.T) {
-	r := testdata.GetService[repository.Repository]()
+	r := repository.NewRepository(
+		db.Connection{},
+	)
 
 	t.Run("add register", func(t *testing.T) {
 		// arrange

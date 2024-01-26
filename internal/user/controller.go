@@ -2,40 +2,41 @@ package user
 
 import (
 	"encoding/json"
-	"log/slog"
+	"fmt"
 	"net/http"
 
-	"github.com/andresmeireles/speaker/internal/tools/servicelocator"
+	"github.com/andresmeireles/speaker/internal/tools/responses"
 )
 
 type UserController struct {
-	repository UserRepository
+	repository Repository
 }
 
-func (c UserController) New(s servicelocator.ServiceLocator) any {
-	return UserController{
-		repository: servicelocator.Get[UserRepository](s),
-	}
+func NewController(repository Repository) UserController {
+	return UserController{repository}
 }
 
 func (c UserController) Me(w http.ResponseWriter, r *http.Request) {
-	userId := r.Context().Value("user_id").(int)
-	user, err := c.repository.GetById(userId)
+	userId, ok := r.Context().Value("user_id").(int)
+	if !ok {
+		responses.BadResponse(w, fmt.Errorf("invalid user id"))
 
+		return
+	}
+
+	user, err := c.repository.GetById(userId)
 	if err != nil {
-		slog.Error("No user id on request", err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		responses.BadResponse(w, err)
 
 		return
 	}
 
 	jsonUser, err := json.Marshal(user)
 	if err != nil {
-		slog.Error("Failed to marshal user", err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		responses.BadResponse(w, err)
 
 		return
 	}
 
-	w.Write(jsonUser)
+	responses.Ok(w, jsonUser)
 }

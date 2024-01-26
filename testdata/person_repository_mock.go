@@ -10,7 +10,7 @@ type PersonRepositoryMock struct {
 	mock.Mock
 }
 
-func (m *PersonRepositoryMock) New(s servicelocator.ServiceLocator) any {
+func (m *PersonRepositoryMock) New(s servicelocator.SL) any {
 	args := m.Called(s)
 	return args.Get(0)
 }

@@ -8,31 +8,34 @@ import (
 
 	"github.com/andresmeireles/speaker/internal/codesender"
 	"github.com/andresmeireles/speaker/internal/tools"
-	"github.com/andresmeireles/speaker/internal/tools/servicelocator"
+	"github.com/andresmeireles/speaker/internal/tools/env"
 	"github.com/andresmeireles/speaker/internal/user"
 	"github.com/golang-jwt/jwt/v5"
 )
 
-const HOURS_TO_EXPIRE = 24
+const (
+	HOURS_TO_EXPIRE = 24
+	DAYS_OF_WEEK    = 7
+)
 
 type Actions struct {
 	repository       AuthRepository
-	userRepository   user.UserRepository
+	userRepository   user.Repository
 	email            *tools.Email
 	codeSenderAction codesender.Actions
 }
 
-func (a Actions) New(s servicelocator.ServiceLocator) any {
-	ra := servicelocator.Get[AuthRepository](s)
-	ru := servicelocator.Get[user.UserRepository](s)
-	e := servicelocator.Get[*tools.Email](s)
-	cs := servicelocator.Get[codesender.Actions](s)
-
+func NewAction(
+	repository AuthRepository,
+	userRepository user.Repository,
+	email *tools.Email,
+	codeSenderAction codesender.Actions,
+) Actions {
 	return Actions{
-		repository:       ra,
-		userRepository:   ru,
-		email:            e,
-		codeSenderAction: cs,
+		repository:       repository,
+		userRepository:   userRepository,
+		email:            email,
+		codeSenderAction: codeSenderAction,
 	}
 }
 
@@ -74,19 +77,13 @@ func (a Actions) ValidateJwt(token string) bool {
 	return int64(exp) > time.Now().Unix()
 }
 
-func (a Actions) CreateJWT(user user.User) (Auth, error) {
-	appKey := os.Getenv("APP_KEY")
-	if appKey == "" {
-		return Auth{}, fmt.Errorf("APP_KEY not set")
+func (a Actions) CreateJWT(user user.User, remember bool) (Auth, error) {
+	expireTime := time.Hour * HOURS_TO_EXPIRE
+	if remember {
+		expireTime *= (DAYS_OF_WEEK * 2)
 	}
 
-	jwtToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"iss": "andres.meireles",
-		"sub": user.Email,
-		"exp": time.Now().Add(time.Hour * HOURS_TO_EXPIRE).Unix(),
-	})
-	token, err := jwtToken.SignedString([]byte(appKey))
-
+	token, err := a.createToken("andre.meireles", user.Email, expireTime)
 	if err != nil {
 		return Auth{}, err
 	}
@@ -103,6 +100,26 @@ func (a Actions) CreateJWT(user user.User) (Auth, error) {
 	}
 
 	return newAuth, nil
+}
+
+func (a Actions) createToken(issuer string, email string, expireTime time.Duration) (string, error) {
+	key, err := env.AppKey()
+	if err != nil {
+		return "", err
+	}
+
+	jwtToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"iss": issuer,
+		"sub": email,
+		"exp": time.Now().Add(expireTime).Unix(),
+	})
+	token, err := jwtToken.SignedString([]byte(key))
+
+	if err != nil {
+		return "", err
+	}
+
+	return token, nil
 }
 
 func (a Actions) HasEmail(email string) bool {

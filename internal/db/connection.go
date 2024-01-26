@@ -6,14 +6,13 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/andresmeireles/speaker/internal/tools/servicelocator"
 	_ "github.com/lib/pq"
 	_ "github.com/mattn/go-sqlite3"
 )
 
 type Connection struct{}
 
-func (c Connection) New(_ servicelocator.ServiceLocator) any {
+func NewConnection() Connection {
 	return Connection{}
 }
 
@@ -54,6 +53,5 @@ func postgres() string {
 
 func sqlite() string {
 	// create a sqlite3 in memory db connection string
-	// return ":memory:"
-	return "sdb.db"
+	return ":memory:"
 }

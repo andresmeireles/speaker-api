@@ -5,27 +5,34 @@ import (
 	"fmt"
 
 	"github.com/andresmeireles/speaker/internal/repository"
-	"github.com/andresmeireles/speaker/internal/tools/servicelocator"
 	"github.com/andresmeireles/speaker/internal/user"
 )
 
-type AuthCodeRepository struct {
-	repository     repository.Repository
-	userRepository user.UserRepository
+type CodeSenderRepository interface {
+	Add(authCode AuthCode) error
+	GetById(authCodeId int) (AuthCode, error)
+	GetAll() ([]AuthCode, error)
+	GetByCode(code string) (AuthCode, error)
+	Update(authCode AuthCode) error
 }
 
-func (r AuthCodeRepository) New(s servicelocator.ServiceLocator) any {
-	return AuthCodeRepository{
-		repository:     servicelocator.Get[repository.Repository](s),
-		userRepository: servicelocator.Get[user.UserRepository](s),
+type Repository struct {
+	repository     repository.Repository
+	userRepository user.Repository
+}
+
+func NewRepository(repository repository.Repository, userRepository user.Repository) Repository {
+	return Repository{
+		repository:     repository,
+		userRepository: userRepository,
 	}
 }
 
-func (r AuthCodeRepository) Add(authCode AuthCode) error {
+func (r Repository) Add(authCode AuthCode) error {
 	return r.repository.Add(authCode)
 }
 
-func (a AuthCodeRepository) GetById(authCodeId int) (AuthCode, error) {
+func (a Repository) GetById(authCodeId int) (AuthCode, error) {
 	authCode := new(AuthCode)
 	row, err := a.repository.GetById(authCode.Table(), authCodeId)
 
@@ -40,7 +47,7 @@ func (a AuthCodeRepository) GetById(authCodeId int) (AuthCode, error) {
 	return *authCode, nil
 }
 
-func (a AuthCodeRepository) GetAll() ([]AuthCode, error) {
+func (a Repository) GetAll() ([]AuthCode, error) {
 	codes := make([]AuthCode, 0)
 	rows, err := a.repository.GetAll(AuthCode{}.Table())
 
@@ -61,7 +68,7 @@ func (a AuthCodeRepository) GetAll() ([]AuthCode, error) {
 	return codes, nil
 }
 
-func (a AuthCodeRepository) GetByCode(code string) (AuthCode, error) {
+func (a Repository) GetByCode(code string) (AuthCode, error) {
 	query := "SELECT * FROM auth_codes WHERE code = $1 LIMIT 1"
 	row, err := a.repository.SingleQuery(query, code)
 
@@ -88,10 +95,10 @@ func (a AuthCodeRepository) GetByCode(code string) (AuthCode, error) {
 	return *authCode, nil
 }
 
-func (a AuthCodeRepository) Update(authCode AuthCode) error {
+func (a Repository) Update(authCode AuthCode) error {
 	return a.repository.Update(authCode)
 }
 
-func (a AuthCodeRepository) Delete(authCode AuthCode) error {
+func (a Repository) Delete(authCode AuthCode) error {
 	return a.repository.Delete(authCode)
 }
