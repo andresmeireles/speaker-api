@@ -20,6 +20,7 @@ type InviteService interface {
 	RememberInvite(inviteId int) error
 	SetDoneStatus(inviteId int, done bool) error
 	UpdateInvite(updateInviteData UpdateInviteData, inviteId int) error
+	Reject(inviteId int) error
 }
 
 type Service struct {
@@ -207,6 +208,10 @@ func (a Service) AcceptInvite(inviteId int) error {
 
 func (a Service) RememberInvite(inviteId int) error {
 	return a.updateStatus(inviteId, STATUS_REMEMBERED)
+}
+
+func (a Service) Reject(inviteId int) error {
+	return a.updateStatus(inviteId, STATUS_REJECTED)
 }
 
 // updateStatus updates the status of an invite.

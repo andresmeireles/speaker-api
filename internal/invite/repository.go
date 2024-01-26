@@ -89,7 +89,9 @@ func (r Repository) GetAll() ([]Invite, error) {
 }
 
 func (r Repository) GetById(id int) (*Invite, error) {
-	row, err := r.repository.GetById(Invite{}.Table(), id)
+	query := "SELECT * FROM invites WHERE id = $1 ORDER BY date ASC"
+	row, err := r.repository.Query(query, id)
+
 	if err != nil {
 		return nil, err
 	}

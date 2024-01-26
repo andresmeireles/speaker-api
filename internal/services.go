@@ -11,6 +11,7 @@ import (
 	"github.com/andresmeireles/speaker/internal/invite"
 	"github.com/andresmeireles/speaker/internal/person"
 	"github.com/andresmeireles/speaker/internal/repository"
+	"github.com/andresmeireles/speaker/internal/stats"
 	"github.com/andresmeireles/speaker/internal/tools"
 	"github.com/andresmeireles/speaker/internal/tools/servicelocator"
 	"github.com/andresmeireles/speaker/internal/user"
@@ -30,7 +31,6 @@ func DIContainer(sl *servicelocator.SL) {
 		}),
 
 		// repository
-		// servicelocator.AddInterface("repository.RepositoryInterface", repository.NewRepository),
 		servicelocator.AddDependency[repository.RepositoryInterface](repository.NewRepository),
 		servicelocator.AddDependency[repository.Repository](repository.NewRepository),
 		servicelocator.AddDependency[codesender.CodeSenderRepository](codesender.NewRepository),
@@ -41,6 +41,7 @@ func DIContainer(sl *servicelocator.SL) {
 		servicelocator.AddDependency[person.Repository](person.NewRepository),
 		servicelocator.AddDependency[auth.AuthRepository](auth.NewRepository),
 		servicelocator.AddDependency[config.ConfigRepository](config.NewRepository),
+		servicelocator.AddDependency[stats.StatsRepository](stats.NewRepository),
 
 		// action / service
 		servicelocator.AddDependency[codesender.Actions](codesender.NewAction),
@@ -55,6 +56,7 @@ func DIContainer(sl *servicelocator.SL) {
 		servicelocator.AddDependency[config.ConfigController](config.NewController),
 		servicelocator.AddDependency[auth.AuthController](auth.NewController),
 		servicelocator.AddDependency[invite.InviteController](invite.NewController),
+		servicelocator.AddDependency[stats.StatsController](stats.NewStatsController),
 
 		// cli cmd
 		servicelocator.AddDependency[auxcmd.Migration](auxcmd.NewMigration),

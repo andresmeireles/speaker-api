@@ -234,6 +234,52 @@ func (_c *InviteService_ParseRememberMessage_Call) RunAndReturn(run func(int) (s
 	return _c
 }
 
+// Reject provides a mock function with given fields: inviteId
+func (_m *InviteService) Reject(inviteId int) error {
+	ret := _m.Called(inviteId)
+
+	if len(ret) == 0 {
+		panic("no return value specified for Reject")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(int) error); ok {
+		r0 = rf(inviteId)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// InviteService_Reject_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Reject'
+type InviteService_Reject_Call struct {
+	*mock.Call
+}
+
+// Reject is a helper method to define mock.On call
+//   - inviteId int
+func (_e *InviteService_Expecter) Reject(inviteId interface{}) *InviteService_Reject_Call {
+	return &InviteService_Reject_Call{Call: _e.mock.On("Reject", inviteId)}
+}
+
+func (_c *InviteService_Reject_Call) Run(run func(inviteId int)) *InviteService_Reject_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(int))
+	})
+	return _c
+}
+
+func (_c *InviteService_Reject_Call) Return(_a0 error) *InviteService_Reject_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *InviteService_Reject_Call) RunAndReturn(run func(int) error) *InviteService_Reject_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // RememberInvite provides a mock function with given fields: inviteId
 func (_m *InviteService) RememberInvite(inviteId int) error {
 	ret := _m.Called(inviteId)

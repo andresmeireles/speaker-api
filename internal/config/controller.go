@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/andresmeireles/speaker/internal/tools/responses"
 	web "github.com/andresmeireles/speaker/internal/web/decoder"
 )
 
@@ -19,8 +20,7 @@ func NewController(repo ConfigRepository, action Actions) ConfigController {
 func (c ConfigController) WriteConfig(w http.ResponseWriter, r *http.Request) {
 	body, err := web.DecodePostBody[[]Config](r.Body)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(err.Error()))
+		responses.BadResponse(w, err)
 
 		return
 	}
@@ -30,33 +30,28 @@ func (c ConfigController) WriteConfig(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(err.Error()))
+		responses.BadResponse(w, err)
 
 		return
 	}
 
-	w.WriteHeader(http.StatusCreated)
-	w.Write([]byte("Config created"))
+	responses.Created(w, []byte("Configs successfully created"))
 }
 
 func (c ConfigController) GetConfigs(w http.ResponseWriter, r *http.Request) {
 	configs, err := c.configRepository.GetAll()
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Error when get configs"))
+		responses.BadResponse(w, err)
 
 		return
 	}
 
 	jsonConfigs, err := json.Marshal(configs)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Error when get configs"))
+		responses.BadResponse(w, err)
 
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(jsonConfigs))
+	responses.Ok(w, jsonConfigs)
 }

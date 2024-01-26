@@ -6,8 +6,6 @@ type InvitePost struct {
 	Time       int    `json:"time"`
 	Date       string `json:"date"`
 	References string `json:"references"`
-	Accepted   bool   `json:"accepted"`
-	Remembered bool   `json:"remembered"`
 }
 
 type UpdateInviteData struct {

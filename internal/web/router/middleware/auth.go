@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 	"net/http"
 
@@ -41,18 +42,18 @@ func CheckTokenOnCookie(next http.Handler, sl servicelocator.ServiceLocator) htt
 		}
 		authEntity, err := auth.AuthRepository{}.GetByHash(token)
 		if err != nil {
-			responses.Unauthorized(response)
+			responses.Unauthorized(response, err)
 
 			return
 		}
 		if authEntity.Expired {
-			responses.Unauthorized(response)
+			responses.Unauthorized(response, fmt.Errorf("token expired"))
 
 			return
 		}
 		if ok := authActions.ValidateJwt(authEntity.Hash); !ok {
 			authActions.Logout(authEntity.UserId)
-			responses.Unauthorized(response)
+			responses.Unauthorized(response, fmt.Errorf("invalid token"))
 
 			return
 		}

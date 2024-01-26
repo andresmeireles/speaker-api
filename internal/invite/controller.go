@@ -11,7 +11,7 @@ import (
 )
 
 type InviteController struct {
-	inviteRepository InviteRepository
+	repository       InviteRepository
 	personRepository person.PersonRepository
 	configRepository config.ConfigRepository
 	service          InviteService
@@ -24,7 +24,7 @@ func NewController(
 	a InviteService,
 ) InviteController {
 	return InviteController{
-		inviteRepository: ir,
+		repository:       ir,
 		personRepository: pr,
 		configRepository: cr,
 		service:          a,
@@ -46,11 +46,11 @@ func (i InviteController) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	responses.Created(w, "Invite successfully created")
+	responses.Created(w, []byte("Invite successfully created"))
 }
 
 func (i InviteController) GetInvite(inviteId int, w http.ResponseWriter, r *http.Request) {
-	invite, err := i.inviteRepository.GetById(inviteId)
+	invite, err := i.repository.GetById(inviteId)
 	if err != nil {
 		responses.BadResponse(w, err)
 
@@ -64,11 +64,11 @@ func (i InviteController) GetInvite(inviteId int, w http.ResponseWriter, r *http
 		return
 	}
 
-	responses.Ok(w, string(response))
+	responses.Ok(w, response)
 }
 
 func (i InviteController) GetAllInvites(w http.ResponseWriter, r *http.Request) {
-	invites, err := i.inviteRepository.GetAllOrdered("date", true)
+	invites, err := i.repository.GetAllOrdered("date", true)
 	if err != nil {
 		responses.BadResponse(w, err)
 
@@ -82,7 +82,25 @@ func (i InviteController) GetAllInvites(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	responses.Ok(w, string(response))
+	responses.Ok(w, response)
+}
+
+func (c InviteController) GetAllInvitesByPerson(w http.ResponseWriter, r *http.Request, personId int) {
+	invites, err := c.repository.GetByPersonId(personId)
+	if err != nil {
+		responses.BadResponse(w, err)
+
+		return
+	}
+
+	response, err := json.Marshal(invites)
+	if err != nil {
+		responses.BadResponse(w, err)
+
+		return
+	}
+
+	responses.Ok(w, response)
 }
 
 func (i InviteController) Update(inviteId int, w http.ResponseWriter, r *http.Request) {
@@ -102,7 +120,7 @@ func (i InviteController) Update(inviteId int, w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	responses.Accepted(w, "Invite successfully updated")
+	responses.Accepted(w, []byte("Invite successfully updated"))
 }
 
 func (i InviteController) SendInvite(inviteId int, w http.ResponseWriter, r *http.Request) {
@@ -130,7 +148,7 @@ func (i InviteController) SendInvite(inviteId int, w http.ResponseWriter, r *htt
 		return
 	}
 
-	responses.Created(w, string(response))
+	responses.Created(w, response)
 }
 
 func (i InviteController) Accepted(inviteId int, w http.ResponseWriter, r *http.Request) {
@@ -142,7 +160,7 @@ func (i InviteController) Accepted(inviteId int, w http.ResponseWriter, r *http.
 		return
 	}
 
-	responses.Ok(w, "Invite successfully accepted")
+	responses.Ok(w, []byte("Invite successfully accepted"))
 }
 
 func (c InviteController) Remember(inviteId int, w http.ResponseWriter, r *http.Request) {
@@ -154,7 +172,7 @@ func (c InviteController) Remember(inviteId int, w http.ResponseWriter, r *http.
 		return
 	}
 
-	responses.Ok(w, "Invite successfully remembered")
+	responses.Ok(w, []byte("Invite successfully remembered"))
 }
 
 func (c InviteController) WasDone(inviteId int, w http.ResponseWriter, r *http.Request) {
@@ -172,7 +190,18 @@ func (c InviteController) WasDone(inviteId int, w http.ResponseWriter, r *http.R
 		return
 	}
 
-	responses.Accepted(w, "Updated")
+	responses.Accepted(w, []byte("Updated"))
+}
+
+func (c InviteController) Reject(w http.ResponseWriter, r *http.Request, inviteId int) {
+	err := c.service.Reject(inviteId)
+	if err != nil {
+		responses.BadResponse(w, err)
+
+		return
+	}
+
+	responses.Accepted(w, []byte("Invite successfully rejected"))
 }
 
 func (c InviteController) DeleteInvite(w http.ResponseWriter, r *http.Request, inviteId int) {
@@ -183,5 +212,5 @@ func (c InviteController) DeleteInvite(w http.ResponseWriter, r *http.Request, i
 		return
 	}
 
-	responses.NoContent(w, "Invite successfully deleted")
+	responses.NoContent(w, []byte("Invite successfully deleted"))
 }

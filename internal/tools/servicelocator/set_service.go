@@ -2,8 +2,6 @@
 package servicelocator
 
 import (
-	"fmt"
-	"os"
 	"reflect"
 )
 
@@ -61,17 +59,11 @@ func Set(sl ServiceLocator, dependencies []Dependency) {
 			continue
 		}
 
-		fmt.Println("error: ", err)
-
 		index += 1
 	}
 }
 
 func resolve(sl ServiceLocator, dep Dependency) error {
-	if os.Getenv("APP_MODE") == "dev" {
-		fmt.Println("set", dep.Name)
-	}
-
 	ref := reflect.TypeOf(dep.Implementation)
 	numOfParams := ref.NumIn()
 
