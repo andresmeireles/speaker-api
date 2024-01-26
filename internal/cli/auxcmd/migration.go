@@ -47,6 +47,11 @@ func NewMigration(conn db.Connection) Migration {
 }
 
 func getDrive(drive string, conn *sql.DB) (database.Driver, error) {
+	err := conn.Ping()
+	if err != nil {
+		panic("error on connection " + err.Error())
+	}
+
 	switch drive {
 	case "postgres":
 		return postgres.WithInstance(conn, &postgres.Config{})

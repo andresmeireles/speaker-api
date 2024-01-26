@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/andresmeireles/speaker/internal/tools/env"
 	_ "github.com/lib/pq"
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -41,8 +42,13 @@ func queryStringByDrive(driver string) (string, error) {
 }
 
 func postgres() string {
+	conn := "user=%s password=%s host=%s port=%s dbname=%s"
+	if env.IsDev() {
+		conn += " sslmode=disable"
+	}
+
 	return fmt.Sprintf(
-		"postgres://%s:%s@%s:%s/%s?sslmode=disable",
+		conn,
 		os.Getenv("DB_USERNAME"),
 		os.Getenv("DB_PASSWORD"),
 		os.Getenv("DB_HOST"),
