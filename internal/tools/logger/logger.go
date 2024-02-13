@@ -21,12 +21,10 @@ func createHandler() *slog.JSONHandler {
 			panic(err)
 		}
 
-		// return slog.NewTextHandler(file, &handlerOptions)
 		return slog.NewJSONHandler(file, &handlerOptions)
 	}
 
 	return slog.NewJSONHandler(os.Stdout, &handlerOptions)
-	// return slog.NewTextHandler(os.Stdout, &handlerOptions)
 }
 
 func Logger() {

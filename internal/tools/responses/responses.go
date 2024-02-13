@@ -58,13 +58,13 @@ func whereErrorWasTriggered() []string {
 func errorLog(err error) {
 	args := []any{}
 
-	if env.IsDev() {
+	if env.IsDev() || env.ShowErrorFile() {
 		for _, v := range whereErrorWasTriggered() {
 			args = append(args, v)
 		}
 	}
 
-	if env.IsDev() && env.ShowStackTrace() {
+	if env.IsDev() || env.ShowStackTrace() {
 		for _, v := range stack() {
 			args = append(args, v)
 		}

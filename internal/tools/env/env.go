@@ -22,3 +22,7 @@ func AppKey() (string, error) {
 func ShowStackTrace() bool {
 	return os.Getenv("SHOW_STACK_TRACE") == "true"
 }
+
+func ShowErrorFile() bool {
+	return os.Getenv("SHOW_ERROR_FILE") == "true"
+}
