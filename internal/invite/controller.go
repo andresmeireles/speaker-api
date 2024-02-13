@@ -68,7 +68,7 @@ func (i InviteController) GetInvite(inviteId int, w http.ResponseWriter, r *http
 }
 
 func (i InviteController) GetAllInvites(w http.ResponseWriter, r *http.Request) {
-	invites, err := i.repository.GetAllOrdered("date", true)
+	invites, err := i.repository.GetAllOrdered("date", false)
 	if err != nil {
 		responses.BadResponse(w, err)
 

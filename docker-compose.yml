@@ -24,16 +24,16 @@ services:
     volumes:
       - ".:/app"
 
-  testdb:
-    image: postgres:latest
-    environment:
-      POSTGRES_DB: ${DB_NAME}
-      POSTGRES_USER: ${DB_USERNAME}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-    ports:
-      - 5433:5432
-    volumes:
-      - ".:/app"
+  # testdb:
+  #   image: postgres:latest
+  #   environment:
+  #     POSTGRES_DB: ${DB_NAME}
+  #     POSTGRES_USER: ${DB_USERNAME}
+  #     POSTGRES_PASSWORD: ${DB_PASSWORD}
+  #   ports:
+  #     - 5433:5432
+  #   volumes:
+  #     - ".:/app"
 
   mailservice:
     image: sj26/mailcatcher
