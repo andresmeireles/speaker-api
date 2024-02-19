@@ -25,8 +25,11 @@ func NewRepository(
 }
 
 func (r Repository) GetNumberOfSpeakersForPersons() ([]SpeakerReport, error) {
-	query := "SELECT p.id as speaker_id, COUNT(i.id) as speaks " +
-		"FROM invites i JOIN persons p ON p.id = i.person_id GROUP BY p.id"
+	query := "select p.id as speaker_name, " +
+	"(select count(i.id) from invites i where i.status = 5 and i.person_id = p.id) as done_speaks, " +
+	"(select count(i2.id) from invites i2 where i2.person_id = p.id ) as total_speaks " +
+	"from persons p"
+
 	rows, err := r.repository.Query(query)
 
 	if err != nil {
@@ -37,7 +40,7 @@ func (r Repository) GetNumberOfSpeakersForPersons() ([]SpeakerReport, error) {
 
 	for rows.Next() {
 		sr := new(SpeakerReport)
-		if err := rows.Scan(&sr.speaker_id, &sr.speaks); err != nil {
+		if err := rows.Scan(&sr.speaker_id, &sr.doneSpeaks, &sr.totalSpeaks); err != nil {
 			return nil, err
 		}
 

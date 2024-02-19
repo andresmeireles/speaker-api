@@ -4,12 +4,14 @@ import "github.com/andresmeireles/speaker/internal/person"
 
 type speakerReport struct {
 	Speaker person.Person `json:"speaker"`
-	Speaks  int           `json:"speaks"`
+	DoneSpeaks int           `json:"doneSpeaks"`
+	TotalSpeaks int       `json:"totalSpeaks"`
 }
 
 func ExportSpeakerReport(report SpeakerReport) speakerReport {
 	return speakerReport{
 		Speaker: report.Speaker(),
-		Speaks:  report.Speaks(),
+		DoneSpeaks:  report.DoneSpeaks(),
+		TotalSpeaks: report.TotalSpeaks(),
 	}
 }
