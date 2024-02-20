@@ -8,7 +8,6 @@ import (
 
 	"github.com/andresmeireles/speaker/internal/auth"
 	"github.com/andresmeireles/speaker/internal/tools/responses"
-	"github.com/andresmeireles/speaker/internal/tools/servicelocator"
 )
 
 func getToken(req *http.Request) (string, error) {
@@ -28,9 +27,7 @@ func getToken(req *http.Request) (string, error) {
 
 // check if user cookie is valid, if not check if has authorization token and
 // check if is valid.
-func CheckTokenOnCookie(next http.Handler, sl servicelocator.ServiceLocator) http.Handler {
-	authActions := servicelocator.Get[auth.Actions](sl)
-
+func CheckTokenOnCookie(next http.Handler, authActions auth.Actions) http.Handler {
 	return http.HandlerFunc(func(response http.ResponseWriter, request *http.Request) {
 		token, err := getToken(request)
 		if err != nil {

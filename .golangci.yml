@@ -1,9 +1,3 @@
 linters:
-  enable-all: true
-  disable:
-    - gofumpt
-    - nosnakecase
-    - ifshort
-    - scopelint
-    - depguard
-    - godot
+  enable:
+    - funlen

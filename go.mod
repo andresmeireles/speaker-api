@@ -1,8 +1,11 @@
 module github.com/andresmeireles/speaker
 
-go 1.21.4
+go 1.21.6
+
+toolchain go1.22.0
 
 require (
+	github.com/andresmeireles/di v0.0.4
 	github.com/go-chi/chi/v5 v5.0.10
 	github.com/go-chi/cors v1.2.1
 	github.com/golang-jwt/jwt/v5 v5.2.0

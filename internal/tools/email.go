@@ -8,8 +8,6 @@ import (
 	"os"
 	"regexp"
 	"strings"
-
-	"github.com/andresmeireles/speaker/internal/tools/servicelocator"
 )
 
 type Email struct {
@@ -18,20 +16,6 @@ type Email struct {
 	password string
 	to       []string
 	from     string
-}
-
-func (e *Email) New(s servicelocator.SL) any {
-	host := os.Getenv("SMTP_HOST")
-	port := os.Getenv("SMTP_PORT")
-	password := os.Getenv("SMTP_PASSWORD")
-	email := os.Getenv("SMTP_USER")
-	client := NewEmail(host, password, port, email)
-
-	if os.Getenv("APP_MODE") != "dev" && !client.isEmail(email) {
-		panic("invalid email")
-	}
-
-	return client
 }
 
 func NewEmail(smtpHost, password, smtpPort, from string) *Email {

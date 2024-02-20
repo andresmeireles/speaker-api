@@ -46,7 +46,9 @@ func routes(ctx context.Context, router *chi.Mux, sl servicelocator.ServiceLocat
 
 	router.Group(func(r chi.Router) {
 		r.Use(func(handler http.Handler) http.Handler {
-			return middleware.CheckTokenOnCookie(handler, sl)
+
+		authActions := servicelocator.Get[auth.Actions](sl)
+			return middleware.CheckTokenOnCookie(handler, authActions)
 		})
 		protectedRoutes(r, sl)
 	})
