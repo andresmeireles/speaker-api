@@ -3,9 +3,9 @@ package main
 import (
 	"os"
 
+	"github.com/andresmeireles/di"
 	"github.com/andresmeireles/speaker/internal"
 	"github.com/andresmeireles/speaker/internal/tools/logger"
-	"github.com/andresmeireles/speaker/internal/tools/servicelocator"
 	"github.com/andresmeireles/speaker/internal/web/router"
 	"github.com/joho/godotenv"
 )
@@ -31,7 +31,14 @@ func main() {
 
 	logger.Logger()
 
-	sl := servicelocator.NewServiceLocator()
-	internal.DIContainer(sl)
-	router.Run(os.Getenv("APP_PORT"), sl)
+	dependencies := internal.DependenciesContainer()
+	container := di.NewContainerBuilder(dependencies, nil, nil, true).Build()
+
+	router, err := di.Get[router.Router](*container)
+
+	if err != nil {
+		panic(err)
+	}
+
+	router.Run(os.Getenv("APP_PORT"))
 }

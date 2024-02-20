@@ -1,8 +1,10 @@
 package person
 
 type Person struct {
-	Id   int    `json:"id"`
-	Name string `json:"name"`
+	Id       int    `json:"id"`
+	Name     string `json:"name"`
+	LastName string `json:"lastName"`
+	Gender   string `json:"gender"`
 }
 
 func (p Person) GetId() int {
@@ -15,6 +17,8 @@ func (p Person) Table() string {
 
 func (p Person) ToJson() map[string]interface{} {
 	return map[string]interface{}{
-		"name": p.Name,
+		"name":     p.Name,
+		"lastName": p.LastName,
+		"gender":   p.Gender,
 	}
 }
