@@ -34,7 +34,6 @@ func (r Repository) Add(person Person) error {
 
 func (r Repository) GetById(id int) (*Person, error) {
 	row, err := r.repository.GetById(tableName, id)
-
 	if err != nil {
 		return nil, err
 	}

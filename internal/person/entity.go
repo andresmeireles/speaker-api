@@ -1,10 +1,12 @@
 package person
 
+import "database/sql"
+
 type Person struct {
-	Id       int    `json:"id"`
-	Name     string `json:"name"`
-	LastName string `json:"lastName"`
-	Gender   string `json:"gender"`
+	Id       int            `json:"id"`
+	Name     string         `json:"name"`
+	LastName sql.NullString `json:"lastName"`
+	Gender   string         `json:"gender"`
 }
 
 func (p Person) GetId() int {

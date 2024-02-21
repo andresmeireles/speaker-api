@@ -52,7 +52,7 @@ func (r Router) Run(port string) {
 	r.server.Use(middleware.Cors)
 
 	r.nonAuthRoutes()
-	r.nonAuthRoutes()
+	r.authRoutes()
 
 	if err := http.ListenAndServe(":"+port, r.server); err != nil {
 		panic(err)
@@ -70,6 +70,7 @@ func (r Router) nonAuthRoutes() {
 	r.server.Post("/devtoken", r.authController.DevAuth)
 }
 
+//nolint:funlen
 func (r Router) authRoutes() {
 	r.server.Group(func(router chi.Router) {
 		router.Use(func(handler http.Handler) http.Handler {
