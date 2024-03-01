@@ -11,10 +11,10 @@ import (
 )
 
 func TestController(t *testing.T) {
-	inviteRepoMock := mocks.InviteRepository{}
-	personRepoMock := mocks.PersonRepository{}
-	configRepoMock := mocks.ConfigRepository{}
-	inviteServiceMock := mocks.InviteService{}
+	inviteRepoMock := mocks.InviteRepositoryinvite{}
+	personRepoMock := mocks.PersonRepositoryperson{}
+	configRepoMock := mocks.ConfigRepositoryconfig{}
+	inviteServiceMock := mocks.InviteServiceinvite{}
 
 	controller := invite.NewController(
 		&inviteRepoMock,

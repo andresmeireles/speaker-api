@@ -44,7 +44,7 @@ func DIContainer(sl *servicelocator.SL) {
 		servicelocator.AddDependency[stats.StatsRepository](stats.NewRepository),
 
 		// action / service
-		servicelocator.AddDependency[codesender.Actions](codesender.NewAction),
+		servicelocator.AddDependency[codesender.Service](codesender.NewAction),
 		servicelocator.AddDependency[auth.Actions](auth.NewAction),
 		servicelocator.AddDependency[config.Actions](config.NewActions),
 		servicelocator.AddDependency[person.ActionsInterface](person.NewAction),

@@ -1,8 +1,9 @@
+quiet: False
 with-expecter: True
 dir: "testdata/mocks"
-mockname: "{{.InterfaceName}}"
+mockname: "{{.InterfaceName}}{{.PackageName}}"
 outpkg: "mocks"
-filename: "{{.InterfaceName}}.go"
+filename: "{{.PackageName}}{{.MockName}}.go"
 packages:
   github.com/andresmeireles/speaker/internal:
     config:

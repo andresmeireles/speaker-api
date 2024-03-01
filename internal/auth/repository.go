@@ -8,6 +8,17 @@ import (
 	"github.com/andresmeireles/speaker/internal/repository"
 )
 
+type Repository interface {
+	GetByHash(hash string) (Auth, error)
+	AuthCodeByUser(authCode string, userId int) (*codesender.AuthCode, error)
+	Add(auth Auth) error
+	GetById(id int) (*Auth, error)
+	GetAll() ([]Auth, error)
+	ExpireTokenByUserId(userId int) error
+	Update(auth Auth) error
+	Delete(auth Auth) error
+}
+
 type AuthRepository struct {
 	repository repository.Repository
 }

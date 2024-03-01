@@ -18,18 +18,25 @@ const (
 	DAYS_OF_WEEK    = 7
 )
 
+type ac interface {
+	Logout(userId int) error
+	ValidateJwt(token string) bool
+	CreateJWT(user user.User, remember bool) (Auth, error)
+	SendCode(email string) error
+}
+
 type Actions struct {
-	repository       AuthRepository
-	userRepository   user.Repository
-	email            *tools.Email
-	codeSenderAction codesender.Actions
+	repository       Repository
+	userRepository   user.UserRepository
+	email            tools.E
+	codeSenderAction codesender.Service
 }
 
 func NewAction(
-	repository AuthRepository,
-	userRepository user.Repository,
-	email *tools.Email,
-	codeSenderAction codesender.Actions,
+	repository Repository,
+	userRepository user.UserRepository,
+	email tools.E,
+	codeSenderAction codesender.Service,
 ) Actions {
 	return Actions{
 		repository:       repository,
@@ -83,7 +90,7 @@ func (a Actions) CreateJWT(user user.User, remember bool) (Auth, error) {
 		expireTime *= (DAYS_OF_WEEK * 2)
 	}
 
-	token, err := a.createToken("andre.meireles", user.Email, expireTime)
+	token, err := a.CreateToken("andre.meireles", user.Email, expireTime)
 	if err != nil {
 		return Auth{}, err
 	}
@@ -102,7 +109,7 @@ func (a Actions) CreateJWT(user user.User, remember bool) (Auth, error) {
 	return newAuth, nil
 }
 
-func (a Actions) createToken(issuer string, email string, expireTime time.Duration) (string, error) {
+func (a Actions) CreateToken(issuer string, email string, expireTime time.Duration) (string, error) {
 	key, err := env.AppKey()
 	if err != nil {
 		return "", err

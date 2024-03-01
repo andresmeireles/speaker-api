@@ -10,6 +10,11 @@ import (
 	"strings"
 )
 
+type E interface {
+	SetFrom(from string) error
+	Send(message string, to string) error
+}
+
 type Email struct {
 	smtpHost string
 	smtpPort string

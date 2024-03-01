@@ -9,9 +9,9 @@ import (
 
 func TestCommands(t *testing.T) {
 	// arrange
-	sl := mocks.ServiceLocator{}
-	sl.EXPECT().Get("user.UserRepository").Return(&mocks.UserRepository{})
-	sl.EXPECT().Get("auxcmd.Migration").Return(&mocks.Migration{})
+	sl := mocks.ServiceLocatorservicelocator{}
+	sl.EXPECT().Get("user.UserRepository").Return(&mocks.UserRepositoryuser{})
+	sl.EXPECT().Get("auxcmd.Migration").Return(&mocks.Migrationauxcmd{})
 
 	// act
 	cli.Commands(&sl)

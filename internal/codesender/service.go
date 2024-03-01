@@ -10,19 +10,24 @@ import (
 	"github.com/andresmeireles/speaker/internal/user"
 )
 
-type Actions struct {
+type Service interface {
+	CreateCode(user user.User) (string, error)
+	VerifyCode(userEmail, code string) error
+}
+
+type service struct {
 	repository CodeSenderRepository
 }
 
 const EXPIRE_TIME_MINUTES = 5
 
-func NewAction(repository CodeSenderRepository) Actions {
-	return Actions{
+func NewAction(repository CodeSenderRepository) Service {
+	return service{
 		repository: repository,
 	}
 }
 
-func (a Actions) CreateCode(user user.User) (string, error) {
+func (a service) CreateCode(user user.User) (string, error) {
 	randGenerator := rand.New(rand.NewSource(time.Now().Unix()))
 	code := strconv.Itoa(randGenerator.Int())
 	authCode := AuthCode{
@@ -40,7 +45,7 @@ func (a Actions) CreateCode(user user.User) (string, error) {
 	return code, nil
 }
 
-func (a Actions) VerifyCode(userEmail, code string) error {
+func (a service) VerifyCode(userEmail, code string) error {
 	row, err := a.repository.GetByCode(code)
 	if err != nil {
 		slog.Error("Failed to get auth code", err)

@@ -14,11 +14,11 @@ import (
 
 type AuthController struct {
 	actions           Actions
-	codesenderActions codesender.Actions
+	codesenderActions codesender.Service
 	userRepository    user.Repository
 }
 
-func NewController(action Actions, codeSenderActions codesender.Actions, userRepo user.Repository) AuthController {
+func NewController(action Actions, codeSenderActions codesender.Service, userRepo user.Repository) AuthController {
 	return AuthController{
 		actions:           action,
 		codesenderActions: codeSenderActions,

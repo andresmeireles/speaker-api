@@ -9,7 +9,7 @@ import (
 
 func TestMigrateUp(t *testing.T) {
 	// arrange
-	migration := mocks.Migration{}
+	migration := mocks.Migrationauxcmd{}
 	migration.EXPECT().Up().Return(nil)
 
 	// act
