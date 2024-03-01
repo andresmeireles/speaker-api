@@ -22,7 +22,7 @@ type Router struct {
 	userController    user.UserController
 	inviteController  invite.InviteController
 	statsController   stats.StatsController
-	authActions       auth.Actions
+	authActions       auth.Service
 }
 
 func NewRouter(

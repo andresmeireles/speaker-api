@@ -19,6 +19,7 @@ func TestMain(m *testing.M) {
 	os.Unsetenv("APP_KEY")
 }
 
+//nolint:funlen
 func TestActions(t *testing.T) {
 	repositoryMock := mocks.Repositoryauth{}
 	emailMock := mocks.Etools{}

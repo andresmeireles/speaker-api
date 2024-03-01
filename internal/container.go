@@ -22,15 +22,7 @@ import (
 func DependenciesContainer() []di.Dependency {
 	return []di.Dependency{
 		di.NewTypedDependency[db.Connection](db.NewConnection),
-		di.NewTypedDependency[tools.E](func() *tools.Email {
-			host := os.Getenv("SMTP_HOST")
-			port := os.Getenv("SMTP_PORT")
-			password := os.Getenv("SMTP_PASSWORD")
-			email := os.Getenv("SMTP_USER")
-
-			return tools.NewEmail(host, password, port, email)
-		}),
-		di.NewTypedDependency[*tools.Email](func() *tools.Email {
+		di.NewTypedDependency[tools.EmailService](func() *tools.Email {
 			host := os.Getenv("SMTP_HOST")
 			port := os.Getenv("SMTP_PORT")
 			password := os.Getenv("SMTP_PASSWORD")
@@ -55,7 +47,7 @@ func DependenciesContainer() []di.Dependency {
 
 		// actions / service
 		di.NewTypedDependency[codesender.Service](codesender.NewAction),
-		di.NewTypedDependency[auth.Actions](auth.NewAction),
+		di.NewTypedDependency[auth.Service](auth.NewAction),
 		di.NewTypedDependency[config.Actions](config.NewActions),
 		di.NewTypedDependency[person.ActionsInterface](person.NewAction),
 		di.NewTypedDependency[person.Actions](person.NewAction),

@@ -27,7 +27,7 @@ func getToken(req *http.Request) (string, error) {
 
 // check if user cookie is valid, if not check if has authorization token and
 // check if is valid.
-func CheckTokenOnCookie(next http.Handler, authActions auth.Actions) http.Handler {
+func CheckTokenOnCookie(next http.Handler, authActions auth.Service) http.Handler {
 	return http.HandlerFunc(func(response http.ResponseWriter, request *http.Request) {
 		token, err := getToken(request)
 		if err != nil {

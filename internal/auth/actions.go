@@ -18,24 +18,25 @@ const (
 	DAYS_OF_WEEK    = 7
 )
 
-type ac interface {
+type Service interface {
 	Logout(userId int) error
 	ValidateJwt(token string) bool
 	CreateJWT(user user.User, remember bool) (Auth, error)
 	SendCode(email string) error
+	HasEmail(email string) bool
 }
 
 type Actions struct {
 	repository       Repository
 	userRepository   user.UserRepository
-	email            tools.E
+	email            tools.EmailService
 	codeSenderAction codesender.Service
 }
 
 func NewAction(
 	repository Repository,
 	userRepository user.UserRepository,
-	email tools.E,
+	email tools.EmailService,
 	codeSenderAction codesender.Service,
 ) Actions {
 	return Actions{

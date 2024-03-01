@@ -10,7 +10,7 @@ import (
 	"strings"
 )
 
-type E interface {
+type EmailService interface {
 	SetFrom(from string) error
 	Send(message string, to string) error
 }
