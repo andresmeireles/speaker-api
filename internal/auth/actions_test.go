@@ -22,7 +22,7 @@ func TestMain(m *testing.M) {
 //nolint:funlen
 func TestActions(t *testing.T) {
 	repositoryMock := mocks.Repositoryauth{}
-	emailMock := mocks.Etools{}
+	emailMock := mocks.EmailServicetools{}
 	codeSenderActionMock := mocks.Servicecodesender{}
 	userRepositoryMock := mocks.UserRepositoryuser{}
 
@@ -140,11 +140,11 @@ func TestActions(t *testing.T) {
 	t.Run("Should return true when email exists", func(t *testing.T) {
 		// arrange
 		userRepositoryMock.EXPECT().
-			GetByEmail("john.doe@email.com").
+			GetByEmail("jao@email.com").
 			Return(user.User{}, nil)
 
 		// act
-		result := authAction.HasEmail("john.doe@email.com")
+		result := authAction.HasEmail("jao@email.com")
 
 		// assert
 		if !result {
@@ -157,7 +157,7 @@ func TestActions(t *testing.T) {
 		user := user.User{
 			Id:    1,
 			Name:  "John",
-			Email: "john.doe@email.com",
+			Email: "john.doe1@email.com",
 		}
 		codeSenderActionMock.EXPECT().
 			CreateCode(user).
@@ -167,10 +167,10 @@ func TestActions(t *testing.T) {
 			GetByEmail(user.Email).
 			Return(user, nil)
 
-		emailMock.EXPECT().Send("code", "john.doe@email.com").Return(nil)
+		emailMock.EXPECT().Send("code", "john.doe1@email.com").Return(nil)
 
 		// act
-		err := authAction.SendCode("john.doe@email.com")
+		err := authAction.SendCode("john.doe1@email.com")
 
 		// assert
 		if err != nil {

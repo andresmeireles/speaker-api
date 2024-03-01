@@ -133,6 +133,7 @@ func (a Actions) CreateToken(issuer string, email string, expireTime time.Durati
 func (a Actions) HasEmail(email string) bool {
 	_, err := a.userRepository.GetByEmail(email)
 
+	fmt.Println(err)
 	return err == nil
 }
 
