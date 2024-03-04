@@ -1,10 +1,12 @@
 package env
 
 import (
-	"fmt"
+	"errors"
 	"os"
 	"strings"
 )
+
+var ErrAPPKeyNotExists = errors.New("APP_KEY not set")
 
 func IsDev() bool {
 	return os.Getenv("APP_MODE") == "dev"
@@ -13,7 +15,7 @@ func IsDev() bool {
 func AppKey() (string, error) {
 	key := os.Getenv("APP_KEY")
 	if len(strings.Trim(key, " ")) == 0 {
-		return "", fmt.Errorf("APP_KEY not set")
+		return "", ErrAPPKeyNotExists
 	}
 
 	return key, nil

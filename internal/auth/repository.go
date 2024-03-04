@@ -20,10 +20,10 @@ type Repository interface {
 }
 
 type AuthRepository struct {
-	repository repository.Repository
+	repository repository.RepositoryInterface
 }
 
-func NewRepository(repository repository.Repository) AuthRepository {
+func NewRepository(repository repository.RepositoryInterface) AuthRepository {
 	return AuthRepository{
 		repository: repository,
 	}

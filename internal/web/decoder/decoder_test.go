@@ -8,6 +8,10 @@ import (
 	web "github.com/andresmeireles/speaker/internal/web/decoder"
 )
 
+type Id struct {
+	Id string
+}
+
 func TestDecodePostBody(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		// arrange
@@ -46,6 +50,19 @@ func TestDecodePostBody(t *testing.T) {
 		}
 		if personWithName.Name != "Person 1" && personWithName.GetId() != 0 {
 			t.Fatalf("expected Person 1 and id 0, got %s and id %d", personWithName.Name, personWithName.GetId())
+		}
+	})
+
+	t.Run("should return error for cannot post body", func(t *testing.T) {
+		// arrange
+		reader := strings.NewReader(`"id": "name"}`)
+
+		// act
+		_, err := web.DecodePostBody[Id](reader)
+
+		// assert
+		if err == nil {
+			t.Fatal("Must not be nil")
 		}
 	})
 }
