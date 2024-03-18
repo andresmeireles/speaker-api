@@ -42,6 +42,7 @@ func DependenciesContainer() []di.Dependency {
 		di.NewTypedDependency[user.Repository](user.NewRepository),
 		di.NewTypedDependency[invite.InviteRepository](invite.NewRepository),
 		di.NewTypedDependency[auth.AuthRepository](auth.NewRepository),
+		di.NewTypedDependency[auth.Repository](auth.NewRepository),
 		di.NewTypedDependency[config.ConfigRepository](config.NewRepository),
 		di.NewTypedDependency[stats.StatsRepository](stats.NewRepository),
 

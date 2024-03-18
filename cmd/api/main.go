@@ -32,7 +32,8 @@ func main() {
 	logger.Logger()
 
 	dependencies := internal.DependenciesContainer()
-	container := di.NewContainerBuilder(dependencies, nil, nil, true).Build()
+	recursion := 3000
+	container := di.NewContainerBuilder(dependencies, nil, &recursion, true).Build()
 
 	router, err := di.Get[router.Router](*container)
 

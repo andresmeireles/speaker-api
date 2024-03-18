@@ -1,8 +1,6 @@
 package middleware
 
 import (
-	"context"
-	"fmt"
 	"log/slog"
 	"net/http"
 
@@ -10,7 +8,7 @@ import (
 	"github.com/andresmeireles/speaker/internal/tools/responses"
 )
 
-func getToken(req *http.Request) (string, error) {
+func GetTokenFromRequest(req *http.Request) (string, error) {
 	if auth := req.Header.Get("Authorization"); auth != "" {
 		a := auth[7:]
 
@@ -29,7 +27,7 @@ func getToken(req *http.Request) (string, error) {
 // check if is valid.
 func CheckTokenOnCookie(next http.Handler, authActions auth.Service) http.Handler {
 	return http.HandlerFunc(func(response http.ResponseWriter, request *http.Request) {
-		token, err := getToken(request)
+		token, err := GetTokenFromRequest(request)
 		if err != nil {
 			slog.Error("error on cookie or auth", "cookie", err)
 			response.WriteHeader(http.StatusBadRequest)
@@ -37,25 +35,12 @@ func CheckTokenOnCookie(next http.Handler, authActions auth.Service) http.Handle
 
 			return
 		}
-		authEntity, err := auth.AuthRepository{}.GetByHash(token)
-		if err != nil {
+		if err := authActions.ValidateJwt(token); err != nil {
 			responses.Unauthorized(response, err)
 
 			return
 		}
-		if authEntity.Expired {
-			responses.Unauthorized(response, fmt.Errorf("token expired"))
 
-			return
-		}
-		if ok := authActions.ValidateJwt(authEntity.Hash); !ok {
-			authActions.Logout(authEntity.UserId)
-			responses.Unauthorized(response, fmt.Errorf("invalid token"))
-
-			return
-		}
-
-		ctx := context.WithValue(request.Context(), "user_id", authEntity.UserId)
-		next.ServeHTTP(response, request.WithContext(ctx))
+		next.ServeHTTP(response, request)
 	})
 }

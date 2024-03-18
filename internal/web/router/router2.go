@@ -23,6 +23,7 @@ type Router struct {
 	inviteController  invite.InviteController
 	statsController   stats.StatsController
 	authActions       auth.Service
+	authRepository    auth.Repository
 }
 
 func NewRouter(
@@ -34,6 +35,7 @@ func NewRouter(
 	inviteController invite.InviteController,
 	statsController stats.StatsController,
 	authActions auth.Service,
+	authRepository auth.Repository,
 ) Router {
 	return Router{
 		server,
@@ -44,6 +46,7 @@ func NewRouter(
 		inviteController,
 		statsController,
 		authActions,
+		authRepository,
 	}
 }
 
@@ -75,6 +78,9 @@ func (r Router) authRoutes() {
 	r.server.Group(func(router chi.Router) {
 		router.Use(func(handler http.Handler) http.Handler {
 			return middleware.CheckTokenOnCookie(handler, r.authActions)
+		})
+		router.Use(func(handler http.Handler) http.Handler {
+			return middleware.SetUserIdOnRequest(handler, r.authRepository)
 		})
 
 		router.Get("/logout", r.authController.Logout)

@@ -19,7 +19,7 @@ func NewController(repository Repository) UserController {
 func (c UserController) Me(w http.ResponseWriter, r *http.Request) {
 	userId, ok := r.Context().Value("user_id").(int)
 	if !ok {
-		responses.BadResponse(w, fmt.Errorf("invalid user id"))
+		responses.BadResponse(w, fmt.Errorf("invalid user id %s", userId))
 
 		return
 	}

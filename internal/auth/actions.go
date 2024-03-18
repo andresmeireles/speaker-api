@@ -13,6 +13,9 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
+var ErrAuthTokenNotFound = fmt.Errorf("token not found")
+var ErrAuthTokenExpired = fmt.Errorf("token has expired")
+
 const (
 	HOURS_TO_EXPIRE = 24
 	DAYS_OF_WEEK    = 7
@@ -20,7 +23,7 @@ const (
 
 type Service interface {
 	Logout(userId int) error
-	ValidateJwt(token string) bool
+	ValidateJwt(token string) error
 	CreateJWT(user user.User, remember bool) (Auth, error)
 	SendCode(email string) error
 	HasEmail(email string) bool
@@ -56,7 +59,17 @@ func (a Actions) Logout(userId int) error {
 	return err
 }
 
-func (a Actions) ValidateJwt(token string) bool {
+func (a Actions) ValidateJwt(token string) error {
+	authToken, err := a.repository.GetByHash(token)
+	if err != nil {
+		fmt.Println("a")
+		return ErrAuthTokenNotFound
+	}
+
+	if authToken.Expired {
+		return ErrAuthTokenExpired
+	}
+
 	parseFunc := func(t *jwt.Token) (interface{}, error) {
 		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", t.Header["alg"])
@@ -64,25 +77,30 @@ func (a Actions) ValidateJwt(token string) bool {
 
 		return []byte(os.Getenv("APP_KEY")), nil
 	}
-	jwtToken, err := jwt.Parse(token, parseFunc)
+	jwtToken, err := jwt.Parse(authToken.Hash, parseFunc)
 
 	if err != nil {
-		return false
+		return err
 	}
 
 	claims, ok := jwtToken.Claims.(jwt.MapClaims)
 	if !ok {
-		return false
+		return fmt.Errorf("No claims")
 	}
 
 	exp, ok := claims["exp"].(float64)
 	if !ok {
 		slog.Error("exp claims are not float64")
 
-		return false
+		return fmt.Errorf("exp claims are not float64")
 	}
 
-	return int64(exp) > time.Now().Unix()
+	if int64(exp) < time.Now().Unix() {
+		fmt.Println(int64(exp), time.Now().Unix())
+		return ErrAuthTokenExpired
+	}
+
+	return nil
 }
 
 func (a Actions) CreateJWT(user user.User, remember bool) (Auth, error) {
@@ -133,7 +151,6 @@ func (a Actions) CreateToken(issuer string, email string, expireTime time.Durati
 func (a Actions) HasEmail(email string) bool {
 	_, err := a.userRepository.GetByEmail(email)
 
-	fmt.Println(err)
 	return err == nil
 }
 
